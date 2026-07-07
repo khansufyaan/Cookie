@@ -1,6 +1,6 @@
 import GradeChip from "@/components/GradeChip";
 
-export const metadata = { title: "Methodology — Cookie" };
+export const metadata = { title: "Methodology — Halbrook" };
 
 const FACTORS = [
   {
@@ -43,9 +43,9 @@ const FACTORS = [
 export default function MethodologyPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 pt-10">
-      <h1 className="text-3xl font-bold tracking-tight">The CRUMB Score</h1>
+      <h1 className="text-3xl font-bold tracking-tight">The Halbrook Score</h1>
       <p className="mt-3 text-muted max-w-2xl">
-        Cookie&apos;s proprietary rating rubric. Five factors, each normalized to 0–1 against network calibration
+        Halbrook&apos;s proprietary rating rubric. Five factors, each normalized to 0–1 against network calibration
         curves, weighted into a 0–1000 score, mapped to a letter grade.
       </p>
 
@@ -95,8 +95,8 @@ export default function MethodologyPage() {
       <section className="mt-12">
         <h2 className="text-xl font-semibold tracking-tight">Trust tiers: KYC and sanctions</h2>
         <p className="mt-3 text-sm text-muted leading-relaxed max-w-2xl">
-          Activity tells you a wallet is real; identity tells you who stands behind it. Cookie layers both on top of
-          the CRUMB score:
+          Activity tells you a wallet is real; identity tells you who stands behind it. Halbrook layers both on top of
+          the Halbrook Score:
         </p>
         <ul className="mt-4 space-y-3 text-sm text-muted leading-relaxed list-disc pl-5">
           <li>

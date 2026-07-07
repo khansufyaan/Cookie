@@ -7,15 +7,16 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Cookie — Wallet Ratings",
+  title: "Halbrook — Wallet Ratings",
   description:
-    "Cookie rates crypto wallets A, B, or C from cross-app on-chain activity. Look up any wallet, or plug the rating API into your app.",
+    "Halbrook rates crypto wallets A, B, or C from real cross-app on-chain history. Look up any wallet, or plug the rating API into your app.",
 };
 
 const NAV = [
   { href: "/network", label: "Network" },
   { href: "/methodology", label: "Methodology" },
   { href: "/developers", label: "API" },
+  { href: "/claim", label: "Claim" },
 ];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <header className="border-b border-line sticky top-0 z-20 bg-surface/95 backdrop-blur">
           <div className="mx-auto max-w-6xl px-5 h-14 flex items-center justify-between">
             <Link href="/" className="flex items-baseline gap-2.5 tracking-tight">
-              <span className="font-bold text-lg">Cookie</span>
+              <span className="font-bold text-lg">Halbrook</span>
               <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] text-faint">Wallet Ratings</span>
               <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] uppercase tracking-widest text-faint">
                 beta
@@ -43,7 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main className="flex-1">{children}</main>
         <footer className="border-t border-line mt-16">
           <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint flex flex-wrap gap-x-6 gap-y-2 justify-between">
-            <span>Cookie — cross-app wallet ratings. Ethereum lookups read live mainnet data; Solana and example profiles are demo tier.</span>
+            <span>Halbrook — cross-app wallet ratings from live Ethereum mainnet data. Solana coverage in progress.</span>
             <span>Ratings are informational, not financial advice or a consumer credit report.</span>
           </div>
         </footer>

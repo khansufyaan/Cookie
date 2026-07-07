@@ -1,4 +1,4 @@
-export const metadata = { title: "API — Cookie" };
+export const metadata = { title: "API — Halbrook" };
 
 const SCORE_EXAMPLE = `curl https://<host>/api/v1/score/0x1f9090aae28b8a3dceadf281b0f12828e676c326`;
 
@@ -19,7 +19,7 @@ const SCORE_RESPONSE = `{
     ],
     "totals": { "txCount": 863, "volumeUsd": 1204551, "appsUsed": 4, … }
   },
-  "meta": { "engine": "crumb-v0.2", "dataSource": "live" }
+  "meta": { "engine": "halbrook-v0.3", "dataSource": "live" }
 }`;
 
 const INGEST_EXAMPLE = `curl -X POST https://<host>/api/v1/ingest \\
@@ -47,7 +47,7 @@ const INGEST_RESPONSE = `{
     ]
   },
   "errors": [],
-  "meta": { "engine": "crumb-v0.2", "tier": "demo" }
+  "meta": { "engine": "halbrook-v0.3", "tier": "demo" }
 }`;
 
 function Code({ children }: { children: string }) {
@@ -63,7 +63,7 @@ export default function DevelopersPage() {
     <div className="mx-auto max-w-4xl px-5 pt-10">
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
       <p className="mt-3 text-muted max-w-2xl">
-        Cookie is a two-sided marketplace: apps push wallet activity in, and pull ratings out. Score lookups for
+        Halbrook is a two-sided marketplace: apps push wallet activity in, and pull ratings out. Score lookups for
         EVM addresses read live Ethereum mainnet data; every request is screened against the OFAC SDN snapshot and
         checked for a KYC attestation. No auth in the MVP; ingest is stateless.
       </p>
@@ -74,7 +74,7 @@ export default function DevelopersPage() {
           <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/score/:address</h2>
         </div>
         <p className="mt-2 text-sm text-muted">
-          The read side. Returns the full CRUMB rating for any EVM address: score, grade, factor decomposition,
+          The read side. Returns the full Halbrook rating (including the monthly score history) for any EVM address: score, grade, factor decomposition,
           totals, and attestation status.
         </p>
         <Code>{SCORE_EXAMPLE}</Code>
@@ -88,7 +88,7 @@ export default function DevelopersPage() {
         </div>
         <p className="mt-2 text-sm text-muted">
           The write side. Report your users&apos; activity in batches of up to 500 wallets and receive A/B/C ratings
-          back in the same call. In production this persists to the Cookie graph and merges with cross-app history;
+          back in the same call. In production this persists to the Halbrook graph and merges with cross-app history;
           in the demo tier the batch is rated statelessly.
         </p>
         <Code>{INGEST_EXAMPLE}</Code>

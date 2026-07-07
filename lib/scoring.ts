@@ -3,7 +3,7 @@ import { hashSeed } from "./prng";
 import type { FactorScore, Grade, ScoreResult, TrustTier, WalletProfile } from "./types";
 
 /**
- * The CRUMB Score — Cookie's proprietary wallet rating rubric.
+ * The Halbrook Score — the proprietary wallet rating rubric.
  *
  * Five factors, each normalized to 0..1 against network calibration curves,
  * weighted into a 0–1000 score:
@@ -78,13 +78,17 @@ export function monthsBetween(fromIso: string, to: Date = new Date()): number {
   );
 }
 
-export function scoreWallet(profile: WalletProfile, signals: ScoreSignals): ScoreResult {
+export function scoreWallet(
+  profile: WalletProfile,
+  signals: ScoreSignals,
+  opts: { asOf?: Date } = {},
+): ScoreResult {
   const trackedApps = appsForFamily(profile.family);
   const active = profile.activities.filter((a) => a.txCount > 0);
   const txCount = active.reduce((s, a) => s + a.txCount, 0);
   const volumeUsd = active.reduce((s, a) => s + a.volumeUsd, 0);
   const appsUsed = active.length;
-  const walletAgeMonths = monthsBetween(profile.firstSeen);
+  const walletAgeMonths = monthsBetween(profile.firstSeen, opts.asOf);
   const avgTicket = txCount > 0 ? volumeUsd / txCount : 0;
 
   const consistency =
@@ -190,9 +194,9 @@ export function scoreWallet(profile: WalletProfile, signals: ScoreSignals): Scor
     totals: { txCount, volumeUsd, appsUsed, walletAgeMonths, activeMonths: profile.activeMonths },
     sbt: {
       minted: txCount > 0 && !signals.sanctioned,
-      tokenId: `CKE-${(hashSeed(profile.address.toLowerCase()) % 1_000_000).toString().padStart(6, "0")}`,
+      tokenId: `HBK-${(hashSeed(profile.address.toLowerCase()) % 1_000_000).toString().padStart(6, "0")}`,
       standard: "ERC-5192 (soulbound, non-transferable)",
-      note: "Testnet attestation — the mainnet SBT program requires wallet-owner opt-in.",
+      note: "Claiming opens soon — the attestation is minted only when the wallet owner opts in.",
     },
   };
 }
