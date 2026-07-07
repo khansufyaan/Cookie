@@ -1,9 +1,12 @@
 import Link from "next/link";
+import GradeSeal from "@/components/GradeSeal";
 import LookupForm from "@/components/LookupForm";
 import { ALL_APPS } from "@/lib/apps";
 import { fetchContractCounters } from "@/lib/counters";
 
 export const revalidate = 3600;
+
+const SAMPLE_WALLET = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"; // vitalik.eth
 
 export default async function Home() {
   const counters = await fetchContractCounters();
@@ -24,7 +27,31 @@ export default async function Home() {
           <LookupForm />
         </div>
         <p className="mt-4 text-xs text-faint">
-          Live Ethereum data · OFAC screened · KYC attestation checked
+          Live Ethereum data · OFAC screened · KYC attestation checked ·{" "}
+          <Link href={`/wallet/${SAMPLE_WALLET}`} className="underline hover:text-muted">
+            see a live sample — vitalik.eth
+          </Link>
+        </p>
+      </section>
+
+      {/* Rating seals */}
+      <section className="pb-16 flex flex-col items-center">
+        <div className="flex items-end gap-6 sm:gap-10">
+          <div className="flex flex-col items-center gap-2">
+            <GradeSeal grade="A" size="md" />
+            <span className="text-xs text-muted font-medium">Top decile</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 -translate-y-3">
+            <GradeSeal grade="B" size="md" />
+            <span className="text-xs text-muted font-medium">Established</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <GradeSeal grade="C" size="md" />
+            <span className="text-xs text-muted font-medium">Developing</span>
+          </div>
+        </div>
+        <p className="mt-6 text-sm text-muted max-w-sm text-center">
+          One legible grade — built from five factors, screened for sanctions, sealed to the wallet.
         </p>
       </section>
 

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FactorBars from "@/components/FactorBars";
+import GradeSeal from "@/components/GradeSeal";
 import LookupForm from "@/components/LookupForm";
 import ScoreHistory from "@/components/ScoreHistory";
-import ScoreRing from "@/components/ScoreRing";
 import { APP_BY_ID } from "@/lib/apps";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
@@ -75,14 +75,20 @@ export default async function WalletPage({ params }: { params: Promise<{ address
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr]">
         <div className="rounded-xl border border-line bg-surface p-8 flex flex-col items-center text-center lg:w-80">
-          <ScoreRing score={result.score} grade={result.grade} modifier={result.modifier} />
-          <div className="mt-4 rounded-full border px-3 py-1 text-xs font-semibold" style={{ borderColor: tierStyle.color, color: tierStyle.color }}>
-            {result.tier} tier
+          <GradeSeal grade={result.grade} modifier={result.modifier} size="lg" />
+          <div className="mt-5 text-3xl font-bold tabular-nums">
+            {result.score}
+            <span className="ml-1 text-sm font-normal text-faint">/ 1000</span>
           </div>
-          <div className="mt-3 rounded-full border border-line-strong px-3 py-1 text-xs font-medium text-accent">
-            {result.archetype}
+          <div className="mt-3 flex items-center gap-2">
+            <span className="rounded-full border px-3 py-1 text-xs font-semibold" style={{ borderColor: tierStyle.color, color: tierStyle.color }}>
+              {result.tier} tier
+            </span>
+            <span className="rounded-full border border-line-strong px-3 py-1 text-xs font-medium text-accent">
+              {result.archetype}
+            </span>
           </div>
-          <p className="mt-2 text-xs text-muted max-w-[16rem]">{result.archetypeNote}</p>
+          <p className="mt-3 text-xs text-muted max-w-[16rem]">{result.archetypeNote}</p>
           {result.fullStackBonus > 0 && (
             <p className="mt-3 text-xs font-medium" style={{ color: "var(--grade-a)" }}>
               ✓ Full-Stack bonus +{result.fullStackBonus}
