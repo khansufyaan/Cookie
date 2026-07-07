@@ -1,4 +1,4 @@
-import { buildProfileFromMatched, checkKycAttestation, fetchLiveEvmLookup } from "./live";
+import { buildProfileFromMatched, checkKycAttestation, fetchLiveEvmLookup, fetchLiveSolLookup } from "./live";
 import { isOfacSanctioned, OFAC_ENTRY_COUNT, OFAC_LIST_NAME } from "./ofac";
 import { scoreWallet } from "./scoring";
 import type { ChainFamily, Grade, ScoreResult, WalletProfile } from "./types";
@@ -38,7 +38,7 @@ export interface WalletReport {
   history: MonthlyScore[]; // last 12 month-end snapshots (first active month onward)
   scannedTx: number;
   windowCapped: boolean;
-  source: "alchemy" | "blockscout";
+  source: "alchemy" | "blockscout" | "helius";
 }
 
 export type Resolution =
@@ -64,11 +64,12 @@ function buildHistory(
   address: string,
   matched: MatchedTx[],
   signals: Parameters<typeof scoreWallet>[1],
+  family: ChainFamily,
 ): MonthlyScore[] {
   if (matched.length === 0) return [];
   const points = lastMonthEnds(12)
     .map(({ month, endDate, asOf }) => {
-      const snapshot = buildProfileFromMatched(address, matched, endDate);
+      const snapshot = buildProfileFromMatched(address, matched, endDate, family);
       if (snapshot.activities.length === 0) return null; // wallet not active yet
       const r = scoreWallet(snapshot, signals, { asOf });
       return { month, score: r.score, grade: r.grade };
@@ -83,12 +84,15 @@ function buildHistory(
 export async function resolveWallet(address: string): Promise<Resolution> {
   const family = detectFamily(address);
   if (!family) return { kind: "invalid" };
-  if (family === "solana") return { kind: "solana-soon" };
 
-  const [live, kyc] = await Promise.all([
-    fetchLiveEvmLookup(address),
-    checkKycAttestation(address),
-  ]);
+  let live, kyc;
+  if (family === "solana") {
+    if (!process.env.HELIUS_API_KEY) return { kind: "solana-soon" };
+    live = await fetchLiveSolLookup(address);
+    kyc = { verified: false, source: "KYC attestation checks are not yet available on Solana" };
+  } else {
+    [live, kyc] = await Promise.all([fetchLiveEvmLookup(address), checkKycAttestation(address)]);
+  }
   if (!live) return { kind: "unavailable" };
 
   const signals = {
@@ -99,7 +103,7 @@ export async function resolveWallet(address: string): Promise<Resolution> {
     sanctionsEntryCount: OFAC_ENTRY_COUNT,
   };
   const result = scoreWallet(live.profile, signals);
-  const history = signals.sanctioned ? [] : buildHistory(address, live.matched, signals);
+  const history = signals.sanctioned ? [] : buildHistory(address, live.matched, signals, family);
 
   return {
     kind: "ok",
@@ -115,11 +119,17 @@ export async function resolveWallet(address: string): Promise<Resolution> {
 }
 
 export function liveCoverageNote(report: WalletReport): string {
+  if (report.source === "helius") {
+    const base = report.windowCapped
+      ? `Recent-history scan via Helius, capped at ${report.scannedTx.toLocaleString()} transactions — very active wallet, older activity may be excluded.`
+      : `Full recent history scanned (${report.scannedTx.toLocaleString()} transactions, Helius).`;
+    return `${base} SOL and major-stablecoin legs are valued in USD; other token volume counts toward Usage only.`;
+  }
   const base =
     report.source === "alchemy"
       ? report.windowCapped
         ? `Full-history scan via Alchemy, capped at ${report.scannedTx.toLocaleString()} transfers — extremely active wallet, oldest activity may be excluded.`
         : `Full outgoing history scanned (${report.scannedTx.toLocaleString()} transfers, Alchemy).`
       : `Most recent ${report.scannedTx.toLocaleString()} transactions scanned (Blockscout fallback).`;
-  return `${base} ETH and major-stablecoin legs are valued in USD; other token volume counts toward Usage only. Polygon (Polymarket) and Solana apps are not yet indexed.`;
+  return `${base} ETH and major-stablecoin legs are valued in USD; other token volume counts toward Usage only. Polygon (Polymarket) is not yet indexed.`;
 }

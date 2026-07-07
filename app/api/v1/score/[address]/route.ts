@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
+export const maxDuration = 60;
+
 /**
  * GET /api/v1/score/:address — the marketplace read side.
  * EVM addresses are served from live Ethereum mainnet data (full history via

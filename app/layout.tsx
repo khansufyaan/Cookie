@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
-  { href: "/network", label: "Network" },
+  { href: "/actions", label: "Actions" },
+  { href: "/research", label: "Research" },
   { href: "/methodology", label: "Methodology" },
   { href: "/developers", label: "API" },
   { href: "/claim", label: "Claim" },
@@ -43,9 +44,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-line mt-16">
-          <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint flex flex-wrap gap-x-6 gap-y-2 justify-between">
-            <span>Halbrook — cross-app wallet ratings from live Ethereum mainnet data. Solana coverage in progress.</span>
-            <span>Ratings are informational, not financial advice or a consumer credit report.</span>
+          <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint">
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <Link href="/network" className="hover:text-muted">Network</Link>
+              <Link href="/watchlist" className="hover:text-muted">Watchlist</Link>
+              <Link href="/disputes" className="hover:text-muted">Disputes</Link>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 justify-between">
+              <span>Halbrook — cross-app wallet ratings from live Ethereum and Solana mainnet data.</span>
+              <span>Ratings are informational, not financial advice or a consumer credit report.</span>
+            </div>
           </div>
         </footer>
       </body>

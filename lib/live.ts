@@ -1,5 +1,5 @@
-import { EVM_APP_BY_CONTRACT } from "./apps";
-import type { AppActivity, WalletProfile } from "./types";
+import { EVM_APP_BY_CONTRACT, SOL_APPS } from "./apps";
+import type { AppActivity, ChainFamily, WalletProfile } from "./types";
 
 /**
  * Live tier: reads real chain data per lookup.
@@ -72,7 +72,7 @@ export interface LiveLookup {
   matched: MatchedTx[]; // per-tx matched history (for the score timeline)
   scannedTx: number;
   windowCapped: boolean;
-  source: "alchemy" | "blockscout";
+  source: "alchemy" | "blockscout" | "helius";
 }
 
 interface AlchemyTransfer {
@@ -89,6 +89,7 @@ export function buildProfileFromMatched(
   address: string,
   matched: MatchedTx[],
   upTo?: string, // inclusive YYYY-MM-DD cutoff for historical snapshots
+  family: ChainFamily = "evm",
 ): WalletProfile {
   const rows = upTo ? matched.filter((m) => m.date <= upTo) : matched;
   const byApp = new Map<string, { hashes: Set<string>; usd: number; first: string; last: string }>();
@@ -112,8 +113,8 @@ export function buildProfileFromMatched(
     lastTx: v.last,
   }));
   return {
-    address: address.toLowerCase(),
-    family: "evm",
+    address: family === "evm" ? address.toLowerCase() : address,
+    family,
     activities,
     firstSeen: firstSeen || new Date().toISOString().slice(0, 10),
     activeMonths: months.size,
@@ -289,6 +290,100 @@ export async function fetchLiveEvmLookup(address: string): Promise<LiveLookup | 
     windowCapped: alchemy.windowCapped,
     source: "alchemy",
   };
+}
+
+// ---------- Solana (Helius parsed-transaction API) ----------
+
+const HELIUS_PAGE_LIMIT = 5; // 5 x 100 parsed transactions
+const SOL_STABLE_MINTS = new Map([
+  ["EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "USDC"],
+  ["Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", "USDT"],
+]);
+const SOL_PROGRAM_TO_APP = new Map(SOL_APPS.map((a) => [a.contract, a]));
+
+async function solPriceUsd(): Promise<number> {
+  try {
+    const data = (await fetchJson(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd",
+      { headers: { accept: "application/json" }, next: { revalidate: 300 } } as RequestInit,
+    )) as { solana?: { usd?: number } };
+    return data.solana?.usd ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+interface HeliusTx {
+  signature: string;
+  timestamp: number;
+  feePayer: string;
+  instructions?: { programId: string; innerInstructions?: { programId: string }[] }[];
+  nativeTransfers?: { fromUserAccount: string; amount: number }[];
+  tokenTransfers?: { fromUserAccount: string; mint: string; tokenAmount: number }[];
+}
+
+/** Live Solana lookup via Helius. Returns null if unreachable or no key. */
+export async function fetchLiveSolLookup(address: string): Promise<LiveLookup | null> {
+  const key = process.env.HELIUS_API_KEY;
+  if (!key) return null;
+  try {
+    const price = await solPriceUsd();
+    const matched: MatchedTx[] = [];
+    let before = "";
+    let pages = 0;
+    let scanned = 0;
+    let windowCapped = false;
+
+    while (pages < HELIUS_PAGE_LIMIT) {
+      const url = `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${key}&limit=100${before}`;
+      const txs = (await fetchJson(url, { headers: { accept: "application/json" } })) as HeliusTx[];
+      if (!Array.isArray(txs) || txs.length === 0) break;
+      scanned += txs.length;
+      pages++;
+
+      for (const tx of txs) {
+        if (tx.feePayer !== address) continue; // only wallet-initiated activity
+        const programs = new Set<string>();
+        for (const ins of tx.instructions ?? []) {
+          programs.add(ins.programId);
+          for (const inner of ins.innerInstructions ?? []) programs.add(inner.programId);
+        }
+        const apps = [...programs]
+          .map((p) => SOL_PROGRAM_TO_APP.get(p))
+          .filter((a): a is NonNullable<typeof a> => Boolean(a));
+        if (apps.length === 0) continue;
+
+        const date = new Date(tx.timestamp * 1000).toISOString().slice(0, 10);
+        let usd = 0;
+        for (const nt of tx.nativeTransfers ?? []) {
+          if (nt.fromUserAccount === address) usd += (nt.amount / 1e9) * price;
+        }
+        for (const tt of tx.tokenTransfers ?? []) {
+          if (tt.fromUserAccount === address && SOL_STABLE_MINTS.has(tt.mint)) usd += tt.tokenAmount;
+        }
+        // A tx can touch multiple tracked programs (e.g. Jupiter routing
+        // through Raydium); credit each, but attach volume once.
+        apps.forEach((app, i) => {
+          matched.push({ appId: app.id, hash: tx.signature, date, usd: i === 0 ? usd : 0 });
+        });
+      }
+
+      if (txs.length < 100) break;
+      before = `&before=${txs[txs.length - 1].signature}`;
+      if (pages >= HELIUS_PAGE_LIMIT) windowCapped = true;
+    }
+
+    return {
+      profile: buildProfileFromMatched(address, matched, undefined, "solana"),
+      matched,
+      scannedTx: scanned,
+      windowCapped,
+      source: "helius",
+    };
+  } catch (err) {
+    console.error(`live: solana fetch failed for ${address}:`, err);
+    return null;
+  }
 }
 
 /**

@@ -8,6 +8,7 @@ import { APP_BY_ID } from "@/lib/apps";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const TIER_STYLE: Record<string, { color: string; blurb: string }> = {
   Prime: { color: "var(--grade-a)", blurb: "KYC-verified identity + grade A activity — the top of the network." },
@@ -56,7 +57,9 @@ export default async function WalletPage({ params }: { params: Promise<{ address
     <div className="mx-auto max-w-6xl px-5 pt-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-faint">Wallet report · Ethereum</p>
+          <p className="text-xs uppercase tracking-widest text-faint">
+            Wallet report · {result.family === "evm" ? "Ethereum" : "Solana"}
+          </p>
           <h1 className="mt-1 font-mono text-sm sm:text-base break-all">{result.address}</h1>
         </div>
         <LookupForm compact />
@@ -201,6 +204,26 @@ export default async function WalletPage({ params }: { params: Promise<{ address
           </table>
         </div>
       </section>
+
+      {/* Embeddable seal */}
+      {!result.sanctions.listed && (
+        <section className="mt-10 rounded-xl border border-line bg-surface p-6">
+          <div className="flex flex-wrap items-center gap-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/api/v1/badge/${result.address}`} alt={`Halbrook grade ${result.grade}${result.modifier} seal`} width={100} height={100} />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold">Embed this seal</h3>
+              <p className="mt-1 text-sm text-muted">
+                Show your rating anywhere — profiles, docs, dApp frontends. The seal updates automatically as the
+                rating changes.
+              </p>
+              <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-surface-2 p-3 text-xs font-mono text-muted">
+                {`<a href="https://halbrook.vercel.app/wallet/${result.address}">\n  <img src="https://halbrook.vercel.app/api/v1/badge/${result.address}" width="120" />\n</a>`}
+              </pre>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Attestation + portability */}
       <section className="mt-10 grid gap-4 md:grid-cols-2">
