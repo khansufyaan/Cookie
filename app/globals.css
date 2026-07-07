@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
-/* Cookie — committed dark theme, warm near-black with amber accent. */
+/* Cookie — institutional light theme (rwa.xyz-inspired): near-white plane,
+   white cards, hairline borders, navy ink, deep-blue accent. */
 :root {
-  --background: #0e0c09;
-  --surface: #191510;
-  --surface-2: #221c14;
-  --border: #2e2820;
-  --border-strong: #4a4030;
-  --foreground: #f4efe6;
-  --muted: #b3a992;
-  --faint: #877d66;
-  --accent: #f5a623;
-  --accent-strong: #ffc45e;
-  --grade-a: #0ca30c;
-  --grade-b: #fab219;
-  --grade-c: #ec835a;
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --border: #e4e7ec;
+  --border-strong: #cbd2dc;
+  --foreground: #101828;
+  --muted: #475467;
+  --faint: #667085;
+  --accent: #1d4ed8;
+  --accent-strong: #1e40af;
+  --grade-a: #067647;
+  --grade-b: #b54708;
+  --grade-c: #b42318;
 }
 
 @theme inline {

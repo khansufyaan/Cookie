@@ -22,12 +22,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <header className="border-b border-line sticky top-0 z-20 bg-background/90 backdrop-blur">
+        <header className="border-b border-line sticky top-0 z-20 bg-surface/95 backdrop-blur">
           <div className="mx-auto max-w-6xl px-5 h-14 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-lg">
-              <span aria-hidden>🍪</span> Cookie
-              <span className="ml-1 rounded-full border border-line-strong px-2 py-0.5 text-[10px] uppercase tracking-widest text-faint">
-                demo
+            <Link href="/" className="flex items-baseline gap-2.5 tracking-tight">
+              <span className="font-bold text-lg">Cookie</span>
+              <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] text-faint">Wallet Ratings</span>
+              <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] uppercase tracking-widest text-faint">
+                beta
               </span>
             </Link>
             <nav className="flex items-center gap-6 text-sm text-muted">

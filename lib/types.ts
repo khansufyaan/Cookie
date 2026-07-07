@@ -8,6 +8,7 @@ export interface AppInfo {
   name: string;
   category: string;
   contract: string; // primary mainnet contract / program id
+  altContracts?: string[]; // secondary entry points matched during live reads
   chain: string;
   family: ChainFamily;
 }
