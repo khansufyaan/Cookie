@@ -8,7 +8,7 @@ import type { AppInfo } from "./types";
  */
 export const EVM_APPS: AppInfo[] = [
   {
-    id: "uniswap", name: "Uniswap", category: "DEX",
+    id: "uniswap", domain: "uniswap.org", name: "Uniswap", category: "DEX",
     contract: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD", // Universal Router
     altContracts: [
       "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D", // V2 Router02
@@ -17,38 +17,38 @@ export const EVM_APPS: AppInfo[] = [
     ],
     chain: "Ethereum", family: "evm",
   },
-  { id: "aave", name: "Aave", category: "Lending", contract: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2", chain: "Ethereum", family: "evm" }, // V3 Pool
+  { id: "aave", domain: "aave.com", name: "Aave", category: "Lending", contract: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2", chain: "Ethereum", family: "evm" }, // V3 Pool
   {
-    id: "lido", name: "Lido", category: "Liquid Staking",
+    id: "lido", domain: "lido.fi", name: "Lido", category: "Liquid Staking",
     contract: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84", // stETH
     altContracts: ["0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"], // wstETH
     chain: "Ethereum", family: "evm",
   },
-  { id: "morpho", name: "Morpho", category: "Lending", contract: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb", chain: "Ethereum", family: "evm" }, // Morpho Blue
-  { id: "curve", name: "Curve", category: "Stableswap DEX", contract: "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7", chain: "Ethereum", family: "evm" }, // 3pool
+  { id: "morpho", domain: "morpho.org", name: "Morpho", category: "Lending", contract: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb", chain: "Ethereum", family: "evm" }, // Morpho Blue
+  { id: "curve", domain: "curve.finance", name: "Curve", category: "Stableswap DEX", contract: "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7", chain: "Ethereum", family: "evm" }, // 3pool
   {
-    id: "1inch", name: "1inch", category: "DEX Aggregator",
+    id: "1inch", domain: "1inch.io", name: "1inch", category: "DEX Aggregator",
     contract: "0x1111111254EEB25477B68fb85Ed929f73A960582", // AggregationRouterV5
     altContracts: ["0x111111125421cA6dc452d289314280a0f8842A65"], // AggregationRouterV6
     chain: "Ethereum", family: "evm",
   },
-  { id: "polymarket", name: "Polymarket", category: "Prediction Market", contract: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E", chain: "Polygon", family: "evm" }, // CTF Exchange
-  { id: "ethena", name: "Ethena", category: "Synthetic Dollar", contract: "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3", chain: "Ethereum", family: "evm" }, // USDe
-  { id: "eigenlayer", name: "EigenLayer", category: "Restaking", contract: "0x858646372CC42E1A627fcE94aa7A7033e7CF075A", chain: "Ethereum", family: "evm" }, // StrategyManager
-  { id: "pendle", name: "Pendle", category: "Yield Trading", contract: "0x888888888889758F76e7103c6CbF23ABbF58F946", chain: "Ethereum", family: "evm" }, // Router V4
+  { id: "polymarket", domain: "polymarket.com", name: "Polymarket", category: "Prediction Market", contract: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E", chain: "Polygon", family: "evm" }, // CTF Exchange
+  { id: "ethena", domain: "ethena.fi", name: "Ethena", category: "Synthetic Dollar", contract: "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3", chain: "Ethereum", family: "evm" }, // USDe
+  { id: "eigenlayer", domain: "eigenlayer.xyz", name: "EigenLayer", category: "Restaking", contract: "0x858646372CC42E1A627fcE94aa7A7033e7CF075A", chain: "Ethereum", family: "evm" }, // StrategyManager
+  { id: "pendle", domain: "pendle.finance", name: "Pendle", category: "Yield Trading", contract: "0x888888888889758F76e7103c6CbF23ABbF58F946", chain: "Ethereum", family: "evm" }, // Router V4
 ];
 
 export const SOL_APPS: AppInfo[] = [
-  { id: "jupiter", name: "Jupiter", category: "DEX Aggregator", contract: "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4", chain: "Solana", family: "solana" }, // v6
-  { id: "raydium", name: "Raydium", category: "DEX", contract: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", chain: "Solana", family: "solana" }, // AMM V4
-  { id: "orca", name: "Orca", category: "DEX", contract: "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc", chain: "Solana", family: "solana" }, // Whirlpools
-  { id: "pumpfun", name: "Pump.fun", category: "Token Launchpad", contract: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P", chain: "Solana", family: "solana" },
-  { id: "pumpswap", name: "PumpSwap", category: "Memecoin AMM", contract: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA", chain: "Solana", family: "solana" },
-  { id: "meteora", name: "Meteora", category: "Liquidity", contract: "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo", chain: "Solana", family: "solana" }, // DLMM
-  { id: "kamino", name: "Kamino", category: "Lending", contract: "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD", chain: "Solana", family: "solana" },
-  { id: "drift", name: "Drift", category: "Perps", contract: "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH", chain: "Solana", family: "solana" }, // v2
-  { id: "jito", name: "Jito", category: "Liquid Staking", contract: "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb", chain: "Solana", family: "solana" },
-  { id: "marinade", name: "Marinade", category: "Liquid Staking", contract: "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD", chain: "Solana", family: "solana" },
+  { id: "jupiter", domain: "jup.ag", name: "Jupiter", category: "DEX Aggregator", contract: "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4", chain: "Solana", family: "solana" }, // v6
+  { id: "raydium", domain: "raydium.io", name: "Raydium", category: "DEX", contract: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", chain: "Solana", family: "solana" }, // AMM V4
+  { id: "orca", domain: "orca.so", name: "Orca", category: "DEX", contract: "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc", chain: "Solana", family: "solana" }, // Whirlpools
+  { id: "pumpfun", domain: "pump.fun", name: "Pump.fun", category: "Token Launchpad", contract: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P", chain: "Solana", family: "solana" },
+  { id: "pumpswap", domain: "swap.pump.fun", name: "PumpSwap", category: "Memecoin AMM", contract: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA", chain: "Solana", family: "solana" },
+  { id: "meteora", domain: "meteora.ag", name: "Meteora", category: "Liquidity", contract: "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo", chain: "Solana", family: "solana" }, // DLMM
+  { id: "kamino", domain: "kamino.finance", name: "Kamino", category: "Lending", contract: "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD", chain: "Solana", family: "solana" },
+  { id: "drift", domain: "drift.trade", name: "Drift", category: "Perps", contract: "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH", chain: "Solana", family: "solana" }, // v2
+  { id: "jito", domain: "jito.network", name: "Jito", category: "Liquid Staking", contract: "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb", chain: "Solana", family: "solana" },
+  { id: "marinade", domain: "marinade.finance", name: "Marinade", category: "Liquid Staking", contract: "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD", chain: "Solana", family: "solana" },
 ];
 
 export const ALL_APPS: AppInfo[] = [...EVM_APPS, ...SOL_APPS];

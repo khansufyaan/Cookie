@@ -1,5 +1,7 @@
 import Link from "next/link";
+import ActionsTicker from "@/components/ActionsTicker";
 import GradeSeal from "@/components/GradeSeal";
+import LogoMarquee from "@/components/LogoMarquee";
 import LookupForm from "@/components/LookupForm";
 import { ALL_APPS } from "@/lib/apps";
 import { fetchContractCounters } from "@/lib/counters";
@@ -13,8 +15,10 @@ export default async function Home() {
   const liveTx = counters.reduce((s, c) => s + (c.txCount ?? 0), 0);
 
   return (
+    <>
+    <ActionsTicker />
     <div className="mx-auto max-w-3xl px-5">
-      <section className="pt-28 pb-16 text-center flex flex-col items-center">
+      <section className="pt-24 pb-16 text-center flex flex-col items-center">
         <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
           The credit rating
           <br />
@@ -27,9 +31,8 @@ export default async function Home() {
           <LookupForm />
         </div>
         <p className="mt-4 text-xs text-faint">
-          Live Ethereum data · OFAC screened · KYC attestation checked ·{" "}
           <Link href={`/wallet/${SAMPLE_WALLET}`} className="underline hover:text-muted">
-            see a live sample — vitalik.eth
+            See a live sample — vitalik.eth
           </Link>
         </p>
       </section>
@@ -61,6 +64,9 @@ export default async function Home() {
           tracked across <span className="font-semibold text-foreground">{ALL_APPS.length}</span> leading apps on{" "}
           <span className="font-semibold text-foreground">2</span> chains.
         </p>
+        <div className="mt-6">
+          <LogoMarquee />
+        </div>
       </section>
 
       <section className="py-14 grid gap-10 sm:grid-cols-3 text-center border-t border-line">
@@ -88,5 +94,6 @@ export default async function Home() {
         </p>
       </section>
     </div>
+    </>
   );
 }

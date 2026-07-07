@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import FactorBars from "@/components/FactorBars";
 import GradeSeal from "@/components/GradeSeal";
 import LookupForm from "@/components/LookupForm";
-import ScoreHistory from "@/components/ScoreHistory";
+import ScoreHistory, { HistoryTable } from "@/components/ScoreHistory";
 import { APP_BY_ID } from "@/lib/apps";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
@@ -76,7 +76,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         </div>
       )}
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr]">
+      <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr] items-start">
         <div className="rounded-xl border border-line bg-surface p-8 flex flex-col items-center text-center lg:w-80">
           <GradeSeal grade={result.grade} modifier={result.modifier} size="lg" />
           <div className="mt-5 text-3xl font-bold tabular-nums">
@@ -112,17 +112,37 @@ export default async function WalletPage({ params }: { params: Promise<{ address
           )}
         </div>
 
-        <div className="rounded-xl border border-line bg-surface p-6">
+        {/* Chart beside the seal when there's a timeline; factors otherwise */}
+        {history.length >= 2 ? (
+          <ScoreHistory history={history} showTable={false} />
+        ) : (
+          <div className="rounded-xl border border-line bg-surface p-6">
+            <h2 className="font-semibold">Halbrook Score breakdown</h2>
+            <p className="mt-1 text-xs text-faint">
+              Five factors, weighted into a 0–1000 score.{" "}
+              <Link href="/methodology" className="text-accent hover:text-accent-strong">How scoring works →</Link>
+            </p>
+            <div className="mt-5">
+              <FactorBars factors={result.factors} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Score breakdown under the chart */}
+      {history.length >= 2 && (
+        <div className="mt-4 rounded-xl border border-line bg-surface p-6">
           <h2 className="font-semibold">Halbrook Score breakdown</h2>
           <p className="mt-1 text-xs text-faint">
             Five factors, weighted into a 0–1000 score.{" "}
             <Link href="/methodology" className="text-accent hover:text-accent-strong">How scoring works →</Link>
           </p>
-          <div className="mt-5">
-            <FactorBars factors={result.factors} />
+          <div className="mt-5 grid gap-x-10 md:grid-cols-2 md:[&>*]:min-w-0">
+            <FactorBars factors={result.factors.slice(0, 3)} />
+            <FactorBars factors={result.factors.slice(3)} />
           </div>
         </div>
-      </div>
+      )}
 
       {/* Compliance panel */}
       <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -150,8 +170,15 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         </div>
       </div>
 
-      {/* Score history — the Experian view */}
-      <ScoreHistory history={history} />
+      {/* Month-by-month table */}
+      {history.length >= 2 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Monthly record</h2>
+          <div className="mt-4">
+            <HistoryTable history={history} />
+          </div>
+        </section>
+      )}
 
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">

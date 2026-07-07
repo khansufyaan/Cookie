@@ -28,8 +28,14 @@ const W = 760;
 const H = 320;
 const PAD = { top: 24, right: 24, bottom: 40, left: 52 };
 
-/** Month-by-month score timeline: interactive line chart + delta table. */
-export default function ScoreHistory({ history }: { history: MonthlyScore[] }) {
+/** Month-by-month score timeline: interactive line chart (+ optional delta table). */
+export default function ScoreHistory({
+  history,
+  showTable = true,
+}: {
+  history: MonthlyScore[];
+  showTable?: boolean;
+}) {
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -60,7 +66,7 @@ export default function ScoreHistory({ history }: { history: MonthlyScore[] }) {
   }
 
   return (
-    <section className="mt-10 rounded-xl border border-line bg-surface p-6 sm:p-8">
+    <section className="rounded-xl border border-line bg-surface p-6 sm:p-8">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold text-lg">Score history</h2>
         <span className="text-xs text-faint">Month-end snapshots · reconstructed from full history</span>
@@ -143,41 +149,52 @@ export default function ScoreHistory({ history }: { history: MonthlyScore[] }) {
         </svg>
       </div>
 
-      {/* Delta table */}
-      <div className="mt-5 overflow-x-auto rounded-lg border border-line">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs uppercase tracking-wider text-faint border-b border-line">
-              <th className="px-4 py-2.5">Month</th>
-              <th className="px-4 py-2.5 text-right">Score</th>
-              <th className="px-4 py-2.5 text-right">Grade</th>
-              <th className="px-4 py-2.5 text-right">Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...history].reverse().map((p) => (
-              <tr key={p.month} className="border-b border-line last:border-0 hover:bg-surface-2 transition-colors">
-                <td className="px-4 py-2.5">{longLabel(p.month)}</td>
-                <td className="px-4 py-2.5 text-right tabular-nums font-medium">{p.score}</td>
-                <td className="px-4 py-2.5 text-right font-semibold" style={{ color: `var(--grade-${p.grade.toLowerCase()})` }}>
-                  {p.grade}
-                </td>
-                <td className="px-4 py-2.5 text-right tabular-nums">
-                  {p.delta === null ? (
-                    <span className="text-faint">—</span>
-                  ) : p.delta > 0 ? (
-                    <span style={{ color: "var(--grade-a)" }}>▲ {p.delta}</span>
-                  ) : p.delta < 0 ? (
-                    <span style={{ color: "var(--grade-c)" }}>▼ {Math.abs(p.delta)}</span>
-                  ) : (
-                    <span className="text-faint">0</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {showTable && (
+        <div className="mt-5">
+          <HistoryTable history={history} />
+        </div>
+      )}
     </section>
+  );
+}
+
+/** The month-by-month delta table, usable standalone. */
+export function HistoryTable({ history }: { history: MonthlyScore[] }) {
+  if (history.length < 2) return null;
+  return (
+    <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-xs uppercase tracking-wider text-faint border-b border-line">
+            <th className="px-4 py-2.5">Month</th>
+            <th className="px-4 py-2.5 text-right">Score</th>
+            <th className="px-4 py-2.5 text-right">Grade</th>
+            <th className="px-4 py-2.5 text-right">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...history].reverse().map((p) => (
+            <tr key={p.month} className="border-b border-line last:border-0 hover:bg-surface-2 transition-colors">
+              <td className="px-4 py-2.5">{longLabel(p.month)}</td>
+              <td className="px-4 py-2.5 text-right tabular-nums font-medium">{p.score}</td>
+              <td className="px-4 py-2.5 text-right font-semibold" style={{ color: `var(--grade-${p.grade.toLowerCase()})` }}>
+                {p.grade}
+              </td>
+              <td className="px-4 py-2.5 text-right tabular-nums">
+                {p.delta === null ? (
+                  <span className="text-faint">—</span>
+                ) : p.delta > 0 ? (
+                  <span style={{ color: "var(--grade-a)" }}>▲ {p.delta}</span>
+                ) : p.delta < 0 ? (
+                  <span style={{ color: "var(--grade-c)" }}>▼ {Math.abs(p.delta)}</span>
+                ) : (
+                  <span className="text-faint">0</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

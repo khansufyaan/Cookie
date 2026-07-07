@@ -11,6 +11,7 @@ export interface AppInfo {
   altContracts?: string[]; // secondary entry points matched during live reads
   chain: string;
   family: ChainFamily;
+  domain: string; // project website domain (used for logo lookup)
 }
 
 /** Raw activity a partner app reports for one wallet (the ingest payload unit). */

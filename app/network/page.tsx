@@ -1,3 +1,4 @@
+import AppLogo from "@/components/AppLogo";
 import { APP_BY_ID, EVM_APPS, SOL_APPS } from "@/lib/apps";
 import { fetchContractCounters } from "@/lib/counters";
 
@@ -45,7 +46,12 @@ export default async function NetworkPage() {
                   const app = APP_BY_ID.get(c.appId)!;
                   return (
                     <tr key={c.appId} className="border-b border-line last:border-0">
-                      <td className="px-4 py-3 font-medium">{app.name}</td>
+                      <td className="px-4 py-3 font-medium">
+                        <span className="flex items-center gap-2.5">
+                          <AppLogo domain={app.domain} name={app.name} size={20} />
+                          {app.name}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-muted">{app.chain}</td>
                       <td className="px-4 py-3 font-mono text-xs text-faint">{c.contract.slice(0, 10)}…{c.contract.slice(-6)}</td>
                       <td className="px-4 py-3 text-right tabular-nums font-medium">
@@ -83,7 +89,12 @@ export default async function NetworkPage() {
                 <tbody>
                   {apps.map((a) => (
                     <tr key={a.id} className="border-b border-line last:border-0">
-                      <td className="px-4 py-2.5 font-medium whitespace-nowrap">{a.name}</td>
+                      <td className="px-4 py-2.5 font-medium whitespace-nowrap">
+                        <span className="flex items-center gap-2.5">
+                          <AppLogo domain={a.domain} name={a.name} size={18} />
+                          {a.name}
+                        </span>
+                      </td>
                       <td className="px-4 py-2.5 text-muted whitespace-nowrap">{a.category}</td>
                       <td className="px-4 py-2.5 font-mono text-xs text-faint truncate max-w-[12rem]" title={a.contract}>
                         {a.contract.slice(0, 10)}…{a.contract.slice(-6)}

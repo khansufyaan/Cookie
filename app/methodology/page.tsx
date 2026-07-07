@@ -12,10 +12,11 @@ const FACTORS = [
   { letter: "B", name: "Bedrock", weight: 15, color: "#4a3aa7", ink: "#ffffff", what: "Wallet tenure plus average ticket size.", why: "Old wallets with meaningful ticket sizes are costly to fake at scale." },
 ];
 
+// Rendered best-first: A on the left, descending to C.
 const BANDS = [
-  { g: "C" as const, from: 0, to: 449, d: "Developing — new, light, or dormant. A starting point, not a scarlet letter." },
-  { g: "B" as const, from: 450, to: 799, d: "Established — real but unremarkable activity." },
   { g: "A" as const, from: 800, to: 1000, d: "Top decile — deep, broad, or economically heavy." },
+  { g: "B" as const, from: 450, to: 799, d: "Established — real but unremarkable activity." },
+  { g: "C" as const, from: 0, to: 449, d: "Developing — new, light, or dormant. A starting point, not a scarlet letter." },
 ];
 
 export default function MethodologyPage() {
@@ -79,7 +80,7 @@ export default function MethodologyPage() {
       {/* Grade spectrum */}
       <section className="mt-16">
         <h2 className="text-xl font-semibold tracking-tight text-center">The grade spectrum</h2>
-        <div className="mt-6 flex h-9 w-full overflow-hidden rounded-lg" role="img" aria-label="Grade bands: C from 0 to 449, B from 450 to 799, A from 800 to 1000">
+        <div className="mt-6 flex h-9 w-full overflow-hidden rounded-lg" role="img" aria-label="Grade bands, best first: A from 1000 down to 800, B to 450, C to 0">
           {BANDS.map((b, i) => (
             <div
               key={b.g}
@@ -91,13 +92,13 @@ export default function MethodologyPage() {
           ))}
         </div>
         <div className="mt-1.5 relative h-4 text-[11px] text-faint tabular-nums">
-          <span className="absolute left-0">0</span>
-          <span className="absolute" style={{ left: "45%" }}>450</span>
-          <span className="absolute" style={{ left: "80%" }}>800</span>
-          <span className="absolute right-0">1000</span>
+          <span className="absolute left-0">1000</span>
+          <span className="absolute" style={{ left: "20%" }}>800</span>
+          <span className="absolute" style={{ left: "55%" }}>450</span>
+          <span className="absolute right-0">0</span>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {[...BANDS].reverse().map((b) => (
+          {BANDS.map((b) => (
             <div key={b.g} className="rounded-xl border border-line bg-surface p-5 flex flex-col items-center text-center">
               <GradeSeal grade={b.g} size="sm" />
               <span className="mt-3 font-mono text-xs text-muted">{b.from}–{b.to}</span>
