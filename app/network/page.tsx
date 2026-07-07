@@ -24,11 +24,12 @@ export default function NetworkPage() {
       </p>
 
       {/* Stat tiles */}
-      <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="mt-8 grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           { label: "Wallets rated", value: stats.population.toLocaleString() },
           { label: "Median score", value: String(stats.medianScore) },
-          { label: "Full-stack wallets (all 5 apps)", value: stats.fullStackWallets.toLocaleString() },
+          { label: "Full-stack wallets (5+ apps)", value: stats.fullStackWallets.toLocaleString() },
+          { label: "KYC-verified", value: stats.kycWallets.toLocaleString() },
           { label: "Total volume", value: `$${(stats.totalVolumeUsd / 1e9).toFixed(2)}B` },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-line bg-surface p-4">

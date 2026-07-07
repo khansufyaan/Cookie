@@ -5,17 +5,21 @@ const SCORE_EXAMPLE = `curl https://<host>/api/v1/score/0x1f9090aae28b8a3dceadf2
 const SCORE_RESPONSE = `{
   "data": {
     "address": "0x1f90…c326",
+    "family": "evm",
     "score": 741,
     "grade": "A",
     "modifier": "-",
+    "tier": "Prime",
     "archetype": "Blue Chip",
+    "kyc": { "verified": true, "source": "Coinbase Verifications attestation (EAS on Base)" },
+    "sanctions": { "listed": false, "list": "OFAC SDN (digital currency addresses)" },
     "factors": [
       { "key": "usage", "points": 201, "weight": 0.25, "detail": "…" },
       …
     ],
     "totals": { "txCount": 863, "volumeUsd": 1204551, "appsUsed": 4, … }
   },
-  "meta": { "engine": "crumb-v0.1", "tier": "demo" }
+  "meta": { "engine": "crumb-v0.2", "dataSource": "live" }
 }`;
 
 const INGEST_EXAMPLE = `curl -X POST https://<host>/api/v1/ingest \\
@@ -28,7 +32,8 @@ const INGEST_EXAMPLE = `curl -X POST https://<host>/api/v1/ingest \\
         "txCount": 42,
         "volumeUsd": 18500,
         "firstTx": "2024-11-02",
-        "lastTx": "2026-06-21"
+        "lastTx": "2026-06-21",
+        "kycVerified": true
       }
     ]
   }'`;
@@ -38,11 +43,11 @@ const INGEST_RESPONSE = `{
     "appId": "your-app",
     "rated": 1,
     "results": [
-      { "address": "0xabc…def", "grade": "B", "modifier": "+", "score": 612, "archetype": "Regular" }
+      { "address": "0xabc…def", "grade": "B", "modifier": "+", "score": 662, "tier": "Verified", "archetype": "Regular", "ofacSanctioned": false }
     ]
   },
   "errors": [],
-  "meta": { "engine": "crumb-v0.1", "tier": "demo" }
+  "meta": { "engine": "crumb-v0.2", "tier": "demo" }
 }`;
 
 function Code({ children }: { children: string }) {
@@ -58,8 +63,9 @@ export default function DevelopersPage() {
     <div className="mx-auto max-w-4xl px-5 pt-10">
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
       <p className="mt-3 text-muted max-w-2xl">
-        Cookie is a two-sided marketplace: apps push wallet activity in, and pull ratings out. Both sides are live
-        in this MVP (demo tier — no auth, synthesized data, stateless ingest).
+        Cookie is a two-sided marketplace: apps push wallet activity in, and pull ratings out. Score lookups for
+        EVM addresses read live Ethereum mainnet data; every request is screened against the OFAC SDN snapshot and
+        checked for a KYC attestation. No auth in the MVP; ingest is stateless.
       </p>
 
       <section className="mt-10">

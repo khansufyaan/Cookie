@@ -14,8 +14,8 @@ const FACTORS = [
     letter: "R",
     name: "Reach",
     weight: "20%",
-    what: "Breadth across the tracked app set. Activity in all five launch apps also earns a flat +50 Full-Stack bonus.",
-    why: "Cross-app presence is the strongest sybil-resistance signal we have — farming five distinct protocols convincingly is expensive.",
+    what: "Breadth across the chain's top-10 tracked apps, saturating at 7. Activity in 5+ apps earns a flat +50 Full-Stack bonus.",
+    why: "Cross-app presence is the strongest sybil-resistance signal we have — farming many distinct protocols convincingly is expensive.",
   },
   {
     letter: "U",
@@ -33,10 +33,10 @@ const FACTORS = [
   },
   {
     letter: "B",
-    name: "Bona fides",
+    name: "Bedrock",
     weight: "15%",
     what: "Wallet tenure (60% of the factor, full credit at 4 years) plus average ticket size (40%).",
-    why: "Old wallets with meaningful average transaction sizes are costly to fake at scale.",
+    why: "Old wallets with meaningful average transaction sizes are costly to fake at scale — the foundation under the other factors.",
   },
 ];
 
@@ -91,6 +91,34 @@ export default function MethodologyPage() {
         </p>
       </section>
 
+      {/* Trust tiers */}
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold tracking-tight">Trust tiers: KYC and sanctions</h2>
+        <p className="mt-3 text-sm text-muted leading-relaxed max-w-2xl">
+          Activity tells you a wallet is real; identity tells you who stands behind it. Cookie layers both on top of
+          the CRUMB score:
+        </p>
+        <ul className="mt-4 space-y-3 text-sm text-muted leading-relaxed list-disc pl-5">
+          <li>
+            <strong style={{ color: "var(--grade-a)" }}>Prime</strong> — a verified KYC attestation (Coinbase
+            Verifications, checked live via EAS on Base) <em>and</em> grade A activity. The highest standing on the
+            network. KYC also adds a flat +50 bonus to the score.
+          </li>
+          <li>
+            <strong className="text-accent">Verified</strong> — KYC attestation present, any grade.
+          </li>
+          <li>
+            <strong className="text-foreground">Standard</strong> — no identity attestation; rated on activity alone.
+          </li>
+          <li>
+            <strong style={{ color: "var(--grade-c)" }}>Restricted</strong> — the address matches the OFAC SDN
+            digital-currency snapshot. The score is suppressed to 0, grade forced to C−, and API consumers receive an
+            explicit <code className="font-mono text-xs">ofacSanctioned</code> flag. Every lookup and every ingest
+            batch is screened.
+          </li>
+        </ul>
+      </section>
+
       {/* Design principles */}
       <section className="mt-12">
         <h2 className="text-xl font-semibold tracking-tight">Design principles</h2>
@@ -101,7 +129,7 @@ export default function MethodologyPage() {
           </li>
           <li>
             <strong className="text-foreground">Breadth beats depth for trust.</strong> Reach plus the Full-Stack bonus
-            means a wallet active across all five apps outranks a single-app wallet with identical totals.
+            means a wallet active across many tracked apps outranks a single-app wallet with identical totals.
           </li>
           <li>
             <strong className="text-foreground">Log everything.</strong> On-chain activity is power-law distributed;

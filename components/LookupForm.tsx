@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
+const EVM_RE = /^0x[0-9a-fA-F]{40}$/;
+const SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 export default function LookupForm({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
@@ -13,12 +14,15 @@ export default function LookupForm({ compact = false }: { compact?: boolean }) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const addr = value.trim();
-    if (!ADDR_RE.test(addr)) {
-      setError("Enter a valid EVM address (0x + 40 hex characters).");
-      return;
+    if (EVM_RE.test(addr)) {
+      setError("");
+      router.push(`/wallet/${addr.toLowerCase()}`);
+    } else if (SOL_RE.test(addr)) {
+      setError("");
+      router.push(`/wallet/${addr}`);
+    } else {
+      setError("Enter a valid EVM (0x…) or Solana (base58) address.");
     }
-    setError("");
-    router.push(`/wallet/${addr.toLowerCase()}`);
   }
 
   return (
@@ -27,7 +31,7 @@ export default function LookupForm({ compact = false }: { compact?: boolean }) {
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="0x… wallet address"
+          placeholder="0x… or Solana wallet address"
           spellCheck={false}
           className="flex-1 rounded-lg border border-line-strong bg-surface px-4 py-3 font-mono text-sm placeholder:text-faint focus:outline-none focus:border-accent"
           aria-label="Wallet address"

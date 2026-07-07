@@ -1,11 +1,15 @@
 export type Grade = "A" | "B" | "C";
+export type ChainFamily = "evm" | "solana";
+export type TrustTier = "Prime" | "Verified" | "Standard" | "Restricted";
+export type DataSource = "live" | "demo";
 
 export interface AppInfo {
   id: string;
   name: string;
   category: string;
-  contract: string; // primary mainnet contract
+  contract: string; // primary mainnet contract / program id
   chain: string;
+  family: ChainFamily;
 }
 
 /** Raw activity a partner app reports for one wallet (the ingest payload unit). */
@@ -19,13 +23,14 @@ export interface AppActivity {
 
 export interface WalletProfile {
   address: string;
+  family: ChainFamily;
   activities: AppActivity[];
-  firstSeen: string; // ISO date of earliest tx across apps
-  activeMonths: number; // distinct months with >=1 tx
+  firstSeen: string; // ISO date of earliest tracked tx
+  activeMonths: number; // distinct months with >=1 tracked tx
 }
 
 export interface FactorScore {
-  key: "consistency" | "reach" | "usage" | "magnitude" | "bonaFides";
+  key: "consistency" | "reach" | "usage" | "magnitude" | "bedrock";
   label: string;
   weight: number; // 0..1, weights sum to 1
   raw: number; // 0..1 normalized factor value
@@ -35,13 +40,25 @@ export interface FactorScore {
 
 export interface ScoreResult {
   address: string;
+  family: ChainFamily;
   score: number; // 0..1000
   grade: Grade;
   modifier: "+" | "" | "-";
+  tier: TrustTier;
   archetype: string;
   archetypeNote: string;
   factors: FactorScore[];
-  fullStackBonus: number; // bonus points for using all tracked apps
+  fullStackBonus: number; // bonus for breadth across the tracked set
+  kycBonus: number; // bonus when a KYC attestation is verified
+  kyc: {
+    verified: boolean;
+    source: string;
+  };
+  sanctions: {
+    listed: boolean;
+    list: string;
+    checkedAgainst: number; // entries in the snapshot
+  };
   totals: {
     txCount: number;
     volumeUsd: number;

@@ -1,46 +1,47 @@
 import type { AppInfo } from "./types";
 
 /**
- * The five launch apps Cookie indexes to bootstrap the rating network.
- * Contracts are the real primary mainnet entry points for each protocol —
- * wallets that have interacted with these are the initial rating universe.
+ * The launch app set: top-10 apps by volume on each chain family
+ * (curated mid-2026; recalibrated quarterly). Contracts/programs are the
+ * real primary mainnet entry points — wallets that interact with these
+ * form the rating universe.
  */
-export const TOP_APPS: AppInfo[] = [
-  {
-    id: "uniswap",
-    name: "Uniswap",
-    category: "DEX / Swaps",
-    contract: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD", // Universal Router
-    chain: "Ethereum",
-  },
-  {
-    id: "opensea",
-    name: "OpenSea",
-    category: "NFT Marketplace",
-    contract: "0x0000000000000068F116a894984e2DB1123eB395", // Seaport 1.6
-    chain: "Ethereum",
-  },
-  {
-    id: "aave",
-    name: "Aave",
-    category: "Lending",
-    contract: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2", // Aave V3 Pool
-    chain: "Ethereum",
-  },
-  {
-    id: "lido",
-    name: "Lido",
-    category: "Liquid Staking",
-    contract: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84", // stETH
-    chain: "Ethereum",
-  },
-  {
-    id: "blur",
-    name: "Blur",
-    category: "Pro NFT Trading",
-    contract: "0x000000000000Ad05Ccc4F10045630fb830B95127", // Blur Marketplace
-    chain: "Ethereum",
-  },
+export const EVM_APPS: AppInfo[] = [
+  { id: "uniswap", name: "Uniswap", category: "DEX", contract: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD", chain: "Ethereum", family: "evm" }, // Universal Router
+  { id: "aave", name: "Aave", category: "Lending", contract: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2", chain: "Ethereum", family: "evm" }, // V3 Pool
+  { id: "lido", name: "Lido", category: "Liquid Staking", contract: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84", chain: "Ethereum", family: "evm" }, // stETH
+  { id: "morpho", name: "Morpho", category: "Lending", contract: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb", chain: "Ethereum", family: "evm" }, // Morpho Blue
+  { id: "curve", name: "Curve", category: "Stableswap DEX", contract: "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7", chain: "Ethereum", family: "evm" }, // 3pool
+  { id: "1inch", name: "1inch", category: "DEX Aggregator", contract: "0x1111111254EEB25477B68fb85Ed929f73A960582", chain: "Ethereum", family: "evm" }, // AggregationRouterV5
+  { id: "polymarket", name: "Polymarket", category: "Prediction Market", contract: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E", chain: "Polygon", family: "evm" }, // CTF Exchange
+  { id: "ethena", name: "Ethena", category: "Synthetic Dollar", contract: "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3", chain: "Ethereum", family: "evm" }, // USDe
+  { id: "eigenlayer", name: "EigenLayer", category: "Restaking", contract: "0x858646372CC42E1A627fcE94aa7A7033e7CF075A", chain: "Ethereum", family: "evm" }, // StrategyManager
+  { id: "pendle", name: "Pendle", category: "Yield Trading", contract: "0x888888888889758F76e7103c6CbF23ABbF58F946", chain: "Ethereum", family: "evm" }, // Router V4
 ];
 
-export const APP_BY_ID = new Map(TOP_APPS.map((a) => [a.id, a]));
+export const SOL_APPS: AppInfo[] = [
+  { id: "jupiter", name: "Jupiter", category: "DEX Aggregator", contract: "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4", chain: "Solana", family: "solana" }, // v6
+  { id: "raydium", name: "Raydium", category: "DEX", contract: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", chain: "Solana", family: "solana" }, // AMM V4
+  { id: "orca", name: "Orca", category: "DEX", contract: "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc", chain: "Solana", family: "solana" }, // Whirlpools
+  { id: "pumpfun", name: "Pump.fun", category: "Token Launchpad", contract: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P", chain: "Solana", family: "solana" },
+  { id: "pumpswap", name: "PumpSwap", category: "Memecoin AMM", contract: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA", chain: "Solana", family: "solana" },
+  { id: "meteora", name: "Meteora", category: "Liquidity", contract: "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo", chain: "Solana", family: "solana" }, // DLMM
+  { id: "kamino", name: "Kamino", category: "Lending", contract: "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD", chain: "Solana", family: "solana" },
+  { id: "drift", name: "Drift", category: "Perps", contract: "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH", chain: "Solana", family: "solana" }, // v2
+  { id: "jito", name: "Jito", category: "Liquid Staking", contract: "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb", chain: "Solana", family: "solana" },
+  { id: "marinade", name: "Marinade", category: "Liquid Staking", contract: "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD", chain: "Solana", family: "solana" },
+];
+
+export const ALL_APPS: AppInfo[] = [...EVM_APPS, ...SOL_APPS];
+export const APP_BY_ID = new Map(ALL_APPS.map((a) => [a.id, a]));
+
+export type ChainFamily = "evm" | "solana";
+
+export function appsForFamily(family: ChainFamily): AppInfo[] {
+  return family === "evm" ? EVM_APPS : SOL_APPS;
+}
+
+/** Contract address (lowercased for EVM) -> app, for live-chain matching. */
+export const EVM_APP_BY_CONTRACT = new Map(
+  EVM_APPS.map((a) => [a.contract.toLowerCase(), a]),
+);

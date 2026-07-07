@@ -42,7 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main className="flex-1">{children}</main>
         <footer className="border-t border-line mt-16">
           <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint flex flex-wrap gap-x-6 gap-y-2 justify-between">
-            <span>Cookie — cross-app wallet ratings. MVP demo: all profiles are synthesized, not live chain data.</span>
+            <span>Cookie — cross-app wallet ratings. Ethereum lookups read live mainnet data; Solana and example profiles are demo tier.</span>
             <span>Ratings are informational, not financial advice or a consumer credit report.</span>
           </div>
         </footer>

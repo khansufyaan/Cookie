@@ -4,37 +4,88 @@ import FactorBars from "@/components/FactorBars";
 import LookupForm from "@/components/LookupForm";
 import ScoreRing from "@/components/ScoreRing";
 import { APP_BY_ID } from "@/lib/apps";
-import { isEthAddress, lookupWallet, buildProfile } from "@/lib/wallets";
+import { resolveWallet } from "@/lib/wallets";
 
-export default async function WalletPage({ params }: { params: Promise<{ address: string }> }) {
+export const dynamic = "force-dynamic";
+
+const TIER_STYLE: Record<string, { color: string; blurb: string }> = {
+  Prime: { color: "var(--grade-a)", blurb: "KYC-verified identity + grade A activity — the top of the network." },
+  Verified: { color: "var(--accent)", blurb: "KYC-verified identity attestation on this wallet." },
+  Standard: { color: "var(--muted)", blurb: "No identity attestation — rated on activity alone." },
+  Restricted: { color: "var(--grade-c)", blurb: "OFAC sanctions match. Do not serve this wallet." },
+};
+
+export default async function WalletPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ address: string }>;
+  searchParams: Promise<{ demo?: string }>;
+}) {
   const { address } = await params;
-  if (!isEthAddress(address)) notFound();
+  const { demo } = await searchParams;
+  const report = await resolveWallet(decodeURIComponent(address), { forceDemo: demo === "1" });
+  if (!report) notFound();
 
-  const result = lookupWallet(address);
-  const profile = buildProfile(address);
+  const { result, profile, dataSource, liveNote } = report;
   const active = profile.activities.filter((a) => a.txCount > 0);
+  const tierStyle = TIER_STYLE[result.tier];
 
   return (
     <div className="mx-auto max-w-6xl px-5 pt-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-faint">Wallet report</p>
+          <p className="text-xs uppercase tracking-widest text-faint">
+            Wallet report · {result.family === "evm" ? "Ethereum" : "Solana"}
+          </p>
           <h1 className="mt-1 font-mono text-sm sm:text-base break-all">{result.address}</h1>
         </div>
         <LookupForm compact />
       </div>
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-[auto_1fr]">
+      {/* Data source banner */}
+      <div
+        className="mt-5 rounded-lg border px-4 py-3 text-sm"
+        style={{
+          borderColor: dataSource === "live" ? "var(--grade-a)" : "var(--grade-b)",
+          background: "var(--surface)",
+        }}
+      >
+        <span className="font-semibold" style={{ color: dataSource === "live" ? "var(--grade-a)" : "var(--grade-b)" }}>
+          {dataSource === "live" ? "● Live data" : "○ Demo data"}
+        </span>
+        <span className="ml-2 text-muted">{liveNote}</span>
+      </div>
+
+      {/* Sanctions banner */}
+      {result.sanctions.listed && (
+        <div className="mt-3 rounded-lg border px-4 py-3 text-sm font-medium" style={{ borderColor: "var(--grade-c)", color: "var(--grade-c)", background: "var(--surface)" }}>
+          ⚠ This address appears on the {result.sanctions.list} snapshot. Rating suppressed; tier Restricted.
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr]">
         {/* Score card */}
         <div className="rounded-xl border border-line bg-surface p-8 flex flex-col items-center text-center lg:w-80">
           <ScoreRing score={result.score} grade={result.grade} modifier={result.modifier} />
-          <div className="mt-4 rounded-full border border-line-strong px-3 py-1 text-xs font-medium text-accent">
+          <div
+            className="mt-4 rounded-full border px-3 py-1 text-xs font-semibold"
+            style={{ borderColor: tierStyle.color, color: tierStyle.color }}
+          >
+            {result.tier} tier
+          </div>
+          <div className="mt-3 rounded-full border border-line-strong px-3 py-1 text-xs font-medium text-accent">
             {result.archetype}
           </div>
           <p className="mt-2 text-xs text-muted max-w-[16rem]">{result.archetypeNote}</p>
           {result.fullStackBonus > 0 && (
             <p className="mt-3 text-xs font-medium" style={{ color: "var(--grade-a)" }}>
-              ✓ Full-Stack bonus +{result.fullStackBonus} — active in all 5 tracked apps
+              ✓ Full-Stack bonus +{result.fullStackBonus} — active in {result.totals.appsUsed} tracked apps
+            </p>
+          )}
+          {result.kycBonus > 0 && (
+            <p className="mt-1 text-xs font-medium" style={{ color: "var(--grade-a)" }}>
+              ✓ KYC bonus +{result.kycBonus}
             </p>
           )}
         </div>
@@ -54,13 +105,49 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         </div>
       </div>
 
+      {/* Compliance panel */}
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="rounded-xl border border-line bg-surface p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Identity (KYC)</h3>
+            <span
+              className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+              style={{
+                borderColor: result.kyc.verified ? "var(--grade-a)" : "var(--border-strong)",
+                color: result.kyc.verified ? "var(--grade-a)" : "var(--faint)",
+              }}
+            >
+              {result.kyc.verified ? "✓ Verified" : "Unverified"}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-muted">{result.kyc.source}</p>
+        </div>
+        <div className="rounded-xl border border-line bg-surface p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Sanctions screening</h3>
+            <span
+              className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+              style={{
+                borderColor: result.sanctions.listed ? "var(--grade-c)" : "var(--grade-a)",
+                color: result.sanctions.listed ? "var(--grade-c)" : "var(--grade-a)",
+              }}
+            >
+              {result.sanctions.listed ? "⚠ Listed" : "✓ Clear"}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-muted">
+            Screened against {result.sanctions.checkedAgainst} entries · {result.sanctions.list}
+          </p>
+        </div>
+      </div>
+
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: "Transactions", value: result.totals.txCount.toLocaleString() },
-          { label: "Lifetime volume", value: `$${Math.round(result.totals.volumeUsd).toLocaleString()}` },
-          { label: "Apps used", value: `${result.totals.appsUsed} / 5` },
-          { label: "Wallet age", value: `${result.totals.walletAgeMonths} mo` },
+          { label: "Tracked transactions", value: result.totals.txCount.toLocaleString() },
+          { label: "Tracked volume", value: `$${Math.round(result.totals.volumeUsd).toLocaleString()}` },
+          { label: "Apps used", value: `${result.totals.appsUsed} / 10` },
+          { label: "History age", value: `${result.totals.walletAgeMonths} mo` },
           { label: "Active months", value: String(result.totals.activeMonths) },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-line bg-surface p-4">
@@ -72,7 +159,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
 
       {/* Per-app activity */}
       <section className="mt-10">
-        <h2 className="text-xl font-semibold tracking-tight">Activity by app</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Activity by tracked app</h2>
         <div className="mt-4 overflow-x-auto rounded-xl border border-line">
           <table className="w-full text-sm">
             <thead>
@@ -88,7 +175,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
               {active.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-6 text-center text-muted">
-                    No activity in the tracked app set.
+                    No interactions with the tracked app set{dataSource === "live" ? " in the scanned window — this is your real, verified on-chain answer" : ""}.
                   </td>
                 </tr>
               )}
@@ -142,11 +229,6 @@ export default async function WalletPage({ params }: { params: Promise<{ address
           </button>
         </div>
       </section>
-
-      <p className="mt-10 text-xs text-faint">
-        Demo tier: this profile is synthesized deterministically from the address, not live chain data. The same
-        address always produces the same report.
-      </p>
     </div>
   );
 }

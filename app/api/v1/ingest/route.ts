@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { APP_BY_ID } from "@/lib/apps";
+import { OFAC_ENTRY_COUNT, OFAC_LIST_NAME, isOfacSanctioned } from "@/lib/ofac";
 import { monthsBetween, scoreWallet } from "@/lib/scoring";
-import { isEthAddress } from "@/lib/wallets";
+import { detectFamily } from "@/lib/wallets";
 import type { AppActivity } from "@/lib/types";
 
 interface IngestWallet {
@@ -10,6 +11,7 @@ interface IngestWallet {
   volumeUsd: number;
   firstTx: string;
   lastTx: string;
+  kycVerified?: boolean; // partner-attested KYC status
 }
 
 interface IngestBody {
@@ -19,9 +21,10 @@ interface IngestBody {
 
 /**
  * POST /api/v1/ingest — the marketplace write side.
- * Partner apps report wallet activity and receive A/B/C ratings back.
- * MVP: rates the submitted batch statelessly; production persists to the
- * indexer DB and merges with on-chain history before rating.
+ * Partner apps report wallet activity and receive ratings back. Every
+ * submitted wallet is screened against the OFAC snapshot. MVP: rates the
+ * batch statelessly; production persists to the indexer DB and merges with
+ * on-chain history before rating.
  */
 export async function POST(req: Request) {
   let body: IngestBody;
@@ -46,8 +49,9 @@ export async function POST(req: Request) {
   const errors = [];
 
   for (const [i, w] of body.wallets.entries()) {
-    if (!w || !isEthAddress(w.address ?? "")) {
-      errors.push({ index: i, error: "Invalid address." });
+    const family = w?.address ? detectFamily(w.address) : null;
+    if (!family) {
+      errors.push({ index: i, error: "Invalid address (EVM 0x… or Solana base58)." });
       continue;
     }
     if (!(Number.isFinite(w.txCount) && w.txCount >= 0 && Number.isFinite(w.volumeUsd) && w.volumeUsd >= 0)) {
@@ -63,19 +67,31 @@ export async function POST(req: Request) {
     };
     const ageMonths = Math.max(1, monthsBetween(w.firstTx));
     const spanMonths = Math.max(1, ageMonths - monthsBetween(w.lastTx));
-    const rated = scoreWallet({
-      address: w.address.toLowerCase(),
-      activities: [activity],
-      firstSeen: w.firstTx,
-      // Without month-level data we assume activity spread over the reported span.
-      activeMonths: Math.min(spanMonths, Math.max(1, Math.floor(activity.txCount / 2))),
-    });
+    const rated = scoreWallet(
+      {
+        address: family === "evm" ? w.address.toLowerCase() : w.address,
+        family,
+        activities: [activity],
+        firstSeen: w.firstTx,
+        // Without month-level data we assume activity spread over the reported span.
+        activeMonths: Math.min(spanMonths, Math.max(1, Math.floor(activity.txCount / 2))),
+      },
+      {
+        kycVerified: w.kycVerified === true,
+        kycSource: w.kycVerified === true ? "Partner-attested via ingest" : "Not attested",
+        sanctioned: isOfacSanctioned(w.address),
+        sanctionsList: OFAC_LIST_NAME,
+        sanctionsEntryCount: OFAC_ENTRY_COUNT,
+      },
+    );
     results.push({
       address: rated.address,
       grade: rated.grade,
       modifier: rated.modifier,
       score: rated.score,
+      tier: rated.tier,
       archetype: rated.archetype,
+      ofacSanctioned: rated.sanctions.listed,
     });
   }
 
@@ -83,9 +99,9 @@ export async function POST(req: Request) {
     data: { appId: body.appId, appKnown: known, rated: results.length, results },
     errors,
     meta: {
-      engine: "crumb-v0.1",
+      engine: "crumb-v0.2",
       tier: "demo",
-      note: "MVP demo tier: batch is rated statelessly on submitted data only. Production merges with indexed cross-app history, persists, and mints/updates the wallet's Cookie SBT.",
+      note: "MVP demo tier: batch is rated statelessly on submitted data only (OFAC screening is live). Production merges with indexed cross-app history and persists.",
     },
   });
 }

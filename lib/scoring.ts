@@ -1,6 +1,6 @@
-import { TOP_APPS } from "./apps";
+import { appsForFamily } from "./apps";
 import { hashSeed } from "./prng";
-import type { FactorScore, Grade, ScoreResult, WalletProfile } from "./types";
+import type { FactorScore, Grade, ScoreResult, TrustTier, WalletProfile } from "./types";
 
 /**
  * The CRUMB Score — Cookie's proprietary wallet rating rubric.
@@ -9,18 +9,26 @@ import type { FactorScore, Grade, ScoreResult, WalletProfile } from "./types";
  * weighted into a 0–1000 score:
  *
  *   C — Consistency (15%)  share of months active since first seen
- *   R — Reach       (20%)  breadth across the tracked app set
+ *   R — Reach       (20%)  breadth across the chain's tracked top-10 apps
  *   U — Usage       (25%)  transaction count (log-calibrated percentile)
  *   M — Magnitude   (25%)  USD volume moved (log-calibrated percentile)
- *   B — Bona fides  (15%)  wallet tenure + average ticket size
+ *   B — Bedrock     (15%)  wallet tenure + average ticket size
  *
  * Usage and Magnitude are weighted equally and calibrated on log curves, so a
  * "whale" (few transactions, large amounts) and a "power user" (many small
- * transactions) can both reach grade A by different paths. Reach captures the
- * cross-app requirement: a wallet active in all five launch apps earns a
- * Full-Stack bonus on top of a maxed Reach factor.
+ * transactions) can both reach grade A by different paths.
  *
- * Grades: A >= 800, B >= 450, C < 450, with +/- modifiers at band edges.
+ * Bonuses (capped at 1000 total):
+ *   +50 Full-Stack — active in 5+ of the chain's 10 tracked apps
+ *   +50 KYC        — a verified identity attestation on the wallet
+ *
+ * Trust tiers layered on top of the grade:
+ *   Prime      — KYC-verified AND grade A (the top of the network)
+ *   Verified   — KYC-verified
+ *   Standard   — no attestation
+ *   Restricted — on the OFAC sanctions snapshot; grade forced to C-
+ *
+ * Grades: A >= 800 (~top decile), B >= 450, C < 450, +/- at band edges.
  */
 
 // Calibration ceilings: the value at which a factor saturates to 1.0.
@@ -38,10 +46,24 @@ const WEIGHTS = {
   reach: 0.2,
   usage: 0.25,
   magnitude: 0.25,
-  bonaFides: 0.15,
+  bedrock: 0.15,
 } as const;
 
-const FULL_STACK_BONUS = 50; // flat bonus for activity in every tracked app
+const FULL_STACK_THRESHOLD = 5; // apps used (of 10) to earn the breadth bonus
+const FULL_STACK_BONUS = 50;
+const KYC_BONUS = 50;
+
+// Reach saturates at 7 of 10 apps: full breadth credit shouldn't require
+// touching literally every tracked protocol.
+const REACH_SATURATION = 7;
+
+export interface ScoreSignals {
+  kycVerified: boolean;
+  kycSource: string;
+  sanctioned: boolean;
+  sanctionsList: string;
+  sanctionsEntryCount: number;
+}
 
 function logCalib(value: number, ceiling: number): number {
   if (value <= 0) return 0;
@@ -56,7 +78,8 @@ export function monthsBetween(fromIso: string, to: Date = new Date()): number {
   );
 }
 
-export function scoreWallet(profile: WalletProfile): ScoreResult {
+export function scoreWallet(profile: WalletProfile, signals: ScoreSignals): ScoreResult {
+  const trackedApps = appsForFamily(profile.family);
   const active = profile.activities.filter((a) => a.txCount > 0);
   const txCount = active.reduce((s, a) => s + a.txCount, 0);
   const volumeUsd = active.reduce((s, a) => s + a.volumeUsd, 0);
@@ -66,10 +89,10 @@ export function scoreWallet(profile: WalletProfile): ScoreResult {
 
   const consistency =
     walletAgeMonths === 0 ? (txCount > 0 ? 1 : 0) : Math.min(1, profile.activeMonths / walletAgeMonths);
-  const reach = appsUsed / TOP_APPS.length;
+  const reach = Math.min(1, appsUsed / REACH_SATURATION);
   const usage = logCalib(txCount, CAL.txCountP99);
   const magnitude = logCalib(volumeUsd, CAL.volumeP99);
-  const bonaFides =
+  const bedrock =
     0.6 * Math.min(1, walletAgeMonths / CAL.tenureFullMonths) +
     0.4 * logCalib(avgTicket, CAL.avgTicketP99);
 
@@ -88,7 +111,7 @@ export function scoreWallet(profile: WalletProfile): ScoreResult {
       weight: WEIGHTS.reach,
       raw: reach,
       points: Math.round(reach * WEIGHTS.reach * 1000),
-      detail: `Used ${appsUsed} of ${TOP_APPS.length} tracked apps`,
+      detail: `Used ${appsUsed} of ${trackedApps.length} tracked apps`,
     },
     {
       key: "usage",
@@ -107,39 +130,66 @@ export function scoreWallet(profile: WalletProfile): ScoreResult {
       detail: `$${Math.round(volumeUsd).toLocaleString()} lifetime volume`,
     },
     {
-      key: "bonaFides",
-      label: "Bona fides",
-      weight: WEIGHTS.bonaFides,
-      raw: bonaFides,
-      points: Math.round(bonaFides * WEIGHTS.bonaFides * 1000),
+      key: "bedrock",
+      label: "Bedrock",
+      weight: WEIGHTS.bedrock,
+      raw: bedrock,
+      points: Math.round(bedrock * WEIGHTS.bedrock * 1000),
       detail: `${walletAgeMonths} months tenure, $${Math.round(avgTicket).toLocaleString()} avg ticket`,
     },
   ];
 
-  const fullStackBonus = appsUsed === TOP_APPS.length ? FULL_STACK_BONUS : 0;
-  const score = Math.min(1000, factors.reduce((s, f) => s + f.points, 0) + fullStackBonus);
+  const fullStackBonus = appsUsed >= FULL_STACK_THRESHOLD ? FULL_STACK_BONUS : 0;
+  const kycBonus = signals.kycVerified ? KYC_BONUS : 0;
+  const score = Math.min(
+    1000,
+    factors.reduce((s, f) => s + f.points, 0) + fullStackBonus + kycBonus,
+  );
 
-  // Bands calibrated so grade A is roughly the top decile of the network.
-  const grade: Grade = score >= 800 ? "A" : score >= 450 ? "B" : "C";
+  let grade: Grade = score >= 800 ? "A" : score >= 450 ? "B" : "C";
   const bandFloor = grade === "A" ? 800 : grade === "B" ? 450 : 0;
   const bandCeil = grade === "A" ? 1000 : grade === "B" ? 800 : 450;
   const pos = (score - bandFloor) / (bandCeil - bandFloor);
-  const modifier = pos >= 0.66 ? "+" : pos < 0.2 ? "-" : "";
+  let modifier: "+" | "" | "-" = pos >= 0.66 ? "+" : pos < 0.2 ? "-" : "";
 
-  const { archetype, archetypeNote } = classifyArchetype({ usage, magnitude, reach, consistency, txCount });
+  let { archetype, archetypeNote } = classifyArchetype({ usage, magnitude, reach, consistency, txCount });
+
+  let tier: TrustTier;
+  if (signals.sanctioned) {
+    tier = "Restricted";
+    grade = "C";
+    modifier = "-";
+    archetype = "Sanctioned";
+    archetypeNote = "Address appears on the OFAC SDN snapshot. Do not serve.";
+  } else if (signals.kycVerified && grade === "A") {
+    tier = "Prime";
+  } else if (signals.kycVerified) {
+    tier = "Verified";
+  } else {
+    tier = "Standard";
+  }
 
   return {
     address: profile.address,
-    score,
+    family: profile.family,
+    score: signals.sanctioned ? 0 : score,
     grade,
     modifier,
+    tier,
     archetype,
     archetypeNote,
     factors,
     fullStackBonus,
+    kycBonus,
+    kyc: { verified: signals.kycVerified, source: signals.kycSource },
+    sanctions: {
+      listed: signals.sanctioned,
+      list: signals.sanctionsList,
+      checkedAgainst: signals.sanctionsEntryCount,
+    },
     totals: { txCount, volumeUsd, appsUsed, walletAgeMonths, activeMonths: profile.activeMonths },
     sbt: {
-      minted: txCount > 0,
+      minted: txCount > 0 && !signals.sanctioned,
       tokenId: `CKE-${(hashSeed(profile.address.toLowerCase()) % 1_000_000).toString().padStart(6, "0")}`,
       standard: "ERC-5192 (soulbound, non-transferable)",
       note: "Testnet attestation — the mainnet SBT program requires wallet-owner opt-in.",
@@ -166,12 +216,12 @@ function classifyArchetype(s: {
       archetype: "Power User",
       archetypeNote: "High transaction frequency at smaller ticket sizes.",
     };
-  if (s.usage >= 0.55 && s.magnitude >= 0.55 && s.reach >= 0.8)
+  if (s.usage >= 0.55 && s.magnitude >= 0.55 && s.reach >= 0.55)
     return {
       archetype: "Blue Chip",
-      archetypeNote: "High activity, high volume, present across the app set.",
+      archetypeNote: "High activity, high volume, broad across the app set.",
     };
-  if (s.reach >= 0.8)
+  if (s.reach >= 0.7)
     return { archetype: "Explorer", archetypeNote: "Broad app coverage with moderate depth." };
   if (s.consistency >= 0.6)
     return { archetype: "Regular", archetypeNote: "Steady month-over-month activity." };
