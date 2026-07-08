@@ -8,7 +8,7 @@ import { Pool } from "pg";
 
 let pool: Pool | null = null;
 
-function getPool(): Pool | null {
+export function getPool(): Pool | null {
   if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new Pool({

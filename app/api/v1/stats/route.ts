@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { APP_BY_ID } from "@/lib/apps";
 import { fetchContractCounters } from "@/lib/counters";
+import { universeStats } from "@/lib/indexer";
 
 export const revalidate = 3600;
 
-/** GET /api/v1/stats — live per-contract activity totals (no synthetic data). */
+/** GET /api/v1/stats — live contract totals + the rated wallet universe. */
 export async function GET() {
-  const counters = await fetchContractCounters();
+  const [counters, universe] = await Promise.all([
+    fetchContractCounters(),
+    universeStats().catch(() => null),
+  ]);
   return NextResponse.json({
     data: {
       totalTx: counters.reduce((s, c) => s + (c.txCount ?? 0), 0),
@@ -18,6 +22,7 @@ export async function GET() {
         txCount: c.txCount,
         note: c.note,
       })),
+      universe, // null until the indexer has data
     },
     meta: { engine: "halbrook-v0.3", dataSource: "live", refreshed: "hourly" },
   });
