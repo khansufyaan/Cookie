@@ -36,7 +36,7 @@ export default function OgImage() {
               boxShadow: "0 12px 40px -12px rgba(16,24,40,0.25)",
             }}
           >
-            <div style={{ fontSize: 16, letterSpacing: 6, color: "#667085", fontWeight: 600 }}>HALBROOK</div>
+            <div style={{ fontSize: 16, letterSpacing: 6, color: "#667085", fontWeight: 600 }}>VISA</div>
             <div style={{ fontSize: 96, fontWeight: 700, color: "#067647", lineHeight: 1 }}>A</div>
             <div style={{ fontSize: 16, letterSpacing: 6, color: "#667085", fontWeight: 600 }}>RATED</div>
           </div>
@@ -46,7 +46,7 @@ export default function OgImage() {
             </div>
             <div style={{ fontSize: 72, fontWeight: 700, color: "#101828", lineHeight: 1.1 }}>for wallets.</div>
             <div style={{ marginTop: 24, fontSize: 28, color: "#475467" }}>
-              halbrook · live on-chain ratings
+              Visa Wallet Rating · live on-chain ratings
             </div>
           </div>
         </div>

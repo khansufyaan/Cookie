@@ -7,7 +7,7 @@ const GRADE_COLORS: Record<string, string> = { A: "#067647", B: "#b54708", C: "#
 /**
  * GET /api/v1/badge/:address — the embeddable rating seal as an SVG.
  * Cached at the edge for a day; apps and users embed it anywhere:
- *   <img src="https://halbrook.vercel.app/api/v1/badge/0x…" />
+ *   <img src="https://visa-wallet-rating.vercel.app/api/v1/badge/0x…" />
  */
 export async function GET(
   _req: Request,

@@ -32,14 +32,36 @@
   --color-grade-a: var(--grade-a);
   --color-grade-b: var(--grade-b);
   --color-grade-c: var(--grade-c);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-brand-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-brand-sans), system-ui, sans-serif;
+}
+
+/* Wordmark — italic heavyweight, tight tracking, echoing the Visa logotype. */
+.visa-wordmark {
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.045em;
+  font-stretch: 112%;
+}
+
+/* Credential card face — deep Visa blue with a soft diagonal sheen. */
+.grade-card {
+  background:
+    radial-gradient(120% 160% at 100% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 46%),
+    linear-gradient(133deg, #2247e8 0%, #1434cb 48%, #0c2189 100%);
+  box-shadow:
+    0 2px 4px rgba(16, 24, 40, 0.12),
+    0 20px 44px -18px rgba(20, 52, 203, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.grade-card-pan {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 -1px 0 rgba(255, 255, 255, 0.18);
 }
 
 /* Logo marquee */

@@ -2,7 +2,7 @@ import ApiPlayground from "@/components/ApiPlayground";
 
 export const metadata = { title: "API — Visa Wallet Rating" };
 
-const INGEST_EXAMPLE = `curl -X POST https://halbrook.vercel.app/api/v1/ingest \\
+const INGEST_EXAMPLE = `curl -X POST https://visa-wallet-rating.vercel.app/api/v1/ingest \\
   -H "Content-Type: application/json" \\
   -d '{
     "appId": "your-app",

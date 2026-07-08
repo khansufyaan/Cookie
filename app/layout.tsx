@@ -1,14 +1,22 @@
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+// Instrument Sans is the closest open typeface to Visa Dialect, the Visa
+// brand face: humanist grotesque, open apertures, tall x-height.
+const brandSans = Instrument_Sans({
+  variable: "--font-brand-sans",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["wdth"],
+});
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://halbrook.vercel.app"),
+  metadataBase: new URL("https://visa-wallet-rating.vercel.app"),
   title: "Visa Wallet Rating — a Visa Labs concept",
   description:
     "Visa Wallet Rating rates crypto wallets A, B, or C from real cross-app on-chain history. Look up any wallet, or plug the rating API into your app.",
@@ -31,11 +39,11 @@ const NAV = [
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
+      <body className={`${brandSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <header className="border-b border-line sticky top-0 z-20 bg-surface/95 backdrop-blur">
           <div className="mx-auto max-w-6xl px-5 h-14 flex items-center justify-between">
             <Link href="/" className="flex items-baseline gap-2.5 tracking-tight">
-              <span className="font-bold text-lg" style={{ color: "var(--accent)" }}>VISA</span>
+              <span className="visa-wordmark text-xl" style={{ color: "var(--accent)" }}>VISA</span>
               <span className="font-semibold text-lg">Wallet Rating</span>
               <span className="hidden sm:inline rounded-full border border-line-strong px-2 py-0.5 text-[10px] uppercase tracking-widest text-faint">Visa Labs concept</span>
             </Link>

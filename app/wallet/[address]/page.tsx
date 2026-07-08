@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FactorBars from "@/components/FactorBars";
-import GradeSeal from "@/components/GradeSeal";
+import GradeCard from "@/components/GradeCard";
 import LookupForm from "@/components/LookupForm";
 import ScoreHistory, { HistoryTable } from "@/components/ScoreHistory";
 import AppLogo from "@/components/AppLogo";
@@ -98,13 +98,15 @@ export default async function WalletPage({ params }: { params: Promise<{ address
       )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr] items-start">
-        <div className="rounded-xl border border-line bg-surface p-8 flex flex-col items-center text-center lg:w-80">
-          <GradeSeal grade={result.grade} modifier={result.modifier} size="lg" />
-          <div className="mt-5 text-3xl font-bold tabular-nums">
-            {result.score}
-            <span className="ml-1 text-sm font-normal text-faint">/ 1000</span>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
+        <div className="rounded-xl border border-line bg-surface p-6 flex flex-col items-center text-center lg:w-96">
+          <GradeCard
+            grade={result.grade}
+            modifier={result.modifier}
+            score={result.score}
+            address={result.address}
+            tier={result.tier}
+          />
+          <div className="mt-5 flex items-center gap-2">
             <span className="rounded-full border px-3 py-1 text-xs font-semibold" style={{ borderColor: tierStyle.color, color: tierStyle.color }}>
               {result.tier} tier
             </span>
@@ -128,7 +130,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
               href="/claim"
               className="mt-5 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
             >
-              Claim your score
+              Claim your card
             </Link>
           )}
         </div>
@@ -266,7 +268,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
                 rating changes.
               </p>
               <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-surface-2 p-3 text-xs font-mono text-muted">
-                {`<a href="https://halbrook.vercel.app/wallet/${result.address}">\n  <img src="https://halbrook.vercel.app/api/v1/badge/${result.address}" width="120" />\n</a>`}
+                {`<a href="https://visa-wallet-rating.vercel.app/wallet/${result.address}">\n  <img src="https://visa-wallet-rating.vercel.app/api/v1/badge/${result.address}" width="120" />\n</a>`}
               </pre>
             </div>
           </div>

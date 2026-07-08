@@ -64,16 +64,17 @@ export default async function Home() {
 
       <section className="py-14 grid gap-4 sm:grid-cols-3 border-t border-line">
         {[
-          { t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
-          { t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
-          { t: "Claim your rating", d: "Mint your score as a soulbound credential you own and carry anywhere.", href: "/claim", cta: "Preview your credential" },
+          { who: "For wallet owners", t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
+          { who: "For apps & exchanges", t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
+          { who: "For credential holders", t: "Claim your card", d: "Mint your rating as a soulbound credential you own and carry anywhere.", href: "/claim", cta: "Preview your card" },
         ].map((x) => (
           <Link
             key={x.t}
             href={x.href}
             className="rounded-xl border border-line bg-surface p-6 hover:border-accent transition-colors group"
           >
-            <h2 className="font-semibold">{x.t}</h2>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{x.who}</p>
+            <h2 className="mt-2 font-semibold">{x.t}</h2>
             <p className="mt-2 text-sm text-muted leading-relaxed">{x.d}</p>
             <span className="mt-3 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">
               {x.cta} →
@@ -87,7 +88,7 @@ export default async function Home() {
           href="/claim"
           className="inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
         >
-          Claim your score
+          Claim your card
         </Link>
         <p className="mt-3 text-xs text-faint">
           Free for wallet owners. <Link href="/developers" className="underline hover:text-muted">API for apps →</Link>
