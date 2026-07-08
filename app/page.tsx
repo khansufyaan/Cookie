@@ -37,6 +37,16 @@ export default async function Home() {
         </p>
       </section>
 
+      {/* Tracked apps */}
+      <section className="pb-16">
+        <LogoMarquee />
+        <p className="mt-4 text-center text-sm text-muted">
+          <span className="font-semibold text-foreground tabular-nums">{liveTx.toLocaleString()}</span> transactions
+          tracked across <span className="font-semibold text-foreground">{ALL_APPS.length}</span> leading apps on{" "}
+          <span className="font-semibold text-foreground">2</span> chains.
+        </p>
+      </section>
+
       {/* Rating seals */}
       <section className="pb-16 flex flex-col items-center">
         <div className="flex items-end gap-6 sm:gap-10">
@@ -56,17 +66,6 @@ export default async function Home() {
         <p className="mt-6 text-sm text-muted max-w-sm text-center">
           One legible grade — built from five factors, screened for sanctions, sealed to the wallet.
         </p>
-      </section>
-
-      <section className="py-10 border-t border-line text-center">
-        <p className="text-sm text-muted">
-          <span className="font-semibold text-foreground tabular-nums">{liveTx.toLocaleString()}</span> transactions
-          tracked across <span className="font-semibold text-foreground">{ALL_APPS.length}</span> leading apps on{" "}
-          <span className="font-semibold text-foreground">2</span> chains.
-        </p>
-        <div className="mt-6">
-          <LogoMarquee />
-        </div>
       </section>
 
       <section className="py-14 grid gap-10 sm:grid-cols-3 text-center border-t border-line">

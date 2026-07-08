@@ -12,7 +12,7 @@ export default function AppLogo({
 }) {
   return (
     <img
-      src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=${size >= 32 ? 64 : 32}`}
+      src={`/api/logo/${domain}`}
       alt={`${name} logo`}
       width={size}
       height={size}
