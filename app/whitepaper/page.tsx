@@ -63,9 +63,8 @@ export default async function WhitepaperPage() {
 
       <Section title="3 · Data infrastructure">
         <p>
-          Ratings are computed from primary sources at request time: full outgoing transfer history (Alchemy;
-          Blockscout fallback) matched against tracked entry-point contracts on Ethereum, and parsed transaction
-          history (Helius) matched against tracked program IDs on Solana. The tracked contracts have processed{" "}
+          Ratings are computed from primary sources at request time: full outgoing transfer history from redundant node providers, matched against tracked entry-point contracts on Ethereum, and parsed transaction
+          history matched against tracked program IDs on Solana. The tracked contracts have processed{" "}
           <strong className="tabular-nums">{liveTotal.toLocaleString()}</strong> cumulative transactions. In
           parallel, an indexer walks every transfer into the tracked contracts from genesis, discovering and rating
           the full wallet universe

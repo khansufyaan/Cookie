@@ -24,7 +24,7 @@ export default function PrivacyPage() {
         </p>
         <p>
           <strong className="text-foreground">Analytics.</strong> We use privacy-friendly, cookie-less page
-          analytics (Vercel Analytics) to understand aggregate usage. No advertising trackers.
+          analytics to understand aggregate usage. No advertising trackers.
         </p>
         <p>
           <strong className="text-foreground">Your rights.</strong> Email us to access, correct, or delete anything

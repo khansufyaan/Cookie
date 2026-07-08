@@ -125,15 +125,15 @@ export async function resolveWallet(address: string): Promise<Resolution> {
 export function liveCoverageNote(report: WalletReport): string {
   if (report.source === "helius") {
     const base = report.windowCapped
-      ? `Recent-history scan via Helius, capped at ${report.scannedTx.toLocaleString()} transactions — very active wallet, older activity may be excluded.`
-      : `Full recent history scanned (${report.scannedTx.toLocaleString()} transactions, Helius).`;
+      ? `Recent-history scan, capped at ${report.scannedTx.toLocaleString()} transactions — very active wallet, older activity may be excluded.`
+      : `Full recent history scanned (${report.scannedTx.toLocaleString()} transactions).`;
     return `${base} SOL and major-stablecoin legs are valued in USD; other token volume counts toward Usage only.`;
   }
   const base =
     report.source === "alchemy"
       ? report.windowCapped
-        ? `Full-history scan via Alchemy, capped at ${report.scannedTx.toLocaleString()} transfers — extremely active wallet, oldest activity may be excluded.`
-        : `Full outgoing history scanned (${report.scannedTx.toLocaleString()} transfers, Alchemy).`
-      : `Most recent ${report.scannedTx.toLocaleString()} transactions scanned (Blockscout fallback).`;
+        ? `Full-history scan, capped at ${report.scannedTx.toLocaleString()} transfers — extremely active wallet, oldest activity may be excluded.`
+        : `Full outgoing history scanned (${report.scannedTx.toLocaleString()} transfers).`
+      : `Most recent ${report.scannedTx.toLocaleString()} transactions scanned (fallback source).`;
   return `${base} ETH and major-stablecoin legs are valued in USD; other token volume counts toward Usage only. Polygon (Polymarket) is not yet indexed.`;
 }
