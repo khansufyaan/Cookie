@@ -22,6 +22,20 @@ export default async function WalletPage({ params }: { params: Promise<{ address
   const resolution = await resolveWallet(decodeURIComponent(address));
   if (resolution.kind === "invalid") notFound();
 
+  if (resolution.kind === "custodial") {
+    return (
+      <div className="mx-auto max-w-2xl px-5 pt-24 text-center">
+        <h1 className="text-2xl font-bold tracking-tight">Custodial pool — not rated</h1>
+        <p className="mt-3 text-muted">
+          This address is a known omnibus wallet ({resolution.label}). It moves funds on behalf of many customers,
+          so a grade here would describe the exchange, not any user. Deposits from it carry no wallet-level signal —
+          the API returns an explicit <code className="font-mono text-xs">custodial_pool</code> flag instead.
+        </p>
+        <div className="mt-8 flex justify-center"><LookupForm compact /></div>
+      </div>
+    );
+  }
+
   if (resolution.kind === "solana-soon") {
     return (
       <div className="mx-auto max-w-2xl px-5 pt-24 text-center">
@@ -117,7 +131,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
           <ScoreHistory history={history} showTable={false} />
         ) : (
           <div className="rounded-xl border border-line bg-surface p-6">
-            <h2 className="font-semibold">Halbrook Score breakdown</h2>
+            <h2 className="font-semibold">Wallet Rating Score breakdown</h2>
             <p className="mt-1 text-xs text-faint">
               Five factors, weighted into a 0–1000 score.{" "}
               <Link href="/methodology" className="text-accent hover:text-accent-strong">How scoring works →</Link>
@@ -132,7 +146,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
       {/* Score breakdown under the chart */}
       {history.length >= 2 && (
         <div className="mt-4 rounded-xl border border-line bg-surface p-6">
-          <h2 className="font-semibold">Halbrook Score breakdown</h2>
+          <h2 className="font-semibold">Wallet Rating Score breakdown</h2>
           <p className="mt-1 text-xs text-faint">
             Five factors, weighted into a 0–1000 score.{" "}
             <Link href="/methodology" className="text-accent hover:text-accent-strong">How scoring works →</Link>
@@ -237,7 +251,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         <section className="mt-10 rounded-xl border border-line bg-surface p-6">
           <div className="flex flex-wrap items-center gap-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/api/v1/badge/${result.address}`} alt={`Halbrook grade ${result.grade}${result.modifier} seal`} width={100} height={100} />
+            <img src={`/api/v1/badge/${result.address}`} alt={`Visa Wallet Rating grade ${result.grade}${result.modifier} seal`} width={100} height={100} />
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold">Embed this seal</h3>
               <p className="mt-1 text-sm text-muted">
@@ -275,7 +289,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         <div className="rounded-xl border border-line bg-surface p-6">
           <h3 className="font-semibold">Port this score to another wallet</h3>
           <p className="mt-2 text-sm text-muted leading-relaxed">
-            Sign a message from both wallets to migrate your reputation. Halbrook revokes the attestation on this
+            Sign a message from both wallets to migrate your reputation. Visa Wallet Rating revokes the attestation on this
             wallet and re-issues it on the destination — one live attestation per identity, ever.
           </p>
           <button disabled className="mt-4 rounded-lg border border-line-strong px-4 py-2 text-sm text-faint cursor-not-allowed">

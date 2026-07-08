@@ -16,7 +16,7 @@ export default function DisputesPage() {
     <div className="mx-auto max-w-2xl px-5 pt-14">
       <h1 className="text-3xl font-bold tracking-tight">Dispute a rating</h1>
       <p className="mt-3 text-muted leading-relaxed">
-        A rating you can&apos;t challenge is an accusation, not an assessment. If you believe a Halbrook rating is
+        A rating you can&apos;t challenge is an accusation, not an assessment. If you believe a Visa Wallet Rating rating is
         inaccurate — missed activity, a wrongly matched transaction, a sanctions false positive — file a dispute and
         a human reviews it.
       </p>

@@ -1,4 +1,4 @@
-export const metadata = { title: "Privacy — Halbrook" };
+export const metadata = { title: "Privacy — Visa Wallet Rating" };
 
 export default function PrivacyPage() {
   return (
@@ -7,7 +7,7 @@ export default function PrivacyPage() {
       <p className="mt-2 text-xs text-faint">Effective July 2026</p>
       <div className="mt-6 space-y-5 text-sm text-muted leading-relaxed">
         <p>
-          <strong className="text-foreground">What we process.</strong> Halbrook computes wallet ratings from
+          <strong className="text-foreground">What we process.</strong> Visa Wallet Rating computes wallet ratings from
           public blockchain data — transactions, timestamps, and counterparty contracts that are permanently
           published on Ethereum and Solana by their networks. We do not collect this data from you; we read it from
           the chains, the same way any block explorer does.

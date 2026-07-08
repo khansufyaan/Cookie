@@ -3,7 +3,7 @@ import { hashSeed } from "./prng";
 import type { FactorScore, Grade, ScoreResult, TrustTier, WalletProfile } from "./types";
 
 /**
- * The Halbrook Score — the proprietary wallet rating rubric.
+ * The Wallet Rating Score — the proprietary wallet rating rubric.
  *
  * Five factors, each normalized to 0..1 against network calibration curves,
  * weighted into a 0–1000 score:
@@ -194,7 +194,7 @@ export function scoreWallet(
     totals: { txCount, volumeUsd, appsUsed, walletAgeMonths, activeMonths: profile.activeMonths },
     sbt: {
       minted: txCount > 0 && !signals.sanctioned,
-      tokenId: `HBK-${(hashSeed(profile.address.toLowerCase()) % 1_000_000).toString().padStart(6, "0")}`,
+      tokenId: `VWR-${(hashSeed(profile.address.toLowerCase()) % 1_000_000).toString().padStart(6, "0")}`,
       standard: "ERC-5192 (soulbound, non-transferable)",
       note: "Claiming opens soon — the attestation is minted only when the wallet owner opts in.",
     },

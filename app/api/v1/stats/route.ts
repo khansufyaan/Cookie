@@ -24,6 +24,6 @@ export async function GET() {
       })),
       universe, // null until the indexer has data
     },
-    meta: { engine: "halbrook-v0.3", dataSource: "live", refreshed: "hourly" },
+    meta: { engine: "vwr-v0.4", dataSource: "live", refreshed: "hourly" },
   });
 }

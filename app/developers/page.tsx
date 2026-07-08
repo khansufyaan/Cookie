@@ -1,6 +1,6 @@
 import ApiPlayground from "@/components/ApiPlayground";
 
-export const metadata = { title: "API — Halbrook" };
+export const metadata = { title: "API — Visa Wallet Rating" };
 
 const INGEST_EXAMPLE = `curl -X POST https://halbrook.vercel.app/api/v1/ingest \\
   -H "Content-Type: application/json" \\
@@ -28,7 +28,7 @@ const INGEST_RESPONSE = `{
     ]
   },
   "errors": [],
-  "meta": { "engine": "halbrook-v0.3" }
+  "meta": { "engine": "vwr-v0.4" }
 }`;
 
 function Code({ children }: { children: string }) {

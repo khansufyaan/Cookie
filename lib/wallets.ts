@@ -1,4 +1,5 @@
 import { buildProfileFromMatched, checkKycAttestation, fetchLiveEvmLookup, fetchLiveSolLookup } from "./live";
+import { custodialLabel } from "./entities";
 import { isOfacSanctioned, OFAC_ENTRY_COUNT, OFAC_LIST_NAME } from "./ofac";
 import { scoreWallet } from "./scoring";
 import type { ChainFamily, Grade, ScoreResult, WalletProfile } from "./types";
@@ -44,6 +45,7 @@ export interface WalletReport {
 export type Resolution =
   | { kind: "ok"; report: WalletReport }
   | { kind: "invalid" }
+  | { kind: "custodial"; label: string }
   | { kind: "solana-soon" }
   | { kind: "unavailable" };
 
@@ -84,6 +86,8 @@ function buildHistory(
 export async function resolveWallet(address: string): Promise<Resolution> {
   const family = detectFamily(address);
   if (!family) return { kind: "invalid" };
+  const pool = custodialLabel(address);
+  if (pool) return { kind: "custodial", label: pool };
 
   let live, kyc;
   if (family === "solana") {

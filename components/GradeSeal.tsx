@@ -27,10 +27,10 @@ export default function GradeSeal({
     <div
       className={`inline-flex flex-col items-center justify-between bg-surface select-none ${dims.box}`}
       style={{ borderColor: color, boxShadow: "0 1px 3px rgba(16,24,40,0.10), 0 8px 24px -12px rgba(16,24,40,0.12)" }}
-      aria-label={`Halbrook grade ${grade}${modifier}`}
+      aria-label={`Visa Wallet Rating grade ${grade}${modifier}`}
     >
       <span className={`font-semibold uppercase leading-none ${dims.micro}`} style={{ color: "var(--faint)" }}>
-        Halbrook
+        Visa Wallet Rating
       </span>
       <span className={`font-bold leading-none ${dims.letter}`} style={{ color }}>
         {grade}

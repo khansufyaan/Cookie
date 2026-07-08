@@ -25,7 +25,7 @@ export default async function Home() {
           for wallets.
         </h1>
         <p className="mt-6 text-lg text-muted max-w-md">
-          Enter any wallet. Get a rating built from real on-chain history.
+          Know the wallet behind every transaction.
         </p>
         <div className="mt-10 w-full flex justify-center">
           <LookupForm />
@@ -65,7 +65,7 @@ export default async function Home() {
       <section className="py-14 grid gap-4 sm:grid-cols-3 border-t border-line">
         {[
           { t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
-          { t: "Rate your users", d: "Send your app's wallet activity through the API; get tiered ratings, KYC and sanctions flags back.", href: "/developers", cta: "Read the API docs" },
+          { t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
           { t: "Claim your rating", d: "Mint your score as a soulbound credential you own and carry anywhere.", href: "/claim", cta: "Preview your credential" },
         ].map((x) => (
           <Link

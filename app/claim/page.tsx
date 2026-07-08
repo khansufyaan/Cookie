@@ -1,6 +1,6 @@
 import ClaimPreview from "@/components/ClaimPreview";
 
-export const metadata = { title: "Claim your score — Halbrook" };
+export const metadata = { title: "Claim your score — Visa Wallet Rating" };
 
 export default function ClaimPage() {
   return (
@@ -8,7 +8,7 @@ export default function ClaimPage() {
       <h1 className="text-4xl font-bold tracking-tight">Your score already exists.</h1>
       <p className="mt-2 text-4xl font-bold tracking-tight text-accent">Claim it.</p>
       <p className="mt-6 text-muted leading-relaxed max-w-lg mx-auto">
-        Every rated wallet has a Halbrook credential waiting — built from its real history, soulbound to the wallet,
+        Every rated wallet has a Visa Wallet Rating credential waiting — built from its real history, soulbound to the wallet,
         portable only by your signature. See yours now; claiming opens with the attestation launch.
       </p>
 

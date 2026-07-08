@@ -62,7 +62,7 @@ export default function ClaimPreview() {
           className="flex h-36 w-36 flex-col items-center justify-center rounded-2xl border-[3px] bg-surface select-none"
           style={{ borderColor: color, boxShadow: "0 1px 3px rgba(16,24,40,0.08)" }}
         >
-          <span className="text-[9px] font-semibold uppercase tracking-[0.28em]" style={{ color: "var(--faint)" }}>Halbrook</span>
+          <span className="text-[9px] font-semibold uppercase tracking-[0.28em]" style={{ color: "var(--faint)" }}>Visa Wallet Rating</span>
           <span className="text-6xl font-bold leading-none my-1" style={{ color }}>{preview.grade}</span>
           <span className="text-[9px] font-semibold uppercase tracking-[0.28em]" style={{ color: "var(--faint)" }}>Rated</span>
         </div>

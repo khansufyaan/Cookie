@@ -99,7 +99,7 @@ export async function POST(req: Request) {
     data: { appId: body.appId, appKnown: known, rated: results.length, results },
     errors,
     meta: {
-      engine: "halbrook-v0.3",
+      engine: "vwr-v0.4",
       tier: "demo",
       note: "MVP demo tier: batch is rated statelessly on submitted data only (OFAC screening is live). Production merges with indexed cross-app history and persists.",
     },

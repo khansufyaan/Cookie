@@ -38,6 +38,14 @@ export async function GET(
         { error: "Invalid address. Expected an EVM (0x…) or Solana (base58) address." },
         { status: 400 },
       );
+    case "custodial":
+      return NextResponse.json({
+        data: { entityType: "custodial_pool", label: resolution.label, grade: null },
+        meta: {
+          engine: "vwr-v0.4",
+          note: "Known custodial/omnibus address — transfers from it carry no wallet-level signal about the end user. No grade is issued.",
+        },
+      });
     case "solana-soon":
       return NextResponse.json(
         { error: "Solana coverage is in progress. No synthetic scores are served." },
@@ -53,7 +61,7 @@ export async function GET(
       return NextResponse.json({
         data: { ...report.result, history: report.history },
         meta: {
-          engine: "halbrook-v0.3",
+          engine: "vwr-v0.4",
           dataSource: "live",
           chainSource: report.source,
           note: liveCoverageNote(report),

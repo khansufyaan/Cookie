@@ -1,6 +1,6 @@
 import GradeSeal from "@/components/GradeSeal";
 
-export const metadata = { title: "Methodology — Halbrook" };
+export const metadata = { title: "Methodology — Visa Wallet Rating" };
 
 // Reference categorical palette (validated for the light surface); identity
 // is carried by direct labels.

@@ -1,4 +1,4 @@
-export const metadata = { title: "Terms — Halbrook" };
+export const metadata = { title: "Terms — Visa Wallet Rating" };
 
 export default function TermsPage() {
   return (
@@ -7,7 +7,7 @@ export default function TermsPage() {
       <p className="mt-2 text-xs text-faint">Effective July 2026 · Beta service</p>
       <div className="mt-6 space-y-5 text-sm text-muted leading-relaxed">
         <p>
-          <strong className="text-foreground">The service.</strong> Halbrook provides informational ratings of
+          <strong className="text-foreground">The service.</strong> Visa Wallet Rating provides informational ratings of
           blockchain wallet addresses computed from public on-chain data, via this website and an API. The service
           is in beta: coverage windows, factor weights, and grade calibrations are documented in the{" "}
           <a href="/methodology" className="text-accent underline">methodology</a> and may change.
@@ -16,7 +16,7 @@ export default function TermsPage() {
           <strong className="text-foreground">Not financial advice; not a consumer report.</strong> Ratings are
           informational opinions about on-chain activity patterns. They are not financial, investment, or legal
           advice; not a recommendation to transact; and not a consumer report as defined by the Fair Credit
-          Reporting Act or similar laws. You may not use Halbrook ratings to determine any individual&apos;s
+          Reporting Act or similar laws. You may not use Visa Wallet Rating ratings to determine any individual&apos;s
           eligibility for credit, insurance, employment, or housing.
         </p>
         <p>

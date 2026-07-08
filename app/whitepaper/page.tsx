@@ -3,7 +3,7 @@ import { universeStats } from "@/lib/indexer";
 import { validationStats } from "@/lib/validation";
 import type { Grade } from "@/lib/types";
 
-export const metadata = { title: "Whitepaper — Halbrook" };
+export const metadata = { title: "Whitepaper — Visa Wallet Rating" };
 export const revalidate = 86400;
 
 const GRADES: Grade[] = ["A", "B", "C"];
@@ -18,10 +18,10 @@ export default async function WhitepaperPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-5 pt-16 pb-8">
-      <p className="text-xs uppercase tracking-[0.25em] text-accent">Halbrook Whitepaper · v1 · July 2026</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight">The Halbrook Score: a credit rating for wallets</h1>
+      <p className="text-xs uppercase tracking-[0.25em] text-accent">Visa Wallet Rating Whitepaper · v1 · July 2026</p>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight">The Wallet Rating Score: a credit rating for wallets</h1>
       <p className="mt-4 text-muted leading-relaxed">
-        Halbrook rates crypto wallets A, B, or C from their complete on-chain history across the highest-volume
+        Visa Wallet Rating rates crypto wallets A, B, or C from their complete on-chain history across the highest-volume
         applications on Ethereum and Solana. This paper describes the methodology, the data infrastructure, the
         compliance layer, and — unusually for this category — publishes live validation statistics computed from the
         rated universe itself.
@@ -37,7 +37,7 @@ export default async function WhitepaperPage() {
         </p>
       </Section>
 
-      <Section title="2 · Methodology: the Halbrook Score">
+      <Section title="2 · Methodology: the Wallet Rating Score">
         <p>
           Every score derives from a wallet&apos;s transactions with the <strong>tracked set</strong>: the top-10
           applications by volume on each chain (Ethereum: Uniswap, Aave, Lido, Morpho, Curve, 1inch, Polymarket,
@@ -147,7 +147,7 @@ export default async function WhitepaperPage() {
           on Base) yields the Verified tier — Prime when combined with grade A. Every lookup and every ingest batch
           is screened against the OFAC SDN digital-currency list; matches are suppressed to a Restricted tier with
           an explicit flag. Ratings are contestable through a published dispute process — acknowledgment within two
-          business days, re-run against source data, outcome with reasoning. Halbrook computes from public data,
+          business days, re-run against source data, outcome with reasoning. Visa Wallet Rating computes from public data,
           mints credentials only with the owner&apos;s signature, and is not a consumer reporting agency.
         </p>
       </Section>
@@ -163,7 +163,7 @@ export default async function WhitepaperPage() {
 
       <p className="mt-10 text-xs text-faint">
         Figures regenerate daily from live data. Ratings are informational and are not financial advice or a
-        consumer credit report. © 2026 Halbrook.
+        consumer credit report. © 2026 Visa Wallet Rating.
       </p>
     </div>
   );

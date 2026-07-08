@@ -1,7 +1,7 @@
 import EmailCapture from "@/components/EmailCapture";
 import { fetchContractCounters } from "@/lib/counters";
 
-export const metadata = { title: "Research — Halbrook" };
+export const metadata = { title: "Research — Visa Wallet Rating" };
 export const revalidate = 86400;
 
 export default async function ResearchPage() {
@@ -10,7 +10,7 @@ export default async function ResearchPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-5 pt-20 text-center">
-      <p className="text-xs uppercase tracking-[0.25em] text-accent">Halbrook Research</p>
+      <p className="text-xs uppercase tracking-[0.25em] text-accent">Visa Labs Research</p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight">State of Wallet Credit</h1>
       <p className="mt-2 text-muted">Quarterly · Q3 2026 edition</p>
 
@@ -28,7 +28,7 @@ export default async function ResearchPage() {
 
       <p className="mt-12 text-sm text-muted">
         Want the methodology and live validation statistics now? Read the{" "}
-        <a href="/whitepaper" className="text-accent underline hover:text-accent-strong">Halbrook whitepaper</a> — public, no email required.
+        <a href="/whitepaper" className="text-accent underline hover:text-accent-strong">Visa Wallet Rating whitepaper</a> — public, no email required.
       </p>
     </div>
   );

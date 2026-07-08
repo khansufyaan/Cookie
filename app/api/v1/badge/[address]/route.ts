@@ -22,9 +22,9 @@ export async function GET(
   const color = GRADE_COLORS[result.grade];
   const grade = `${result.grade}${result.modifier}`;
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Halbrook grade ${grade}">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Visa Wallet Rating grade ${grade}">
   <rect x="4" y="4" width="132" height="132" rx="16" fill="#ffffff" stroke="${color}" stroke-width="4"/>
-  <text x="70" y="34" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="600" letter-spacing="3" fill="#667085">HALBROOK</text>
+  <text x="70" y="34" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="600" letter-spacing="3" fill="#667085">VISA</text>
   <text x="70" y="88" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" fill="${color}">${grade}</text>
   <text x="70" y="114" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="600" letter-spacing="3" fill="#667085">RATED</text>
 </svg>`;

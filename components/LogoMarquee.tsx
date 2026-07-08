@@ -5,7 +5,7 @@ import { ALL_APPS } from "@/lib/apps";
 export default function LogoMarquee() {
   const items = [...ALL_APPS, ...ALL_APPS]; // duplicated for a seamless loop
   return (
-    <div className="marquee-mask overflow-hidden" aria-label="Apps tracked by Halbrook">
+    <div className="marquee-mask overflow-hidden" aria-label="Apps tracked by Visa Wallet Rating">
       <div className="marquee flex w-max items-center gap-20 py-4">
         {items.map((a, i) => (
           <span

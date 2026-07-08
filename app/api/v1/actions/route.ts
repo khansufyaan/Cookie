@@ -9,6 +9,6 @@ export async function GET() {
   const { actions } = await studyCohort(10);
   return NextResponse.json({
     data: actions,
-    meta: { engine: "halbrook-v0.3", dataSource: "live", refreshed: "hourly" },
+    meta: { engine: "vwr-v0.4", dataSource: "live", refreshed: "hourly" },
   });
 }

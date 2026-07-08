@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Halbrook — The credit rating for wallets";
+export const alt = "Visa Wallet Rating — The credit rating for wallets";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -1,30 +1,30 @@
 import KeyGenerator from "@/components/KeyGenerator";
 
-export const metadata = { title: "Pricing — Halbrook" };
+export const metadata = { title: "Pricing — Visa Wallet Rating" };
 
 const TIERS = [
   {
-    name: "Free",
+    name: "Sandbox",
     price: "$0",
-    period: "forever",
-    blurb: "For builders and evaluation.",
-    features: ["1,000 score lookups / day", "Full rating + factor breakdown", "Score history included", "OFAC + KYC flags", "Embeddable seals"],
+    period: "",
+    blurb: "Evaluate the rating engine.",
+    features: ["1,000 verifications / day", "Full rating + factor breakdown", "Score history + OFAC/KYC flags", "Test seals and badges"],
     highlight: false,
   },
   {
-    name: "Growth",
-    price: "$99",
-    period: "/ month",
-    blurb: "For apps in production.",
-    features: ["25,000 score lookups / day", "Batch ingest priority", "Grade-change webhooks (soon)", "Email support", "Usage dashboard (soon)"],
+    name: "Commercial",
+    price: "$0.002",
+    period: "/ verification",
+    blurb: "Wallet providers and dApps in production.",
+    features: ["Volume tiers, $2,500 / mo minimum", "25,000+ verifications / day", "Deposit + transfer-time screening", "Grade-change webhooks (soon)", "Priority ingest for contributed signals"],
     highlight: true,
   },
   {
-    name: "Enterprise",
+    name: "Strategic",
     price: "Custom",
     period: "",
-    blurb: "For exchanges, lenders, compliance desks.",
-    features: ["Unlimited volume + SLA", "Bulk universe export", "Custom factor weighting", "Dedicated support", "MSA + DPA"],
+    blurb: "Issuers, exchanges, and networks.",
+    features: ["Committed volume + SLA", "Bulk universe export", "Custom factor weighting", "Co-branded rating programs", "MSA + DPA"],
     highlight: false,
   },
 ];
@@ -34,7 +34,7 @@ export default function PricingPage() {
     <div className="mx-auto max-w-5xl px-5 pt-16 pb-8">
       <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tight">Pricing</h1>
-        <p className="mt-3 text-muted">Reading scores costs money. Contributing data never does — ingest is free on every tier.</p>
+        <p className="mt-3 text-muted">Priced per verification, like the network you already know. Contributing signals is free on every tier.</p>
       </div>
 
       <div className="mt-12 grid gap-4 md:grid-cols-3">
@@ -57,15 +57,15 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            {t.name !== "Free" && (
+            {t.name !== "Sandbox" && (
               <a
-                href={`mailto:khansufyaan@gmail.com?subject=${encodeURIComponent(`Halbrook ${t.name} plan`)}`}
+                href={`mailto:khansufyaan@gmail.com?subject=${encodeURIComponent(`Visa Wallet Rating ${t.name} plan`)}`}
                 className={`mt-5 rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${t.highlight ? "bg-accent text-white hover:bg-accent-strong" : "border border-line-strong hover:border-accent"}`}
               >
                 Talk to us
               </a>
             )}
-            {t.name === "Free" && <div className="mt-5"><KeyGenerator /></div>}
+            {t.name === "Sandbox" && <div className="mt-5"><KeyGenerator /></div>}
           </div>
         ))}
       </div>

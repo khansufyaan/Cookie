@@ -5,7 +5,7 @@ import { fetchContractCounters } from "@/lib/counters";
 import { universeStats } from "@/lib/indexer";
 import type { Grade } from "@/lib/types";
 
-export const metadata = { title: "Network — Halbrook" };
+export const metadata = { title: "Network — Visa Wallet Rating" };
 export const revalidate = 1800;
 
 export default async function NetworkPage() {
