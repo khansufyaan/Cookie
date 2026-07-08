@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍪 Cookie — Wallet Ratings
 
-## Getting Started
+Cookie rates crypto wallets **A, B, or C** from their activity across the top apps on-chain. Apps push user activity through an ingest API and get ratings back; wallet owners look up their score, see exactly what drives it, and claim it as a soulbound attestation.
 
-First, run the development server:
+**MVP status: hybrid.** Ethereum lookups read **live mainnet data** (Blockscout; most recent ~250 outgoing transactions matched against the tracked contracts), are screened against a committed **OFAC SDN snapshot**, and checked for a **KYC attestation** (Coinbase Verifications via EAS on Base). Solana lookups and the example profiles are demo tier — synthesized deterministically from the address — until the Solana indexer is connected.
+
+## The CRUMB Score
+
+Proprietary 0–1000 rubric, five factors (see `/methodology` in the app):
+
+| Factor | Weight | Signal |
+|---|---|---|
+| **C**onsistency | 15% | Share of months active since first seen |
+| **R**each | 20% | Breadth across the chain's top-10 tracked apps (+50 Full-Stack bonus at 5+) |
+| **U**sage | 25% | Transaction count, log-calibrated |
+| **M**agnitude | 25% | USD volume, log-calibrated |
+| **B**edrock | 15% | Wallet tenure + average ticket size |
+
+Usage and Magnitude are weighted equally so **whales** (few large transactions) and **power users** (many small ones) both have a path to grade A. Grades: A ≥ 800 (~top decile), B ≥ 450, C below.
+
+**Trust tiers** layer identity and compliance on top: **Prime** (KYC + grade A), **Verified** (KYC), **Standard**, **Restricted** (OFAC SDN match — score suppressed, explicit `ofacSanctioned` flag). KYC adds a +50 bonus.
+
+## Tracked app set — top 10 by volume, per chain
+
+**Ethereum/EVM:** Uniswap, Aave, Lido, Morpho, Curve, 1inch, Polymarket (Polygon), Ethena, EigenLayer, Pendle.
+**Solana:** Jupiter, Raydium, Orca, Pump.fun, PumpSwap, Meteora, Kamino, Drift, Jito, Marinade.
+
+## API
+
+- `GET /api/v1/score/:address` — full rating: score, grade, factor decomposition, totals
+- `POST /api/v1/ingest` — partner apps report wallet activity (≤500/batch), receive A/B/C ratings back
+- `GET /api/v1/stats` — network aggregates
+
+## Develop
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev    # http://localhost:3000
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Next.js 15 (App Router) + TypeScript + Tailwind v4. Scoring engine in `lib/scoring.ts`, demo data layer in `lib/wallets.ts`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Important design decisions (read before pitching this)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Attestations are opt-in.** Ratings are computed from public data, but the soulbound token is only minted when the owner claims it. Stealth-minting tokens to wallets pattern-matches dusting attacks, is hidden by default in major wallets, and creates severe GDPR/FCRA exposure. See `docs/IDEA-REVIEW.md`.
+- **Portability is revoke-and-reissue,** signed by both wallets and logged — never a transfer, which would create a market for scored wallets and break sybil-resistance.
+- **The name "Cookie" has a serious conflict** with Cookie DAO / Cookie3 (Binance-listed COOKIE token, wallet-analytics company). See `docs/IDEA-REVIEW.md`.

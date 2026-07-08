@@ -1,103 +1,99 @@
-import Image from "next/image";
+import Link from "next/link";
+import ActionsTicker from "@/components/ActionsTicker";
+import GradeSeal from "@/components/GradeSeal";
+import LogoMarquee from "@/components/LogoMarquee";
+import LookupForm from "@/components/LookupForm";
+import { ALL_APPS } from "@/lib/apps";
+import { fetchContractCounters } from "@/lib/counters";
 
-export default function Home() {
+export const revalidate = 3600;
+
+const SAMPLE_WALLET = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"; // vitalik.eth
+
+export default async function Home() {
+  const counters = await fetchContractCounters();
+  const liveTx = counters.reduce((s, c) => s + (c.txCount ?? 0), 0);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <>
+    <ActionsTicker />
+    <div className="mx-auto max-w-3xl px-5">
+      <section className="pt-24 pb-16 text-center flex flex-col items-center">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
+          The credit rating
+          <br />
+          for wallets.
+        </h1>
+        <p className="mt-6 text-lg text-muted max-w-md">
+          Know the wallet behind every transaction.
+        </p>
+        <div className="mt-10 w-full flex justify-center">
+          <LookupForm />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        <p className="mt-4 text-xs text-faint">
+          <Link href={`/wallet/${SAMPLE_WALLET}`} className="underline hover:text-muted">
+            See a live sample — vitalik.eth
+          </Link>
+        </p>
+      </section>
+
+      {/* Tracked apps */}
+      <section className="pb-16">
+        <LogoMarquee />
+        <p className="mt-4 text-center text-sm text-muted">
+          <span className="font-semibold text-foreground tabular-nums">{liveTx.toLocaleString()}</span> transactions
+          tracked across <span className="font-semibold text-foreground">{ALL_APPS.length}</span> leading apps on{" "}
+          <span className="font-semibold text-foreground">2</span> chains.
+        </p>
+      </section>
+
+      {/* Rating seals */}
+      <section className="pb-16 flex flex-col items-center">
+        <div className="grid grid-cols-3 gap-8 sm:gap-14">
+          {([["A", "Top decile"], ["B", "Established"], ["C", "Developing"]] as const).map(([g, label]) => (
+            <div key={g} className="flex flex-col items-center gap-3">
+              <GradeSeal grade={g} size="md" />
+              <span className="text-sm text-muted font-medium">{label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-8 text-sm text-muted max-w-sm text-center">
+          One legible grade — built from five factors, screened for sanctions, sealed to the wallet.
+        </p>
+      </section>
+
+      <section className="py-14 grid gap-4 sm:grid-cols-3 border-t border-line">
+        {[
+          { t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
+          { t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
+          { t: "Claim your rating", d: "Mint your score as a soulbound credential you own and carry anywhere.", href: "/claim", cta: "Preview your credential" },
+        ].map((x) => (
+          <Link
+            key={x.t}
+            href={x.href}
+            className="rounded-xl border border-line bg-surface p-6 hover:border-accent transition-colors group"
+          >
+            <h2 className="font-semibold">{x.t}</h2>
+            <p className="mt-2 text-sm text-muted leading-relaxed">{x.d}</p>
+            <span className="mt-3 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">
+              {x.cta} →
+            </span>
+          </Link>
+        ))}
+      </section>
+
+      <section className="py-14 border-t border-line text-center">
+        <Link
+          href="/claim"
+          className="inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          Claim your score
+        </Link>
+        <p className="mt-3 text-xs text-faint">
+          Free for wallet owners. <Link href="/developers" className="underline hover:text-muted">API for apps →</Link>
+        </p>
+      </section>
     </div>
+    </>
   );
 }
