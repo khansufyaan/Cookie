@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { meter } from "@/lib/apikeys";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
 export const maxDuration = 60;
@@ -10,9 +11,24 @@ export const maxDuration = 60;
  * synthetic data: Solana returns 501 until its indexer lands.
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ address: string }> },
 ) {
+  const usage = await meter(req);
+  if (!usage.allowed) {
+    return NextResponse.json(
+      usage.tier === "invalid"
+        ? { error: "Invalid API key." }
+        : {
+            error: `Daily limit reached (${usage.limit}/day on the ${usage.tier} tier). Get a free key at /pricing for 1,000/day.`,
+            tier: usage.tier,
+            used: usage.used,
+            limit: usage.limit,
+          },
+      { status: usage.tier === "invalid" ? 401 : 429 },
+    );
+  }
+
   const { address } = await params;
   const resolution = await resolveWallet(address);
 

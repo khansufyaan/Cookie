@@ -25,6 +25,11 @@ export default async function ResearchPage() {
         <EmailCapture source="research" cta="Get the report" />
         <p className="text-xs text-faint">Delivered by email when the quarterly publishes. No spam, one report per quarter.</p>
       </div>
+
+      <p className="mt-12 text-sm text-muted">
+        Want the methodology and live validation statistics now? Read the{" "}
+        <a href="/whitepaper" className="text-accent underline hover:text-accent-strong">Halbrook whitepaper</a> — public, no email required.
+      </p>
     </div>
   );
 }

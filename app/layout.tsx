@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
@@ -7,15 +8,23 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://halbrook.vercel.app"),
   title: "Halbrook — Wallet Ratings",
   description:
     "Halbrook rates crypto wallets A, B, or C from real cross-app on-chain history. Look up any wallet, or plug the rating API into your app.",
+  openGraph: {
+    title: "Halbrook — The credit rating for wallets",
+    description: "Live A/B/C wallet ratings from real on-chain history across Ethereum and Solana.",
+    siteName: "Halbrook",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 const NAV = [
   { href: "/research", label: "Research" },
   { href: "/methodology", label: "Methodology" },
   { href: "/developers", label: "API" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/claim", label: "Claim" },
 ];
 
@@ -39,12 +48,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
         </header>
         <main className="flex-1">{children}</main>
+        <Analytics />
         <footer className="border-t border-line mt-16">
           <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint">
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               <Link href="/network" className="hover:text-muted">Network</Link>
               <Link href="/watchlist" className="hover:text-muted">Watchlist</Link>
+              <Link href="/whitepaper" className="hover:text-muted">Whitepaper</Link>
               <Link href="/disputes" className="hover:text-muted">Disputes</Link>
+              <Link href="/privacy" className="hover:text-muted">Privacy</Link>
+              <Link href="/terms" className="hover:text-muted">Terms</Link>
             </div>
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 justify-between">
               <span>Halbrook — cross-app wallet ratings from live Ethereum and Solana mainnet data.</span>
