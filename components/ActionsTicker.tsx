@@ -48,7 +48,7 @@ export default function ActionsTicker() {
 
   return (
     <div className="border-b border-line bg-surface">
-      <div className="mx-auto max-w-6xl px-5 h-9 flex items-center gap-3 text-xs">
+      <div className="mx-auto max-w-6xl px-5 h-9 flex items-center justify-center gap-3 text-xs">
         <span className="uppercase tracking-widest text-faint shrink-0">Rating actions</span>
         <span
           className="flex items-center gap-2 truncate transition-opacity duration-200 tabular-nums"

@@ -28,9 +28,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/" className="flex items-baseline gap-2.5 tracking-tight">
               <span className="font-bold text-lg">Halbrook</span>
               <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] text-faint">Wallet Ratings</span>
-              <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] uppercase tracking-widest text-faint">
-                beta
-              </span>
             </Link>
             <nav className="flex items-center gap-6 text-sm text-muted">
               {NAV.map((n) => (

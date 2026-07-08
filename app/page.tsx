@@ -49,35 +49,36 @@ export default async function Home() {
 
       {/* Rating seals */}
       <section className="pb-16 flex flex-col items-center">
-        <div className="flex items-end gap-6 sm:gap-10">
-          <div className="flex flex-col items-center gap-2">
-            <GradeSeal grade="A" size="md" />
-            <span className="text-xs text-muted font-medium">Top decile</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 -translate-y-3">
-            <GradeSeal grade="B" size="md" />
-            <span className="text-xs text-muted font-medium">Established</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <GradeSeal grade="C" size="md" />
-            <span className="text-xs text-muted font-medium">Developing</span>
-          </div>
+        <div className="grid grid-cols-3 gap-8 sm:gap-14">
+          {([["A", "Top decile"], ["B", "Established"], ["C", "Developing"]] as const).map(([g, label]) => (
+            <div key={g} className="flex flex-col items-center gap-3">
+              <GradeSeal grade={g} size="md" />
+              <span className="text-sm text-muted font-medium">{label}</span>
+            </div>
+          ))}
         </div>
-        <p className="mt-6 text-sm text-muted max-w-sm text-center">
+        <p className="mt-8 text-sm text-muted max-w-sm text-center">
           One legible grade — built from five factors, screened for sanctions, sealed to the wallet.
         </p>
       </section>
 
-      <section className="py-14 grid gap-10 sm:grid-cols-3 text-center border-t border-line">
+      <section className="py-14 grid gap-4 sm:grid-cols-3 border-t border-line">
         {[
-          { t: "Rated", d: "A, B, or C — one legible grade from five factors of real activity." },
-          { t: "Screened", d: "Every lookup checked against OFAC and for a KYC attestation." },
-          { t: "Yours", d: "Claim your score as a soulbound credential. Take it anywhere." },
+          { t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
+          { t: "Rate your users", d: "Send your app's wallet activity through the API; get tiered ratings, KYC and sanctions flags back.", href: "/developers", cta: "Read the API docs" },
+          { t: "Claim your rating", d: "Mint your score as a soulbound credential you own and carry anywhere.", href: "/claim", cta: "Preview your credential" },
         ].map((x) => (
-          <div key={x.t}>
+          <Link
+            key={x.t}
+            href={x.href}
+            className="rounded-xl border border-line bg-surface p-6 hover:border-accent transition-colors group"
+          >
             <h2 className="font-semibold">{x.t}</h2>
             <p className="mt-2 text-sm text-muted leading-relaxed">{x.d}</p>
-          </div>
+            <span className="mt-3 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">
+              {x.cta} →
+            </span>
+          </Link>
         ))}
       </section>
 
