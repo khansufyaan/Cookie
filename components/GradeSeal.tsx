@@ -30,7 +30,7 @@ export default function GradeSeal({
       aria-label={`Visa Wallet Rating grade ${grade}${modifier}`}
     >
       <span className={`font-semibold uppercase leading-none ${dims.micro}`} style={{ color: "var(--faint)" }}>
-        Visa Wallet Rating
+        Visa
       </span>
       <span className={`font-bold leading-none ${dims.letter}`} style={{ color }}>
         {grade}
