@@ -4,6 +4,7 @@ import FactorBars from "@/components/FactorBars";
 import GradeSeal from "@/components/GradeSeal";
 import LookupForm from "@/components/LookupForm";
 import ScoreHistory, { HistoryTable } from "@/components/ScoreHistory";
+import AppLogo from "@/components/AppLogo";
 import { APP_BY_ID } from "@/lib/apps";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
@@ -64,6 +65,12 @@ export default async function WalletPage({ params }: { params: Promise<{ address
 
   const { report } = resolution;
   const { result, profile, history } = report;
+  const stableMix = report.stableMix.filter((s) => s.usd >= 1);
+  const stableTotal = stableMix.reduce((t, s) => t + s.usd, 0);
+  const STABLE_DOMAINS: Record<string, string> = {
+    USDC: "circle.com", USDT: "tether.to", DAI: "sky.money", USDE: "ethena.fi",
+    PYUSD: "paypal.com", USDS: "sky.money", FDUSD: "firstdigitallabs.com",
+  };
   const active = profile.activities.filter((a) => a.txCount > 0);
   const tierStyle = TIER_STYLE[result.tier];
 

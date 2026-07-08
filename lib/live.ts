@@ -73,6 +73,7 @@ export interface LiveLookup {
   scannedTx: number;
   windowCapped: boolean;
   source: "alchemy" | "blockscout" | "helius";
+  stableMix?: { asset: string; usd: number }[]; // outgoing stablecoin volume by asset
 }
 
 interface AlchemyTransfer {
@@ -125,6 +126,7 @@ async function alchemyLookup(address: string): Promise<LiveLookup> {
   const url = alchemyUrl()!;
   const price = await ethPriceUsd();
   const matched: MatchedTx[] = [];
+  const stableSums = new Map<string, number>();
   let pageKey: string | undefined;
   let pages = 0;
   let scanned = 0;
@@ -157,6 +159,10 @@ async function alchemyLookup(address: string): Promise<LiveLookup> {
     pages++;
 
     for (const t of transfers) {
+      if (t.category === "erc20" && t.value && t.asset && STABLECOINS.has(t.asset.toUpperCase())) {
+        const a = t.asset.toUpperCase();
+        stableSums.set(a, (stableSums.get(a) ?? 0) + t.value);
+      }
       const to = t.to?.toLowerCase();
       if (!to) continue;
       const app = EVM_APP_BY_CONTRACT.get(to);
@@ -181,6 +187,7 @@ async function alchemyLookup(address: string): Promise<LiveLookup> {
     scannedTx: scanned,
     windowCapped,
     source: "alchemy",
+    stableMix: [...stableSums.entries()].map(([asset, usd]) => ({ asset, usd: Math.round(usd) })).sort((a, b) => b.usd - a.usd),
   };
 }
 
@@ -329,6 +336,7 @@ export async function fetchLiveSolLookup(address: string): Promise<LiveLookup | 
   try {
     const price = await solPriceUsd();
     const matched: MatchedTx[] = [];
+    const stableSums = new Map<string, number>();
     let before = "";
     let pages = 0;
     let scanned = 0;
@@ -359,7 +367,11 @@ export async function fetchLiveSolLookup(address: string): Promise<LiveLookup | 
           if (nt.fromUserAccount === address) usd += (nt.amount / 1e9) * price;
         }
         for (const tt of tx.tokenTransfers ?? []) {
-          if (tt.fromUserAccount === address && SOL_STABLE_MINTS.has(tt.mint)) usd += tt.tokenAmount;
+          if (tt.fromUserAccount === address && SOL_STABLE_MINTS.has(tt.mint)) {
+            usd += tt.tokenAmount;
+            const sym = SOL_STABLE_MINTS.get(tt.mint)!;
+            stableSums.set(sym, (stableSums.get(sym) ?? 0) + tt.tokenAmount);
+          }
         }
         // A tx can touch multiple tracked programs (e.g. Jupiter routing
         // through Raydium); credit each, but attach volume once.
@@ -379,6 +391,7 @@ export async function fetchLiveSolLookup(address: string): Promise<LiveLookup | 
       scannedTx: scanned,
       windowCapped,
       source: "helius",
+      stableMix: [...stableSums.entries()].map(([asset, usd]) => ({ asset, usd: Math.round(usd) })).sort((a, b) => b.usd - a.usd),
     };
   } catch (err) {
     console.error(`live: solana fetch failed for ${address}:`, err);

@@ -40,6 +40,7 @@ export interface WalletReport {
   scannedTx: number;
   windowCapped: boolean;
   source: "alchemy" | "blockscout" | "helius";
+  stableMix: { asset: string; usd: number }[];
 }
 
 export type Resolution =
@@ -118,6 +119,7 @@ export async function resolveWallet(address: string): Promise<Resolution> {
       scannedTx: live.scannedTx,
       windowCapped: live.windowCapped,
       source: live.source,
+      stableMix: live.stableMix ?? [],
     },
   };
 }
