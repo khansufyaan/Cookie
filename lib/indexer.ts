@@ -113,8 +113,17 @@ export interface DiscoveryResult {
 export async function discoverStep(): Promise<DiscoveryResult | null> {
   const p = getPool();
   if (!p) return null;
+  // Atomically claim the least-recently-run open cursor: the FOR UPDATE
+  // SKIP LOCKED subquery runs inside this single UPDATE's implicit transaction,
+  // so two overlapping invocations claim different cursors (bumping last_run)
+  // instead of both fetching the same pages.
   const { rows } = await p.query(
-    `SELECT contract, app_id, page_key FROM index_cursors WHERE done = false ORDER BY last_run ASC LIMIT 1`,
+    `UPDATE index_cursors SET last_run = now()
+     WHERE contract = (
+       SELECT contract FROM index_cursors WHERE done = false
+       ORDER BY last_run ASC LIMIT 1 FOR UPDATE SKIP LOCKED
+     )
+     RETURNING contract, app_id, page_key`,
   );
   if (rows.length === 0) return null;
   const cursor = rows[0] as { contract: string; app_id: string; page_key: string | null };
@@ -156,25 +165,52 @@ export async function discoverStep(): Promise<DiscoveryResult | null> {
 export interface RateResult {
   rated: number;
   errored: number;
+  requeued?: number; // transient failures returned to 'pending'
+  skipped?: number; // legitimately unrateable (custodial / solana-soon)
 }
 
 /** One rating slice: rate a batch of pending wallets with the live engine. */
 export async function rateStep(batch = RATE_BATCH): Promise<RateResult> {
   const p = getPool();
   if (!p) return { rated: 0, errored: 0 };
+  // Recover wallets stranded in 'rating' by a crashed prior invocation (no
+  // timeout would otherwise ever re-pick them), then claim a fresh batch.
+  // FOR UPDATE SKIP LOCKED lets overlapping invocations claim disjoint batches.
+  await p.query(
+    `UPDATE wallets SET status = 'pending'
+     WHERE status = 'rating' AND created_at < now() - interval '10 minutes'`,
+  );
   const { rows } = await p.query(
     `UPDATE wallets SET status = 'rating'
-     WHERE address IN (SELECT address FROM wallets WHERE status = 'pending' LIMIT $1)
+     WHERE address IN (
+       SELECT address FROM wallets WHERE status = 'pending'
+       ORDER BY created_at LIMIT $1 FOR UPDATE SKIP LOCKED
+     )
      RETURNING address`,
     [batch],
   );
   let rated = 0;
   let errored = 0;
+  let requeued = 0;
+  let skipped = 0;
   await Promise.all(
     (rows as { address: string }[]).map(async ({ address }) => {
       try {
         const resolution = await resolveWallet(address);
-        if (resolution.kind !== "ok") throw new Error(resolution.kind);
+        if (resolution.kind === "unavailable") {
+          // Transient all-sources-down blip — requeue for a later tick rather
+          // than poisoning the wallet as a permanent 'error'.
+          await p.query(`UPDATE wallets SET status = 'pending' WHERE address = $1`, [address]).catch(() => {});
+          requeued++;
+          return;
+        }
+        if (resolution.kind !== "ok") {
+          // Legitimately unrateable (custodial pool, Solana-not-yet-indexed,
+          // invalid) — mark 'skipped' so it's never retried but not an error.
+          await p.query(`UPDATE wallets SET status = 'skipped' WHERE address = $1`, [address]).catch(() => {});
+          skipped++;
+          return;
+        }
         const r = resolution.report.result;
         await p.query(
           `INSERT INTO ratings (address, family, score, grade, modifier, tier, archetype, tx_count, volume_usd, apps_used, kyc_verified, sanctioned, history, updated_at)
@@ -210,7 +246,7 @@ export async function rateStep(batch = RATE_BATCH): Promise<RateResult> {
       }
     }),
   );
-  return { rated, errored };
+  return { rated, errored, requeued, skipped };
 }
 
 export interface UniverseStats {

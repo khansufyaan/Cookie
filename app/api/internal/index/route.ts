@@ -1,16 +1,25 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { discoverStep, initSchema, rateStep, universeStats } from "@/lib/indexer";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+/** Constant-time string compare that doesn't leak length via early return. */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual(ab, bb);
+}
+
 function authorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
   const header = req.headers.get("authorization");
-  if (header === `Bearer ${secret}`) return true; // Vercel cron
+  if (header && safeEqual(header, `Bearer ${secret}`)) return true; // Vercel cron / kicks
   const key = new URL(req.url).searchParams.get("key");
-  return key === secret; // manual kicks
+  return key != null && safeEqual(key, secret); // legacy manual kick
 }
 
 /**

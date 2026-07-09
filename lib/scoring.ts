@@ -72,9 +72,12 @@ function logCalib(value: number, ceiling: number): number {
 
 export function monthsBetween(fromIso: string, to: Date = new Date()): number {
   const from = new Date(fromIso);
+  // Compare in UTC: firstSeen ("YYYY-MM-DD") parses as UTC midnight and the
+  // month-end snapshots are built with Date.UTC, so using local getters here
+  // would shift a boundary date into the adjacent month in non-UTC timezones.
   return Math.max(
     0,
-    (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth()),
+    (to.getUTCFullYear() - from.getUTCFullYear()) * 12 + (to.getUTCMonth() - from.getUTCMonth()),
   );
 }
 
@@ -210,6 +213,14 @@ function classifyArchetype(s: {
 }): { archetype: string; archetypeNote: string } {
   if (s.txCount === 0)
     return { archetype: "Ghost", archetypeNote: "No activity in the tracked app set yet." };
+  // Blue Chip is the strongest profile (high on every axis) — check it before
+  // the Whale/Power-User specializations, which would otherwise shadow it
+  // whenever usage and magnitude are close but both high.
+  if (s.usage >= 0.55 && s.magnitude >= 0.55 && s.reach >= 0.55)
+    return {
+      archetype: "Blue Chip",
+      archetypeNote: "High activity, high volume, broad across the app set.",
+    };
   if (s.magnitude >= 0.55 && s.magnitude - s.usage >= 0.25)
     return {
       archetype: "Whale",
@@ -219,11 +230,6 @@ function classifyArchetype(s: {
     return {
       archetype: "Power User",
       archetypeNote: "High transaction frequency at smaller ticket sizes.",
-    };
-  if (s.usage >= 0.55 && s.magnitude >= 0.55 && s.reach >= 0.55)
-    return {
-      archetype: "Blue Chip",
-      archetypeNote: "High activity, high volume, broad across the app set.",
     };
   if (s.reach >= 0.7)
     return { archetype: "Explorer", archetypeNote: "Broad app coverage with moderate depth." };

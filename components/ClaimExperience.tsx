@@ -103,6 +103,17 @@ export default function ClaimExperience() {
         setMessage(json.error ?? "Lookup failed — try again.");
         return;
       }
+      // Custodial pools return 200 with grade:null and no sbt — don't crash on
+      // the missing fields; explain why there's no pass.
+      if (!json.data?.sbt || json.data.grade == null) {
+        setState("error");
+        setMessage(
+          json.data?.entityType === "custodial_pool"
+            ? `This is a known custodial/exchange pool${json.data.label ? ` (${json.data.label})` : ""} — it holds many users' funds, so no individual pass is issued.`
+            : "This address isn't eligible for a pass yet.",
+        );
+        return;
+      }
       setPreview({
         address: json.data.address,
         grade: json.data.grade,

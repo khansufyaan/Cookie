@@ -219,6 +219,68 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         ))}
       </div>
 
+      {/* "Active on" — app logos, sorted by activity */}
+      {active.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Active on</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {[...active]
+              .sort((a, b) => b.txCount - a.txCount)
+              .map((a) => {
+                const app = APP_BY_ID.get(a.appId);
+                return (
+                  <div key={a.appId} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                    {app && <AppLogo domain={app.domain} name={app.name} size={32} />}
+                    <div>
+                      <div className="font-semibold text-sm">{app?.name ?? a.appId}</div>
+                      <div className="text-xs text-faint tabular-nums">
+                        {a.txCount.toLocaleString()} tx
+                        {a.volumeUsd > 0 && ` · $${Math.round(a.volumeUsd).toLocaleString()}`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </section>
+      )}
+
+      {/* Stablecoin usage — per-asset outgoing volume */}
+      {stableMix.length > 0 && stableTotal > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Stablecoin usage</h2>
+          <p className="mt-1 text-xs text-faint">
+            Outgoing stablecoin volume by asset, across tracked activity.
+          </p>
+          <div className="mt-4 flex h-3 w-full overflow-hidden rounded-full">
+            {stableMix.map((s, i) => (
+              <div
+                key={s.asset}
+                title={`${s.asset} — $${Math.round(s.usd).toLocaleString()}`}
+                style={{
+                  width: `${(s.usd / stableTotal) * 100}%`,
+                  background: `var(--accent)`,
+                  opacity: 1 - i * (0.6 / Math.max(stableMix.length, 1)),
+                }}
+              />
+            ))}
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {stableMix.map((s) => (
+              <div key={s.asset} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                {STABLE_DOMAINS[s.asset] && <AppLogo domain={STABLE_DOMAINS[s.asset]} name={s.asset} size={28} />}
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm">{s.asset}</div>
+                  <div className="text-xs text-faint tabular-nums">
+                    ${Math.round(s.usd).toLocaleString()} · {Math.round((s.usd / stableTotal) * 100)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Per-app activity */}
       <section className="mt-10">
         <h2 className="text-xl font-semibold tracking-tight">Activity by tracked app</h2>

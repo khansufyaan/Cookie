@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { meter } from "@/lib/apikeys";
 import { APP_BY_ID } from "@/lib/apps";
 import { OFAC_ENTRY_COUNT, OFAC_LIST_NAME, isOfacSanctioned } from "@/lib/ofac";
 import { monthsBetween, scoreWallet } from "@/lib/scoring";
@@ -27,6 +28,18 @@ interface IngestBody {
  * on-chain history before rating.
  */
 export async function POST(req: Request) {
+  // Metered (by IP for anonymous callers) so an unauthenticated caller can't
+  // drive unbounded scoring work — each batch scores up to 500 wallets.
+  const usage = await meter(req);
+  if (!usage.allowed) {
+    return NextResponse.json(
+      usage.tier === "invalid"
+        ? { error: "Invalid API key." }
+        : { error: `Daily limit reached (${usage.limit}/day on the ${usage.tier} tier).`, tier: usage.tier },
+      { status: usage.tier === "invalid" ? 401 : 429 },
+    );
+  }
+
   let body: IngestBody;
   try {
     body = await req.json();
