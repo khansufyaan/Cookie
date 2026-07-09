@@ -17,8 +17,9 @@ function panGroups(address: string): string {
 
 /**
  * The pass — the rating rendered as a wallet pass in card proportions:
- * Visa-blue face, grade + score, grouped wallet address. Server-safe: no
- * hooks. Sizes: md (default, hero/claim), sm (compact grids).
+ * Visa-blue face, grade + score, grouped wallet address, holder line, VISA
+ * wordmark. Deliberately minimal. Server-safe: no hooks.
+ * Sizes: md (default, hero/claim), sm (compact grids).
  */
 export default function GradeCard({
   grade,
@@ -48,37 +49,20 @@ export default function GradeCard({
       aria-label={`Visa Wallet Rating pass: grade ${grade}${modifier}, score ${score} of 1000`}
     >
       <div className={`absolute inset-0 flex flex-col justify-between ${sm ? "p-3.5" : "p-5"}`}>
-        {/* Top row: product name + grade */}
+        {/* Top row: brand + grade */}
         <div className="flex items-start justify-between">
-          <div>
-            <div className={`font-semibold uppercase text-white/70 ${sm ? "text-[8px] tracking-[0.18em]" : "text-[10px] tracking-[0.24em]"}`}>
-              Visa Wallet Rating
-            </div>
-            {!sm && (
-              <div className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
-                Living wallet pass
-              </div>
-            )}
+          <div className={`font-semibold uppercase text-white/75 ${sm ? "text-[8px] tracking-[0.18em]" : "text-[10px] tracking-[0.24em]"}`}>
+            Visa Wallet Rating
           </div>
           <div className="flex flex-col items-end leading-none">
-            <span className={`font-bold ${sm ? "text-[30px]" : "text-[42px]"}`} style={{ color: gradeColor }}>
+            <span className={`font-bold ${sm ? "text-[30px]" : "text-[46px]"}`} style={{ color: gradeColor }}>
               {grade}
               {modifier && <span className="align-super text-[0.45em]">{modifier}</span>}
             </span>
-            <span className={`mt-1 font-semibold tracking-[0.14em] text-white/70 tabular-nums ${sm ? "text-[8px]" : "text-[10px]"}`}>
+            <span className={`mt-1 font-semibold tracking-[0.14em] text-white/70 tabular-nums ${sm ? "text-[8px]" : "text-[11px]"}`}>
               {score} / 1000
             </span>
           </div>
-        </div>
-
-        {/* Middle: rated badge */}
-        <div className="flex items-center">
-          <span
-            className={`rounded-full border font-semibold uppercase ${sm ? "px-1.5 py-0.5 text-[7px] tracking-[0.14em]" : "px-2 py-0.5 text-[9px] tracking-[0.16em]"}`}
-            style={{ borderColor: gradeColor, color: gradeColor }}
-          >
-            Rated
-          </span>
         </div>
 
         {/* Bottom: grouped address + holder + wordmark */}
@@ -86,7 +70,7 @@ export default function GradeCard({
           <div className={`grade-card-pan font-mono tracking-[0.12em] text-white/95 whitespace-nowrap ${sm ? "text-[9px]" : "text-[13px] sm:text-sm"}`}>
             {panGroups(address)}
           </div>
-          <div className={`flex items-end justify-between ${sm ? "mt-1" : "mt-2"}`}>
+          <div className={`flex items-end justify-between ${sm ? "mt-1" : "mt-2.5"}`}>
             <div className={`font-medium uppercase text-white/60 ${sm ? "text-[7px] tracking-[0.14em]" : "text-[10px] tracking-[0.18em]"}`}>
               {holder ?? (tier ? `${tier} tier` : "Wallet owner")}
             </div>

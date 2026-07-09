@@ -116,13 +116,13 @@ export default function MethodologyPage() {
         {(
           [
             { title: "Ethereum", apps: EVM_APPS, live: true },
-            { title: "Solana", apps: SOL_APPS, live: false },
+            { title: "Solana", apps: SOL_APPS, live: true },
           ] as const
         ).map((g) => (
           <div key={g.title} className="mt-8">
             <h3 className="text-sm font-semibold uppercase tracking-widest text-faint text-center">
               {g.title}
-              {!g.live && <span className="ml-2 normal-case tracking-normal font-medium">— indexer in progress</span>}
+              <span className="ml-2 normal-case tracking-normal font-medium" style={{ color: "var(--grade-a)" }}>· live</span>
             </h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {g.apps.map((a) => (
