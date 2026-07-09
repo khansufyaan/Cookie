@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ActionsTicker from "@/components/ActionsTicker";
-import GradeSeal from "@/components/GradeSeal";
+import GradeCard from "@/components/GradeCard";
 import LogoMarquee from "@/components/LogoMarquee";
 import LookupForm from "@/components/LookupForm";
 import { ALL_APPS } from "@/lib/apps";
@@ -47,12 +47,18 @@ export default async function Home() {
         </p>
       </section>
 
-      {/* Rating seals */}
+      {/* Rating passes */}
       <section className="pb-16 flex flex-col items-center">
-        <div className="grid grid-cols-3 gap-8 sm:gap-14">
-          {([["A", "Top decile"], ["B", "Established"], ["C", "Developing"]] as const).map(([g, label]) => (
+        <div className="grid gap-6 sm:grid-cols-3 sm:gap-5 w-full max-w-2xl">
+          {(
+            [
+              ["A", "", 870, "Top decile", "0x7f3ba28c91d4e05a66f19c8e2b74d0a153c9ef21"],
+              ["B", "+", 645, "Established", "0x91af5507c26be4d380e12cf94a70b6a2e8fd03c4"],
+              ["C", "+", 365, "Developing", "0x5db07ee1a4c2f89b30d165a9cc84f01d92be476a"],
+            ] as const
+          ).map(([g, mod, score, label, addr]) => (
             <div key={g} className="flex flex-col items-center gap-3">
-              <GradeSeal grade={g} size="md" />
+              <GradeCard grade={g} modifier={mod} score={score} address={addr} holder={label} size="sm" />
               <span className="text-sm text-muted font-medium">{label}</span>
             </div>
           ))}

@@ -1,4 +1,6 @@
+import AppLogo from "@/components/AppLogo";
 import GradeSeal from "@/components/GradeSeal";
+import { EVM_APPS, SOL_APPS } from "@/lib/apps";
 
 export const metadata = { title: "Methodology — Visa Wallet Rating" };
 
@@ -102,6 +104,45 @@ export default function MethodologyPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* The tracked app set */}
+      <section id="apps" className="mt-16 scroll-mt-20">
+        <h2 className="text-2xl font-bold tracking-tight text-center">The tracked apps</h2>
+        <p className="mt-3 text-muted text-center max-w-xl mx-auto text-sm">
+          Reach and the Full-Stack bonus are measured against this set — the top apps by volume on each chain,
+          recalibrated quarterly. Activity is matched at their primary on-chain entry points.
+        </p>
+        {(
+          [
+            { title: "Ethereum", apps: EVM_APPS, live: true },
+            { title: "Solana", apps: SOL_APPS, live: false },
+          ] as const
+        ).map((g) => (
+          <div key={g.title} className="mt-8">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-faint text-center">
+              {g.title}
+              {!g.live && <span className="ml-2 normal-case tracking-normal font-medium">— indexer in progress</span>}
+            </h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {g.apps.map((a) => (
+                <div key={a.id} className="rounded-xl border border-line bg-surface px-4 py-3 flex items-center gap-3">
+                  <AppLogo domain={a.domain} name={a.name} size={28} />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm">{a.name}</div>
+                    <div className="text-xs text-faint">
+                      {a.category} · {a.chain}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        <p className="mt-4 text-xs text-faint text-center">
+          Polymarket (Polygon) is listed but not yet indexed — activity there doesn&apos;t count until its
+          connection lands.
+        </p>
       </section>
 
       {/* How to raise a rating */}
