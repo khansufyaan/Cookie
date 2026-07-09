@@ -65,10 +65,33 @@ export default function DevelopersPage() {
     <div className="mx-auto max-w-4xl px-5 pt-10">
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
       <p className="mt-3 text-muted max-w-2xl">
-        Two sides, one engine: pull ratings out, or push your users&apos; activity in. Score lookups read live
-        Ethereum history, screen against the OFAC SDN snapshot, check KYC attestations, and include the monthly
-        score timeline.
+        Two sides, one engine: pull ratings out, or push your users&apos; activity in.
       </p>
+
+      {/* At-a-glance: what you can do here */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <a href="#read" className="rounded-xl border border-line bg-surface p-5 hover:border-accent transition-colors group">
+          <div className="flex items-center gap-2.5">
+            <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
+            <h2 className="font-semibold">Read — look up any wallet</h2>
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            Score, grade, tier, app activity, KYC + sanctions flags in one call. Free key: 1,000/day.
+          </p>
+          <span className="mt-2 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">Jump to read API →</span>
+        </a>
+        <a href="#write" className="rounded-xl border-2 bg-surface p-5 transition-colors group" style={{ borderColor: "var(--accent)" }}>
+          <div className="flex items-center gap-2.5">
+            <span className="rounded bg-accent px-2 py-0.5 font-mono text-xs text-white">POST</span>
+            <h2 className="font-semibold">Write — report your data</h2>
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            Push activity, outcomes, and fraud flags. <strong className="text-foreground">Partners who write read
+            free</strong> — data is the payment.
+          </p>
+          <span className="mt-2 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">Jump to write API →</span>
+        </a>
+      </div>
 
       {/* Live playground */}
       <section className="mt-8">
@@ -79,7 +102,7 @@ export default function DevelopersPage() {
         <ApiPlayground />
       </section>
 
-      <section className="mt-12">
+      <section id="read" className="mt-12 scroll-mt-20">
         <div className="flex items-center gap-3">
           <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
           <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/score/:address</h2>
@@ -93,7 +116,7 @@ export default function DevelopersPage() {
         </p>
       </section>
 
-      <section className="mt-12">
+      <section id="write" className="mt-12 scroll-mt-20">
         <div className="flex items-center gap-3">
           <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">POST</span>
           <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/ingest</h2>
@@ -158,15 +181,6 @@ export default function DevelopersPage() {
         </p>
       </section>
 
-      <section className="mt-12 mb-4 rounded-xl border border-line bg-surface p-6">
-        <h2 className="font-semibold">Production roadmap</h2>
-        <ul className="mt-3 space-y-2 text-sm text-muted list-disc pl-5">
-          <li>API keys + usage-based pricing for the read side; ingest is free (data is the payment).</li>
-          <li>Full-universe indexer: every wallet that ever touched the tracked contracts, pre-rated.</li>
-          <li>Webhooks: grade-change and sanctions-hit events pushed to subscribed apps.</li>
-          <li>Attestations: EAS-based soulbound claims on Base with revoke-and-reissue portability.</li>
-        </ul>
-      </section>
     </div>
   );
 }

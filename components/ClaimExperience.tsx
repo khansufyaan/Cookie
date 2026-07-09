@@ -1,74 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { Grade } from "@/lib/types";
 import EmailCapture from "./EmailCapture";
 import GradeCard from "./GradeCard";
 
 const EVM_RE = /^0x[0-9a-fA-F]{40}$/;
 const SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-/* Illustrative personas — sample cards, not live wallets. Each shows what
-   kind of history earns which grade and the fastest factor to push next. */
-const PERSONAS = [
-  {
-    id: "power-user",
-    name: "The Power User",
-    grade: "A" as Grade,
-    modifier: "",
-    score: 870,
-    address: "0x7f3ba28c91d4e05a66f19c8e2b74d0a153c9ef21",
-    tagline: "Every month, everywhere.",
-    drivers: [
-      "Active in 8 of the 10 tracked apps — Reach near its ceiling, plus the +50 Full-Stack bonus.",
-      "Transactions in nearly every month for three years — Consistency maxed.",
-    ],
-    lever: "Already at the top of the scale — keeping the monthly rhythm holds the A.",
-  },
-  {
-    id: "whale",
-    name: "The Whale",
-    grade: "A" as Grade,
-    modifier: "−",
-    score: 815,
-    address: "0x2ce84b90f16da3341f0c9d7ab52ee08e174ab5d9",
-    tagline: "Few transactions, serious size.",
-    drivers: [
-      "Eight-figure tracked volume — Magnitude at its ceiling despite a modest transaction count.",
-      "Large average ticket on an aged wallet — Bedrock does the rest.",
-    ],
-    lever: "Touching two or three more tracked apps would lift Reach and lock in a flat A.",
-  },
-  {
-    id: "regular",
-    name: "The Regular",
-    grade: "B" as Grade,
-    modifier: "+",
-    score: 645,
-    address: "0x91af5507c26be4d380e12cf94a70b6a2e8fd03c4",
-    tagline: "Steady DeFi, three apps deep.",
-    drivers: [
-      "Consistent monthly activity on 3 tracked apps — solid Consistency and Usage.",
-      "Mid-size volume keeps Magnitude in the middle of its range.",
-    ],
-    lever: "Reach is the gap: two more tracked apps is worth up to ~40 points and starts the climb to A.",
-  },
-  {
-    id: "newcomer",
-    name: "The Newcomer",
-    grade: "C" as Grade,
-    modifier: "+",
-    score: 365,
-    address: "0x5db07ee1a4c2f89b30d165a9cc84f01d92be476a",
-    tagline: "Three months in, building history.",
-    drivers: [
-      "Short tenure caps Consistency and Bedrock — most of the gap is simply time.",
-      "Two tracked apps so far; every factor still has headroom.",
-    ],
-    lever: "Stay active each month and add apps — Developing wallets typically reach B within two quarters.",
-  },
-];
 
 interface Preview {
   address: string;
@@ -79,8 +17,8 @@ interface Preview {
   tokenId: string;
 }
 
+/** The live "see your own pass" moment: one prominent input, card on success. */
 export default function ClaimExperience() {
-  const [tab, setTab] = useState<string>("power-user");
   const [value, setValue] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "ready" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -103,8 +41,8 @@ export default function ClaimExperience() {
         setMessage(json.error ?? "Lookup failed — try again.");
         return;
       }
-      // Custodial pools return 200 with grade:null and no sbt — don't crash on
-      // the missing fields; explain why there's no pass.
+      // Custodial pools return 200 with grade:null and no sbt — explain
+      // why there's no pass instead of crashing on the missing fields.
       if (!json.data?.sbt || json.data.grade == null) {
         setState("error");
         setMessage(
@@ -129,137 +67,58 @@ export default function ClaimExperience() {
     }
   }
 
-  const persona = PERSONAS.find((p) => p.id === tab);
-
-  return (
-    <div>
-      {/* Persona tabs */}
-      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Sample passes">
-        {PERSONAS.map((p) => (
-          <button
-            key={p.id}
-            role="tab"
-            aria-selected={tab === p.id}
-            onClick={() => setTab(p.id)}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === p.id
-                ? "border-accent bg-accent text-white"
-                : "border-line-strong text-muted hover:border-accent hover:text-foreground"
-            }`}
-          >
-            {p.name}
-          </button>
-        ))}
+  if (state === "ready" && preview) {
+    return (
+      <div className="flex flex-col items-center text-center">
+        <div className="w-72 sm:w-[340px] max-w-full">
+          <GradeCard
+            grade={preview.grade}
+            modifier={preview.modifier}
+            score={preview.score}
+            address={preview.address}
+            tier={preview.tier}
+          />
+        </div>
+        <h2 className="mt-6 text-2xl font-bold tracking-tight">This one&apos;s yours.</h2>
+        <p className="mt-2 text-sm text-muted max-w-sm">
+          Pass <span className="font-mono">{preview.tokenId}</span> — live from your real history. Claiming puts it
+          in your wallet, sealed to your address. Be first in line:
+        </p>
+        <div className="mt-4">
+          <EmailCapture source="claim" cta="Join the waitlist" wallet={preview.address} />
+        </div>
         <button
-          role="tab"
-          aria-selected={tab === "you"}
-          onClick={() => setTab("you")}
-          className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
-            tab === "you"
-              ? "border-accent bg-accent text-white"
-              : "border-accent text-accent hover:bg-accent hover:text-white"
-          }`}
+          onClick={() => { setState("idle"); setValue(""); setPreview(null); }}
+          className="mt-3 text-xs text-faint hover:text-muted"
         >
-          Your wallet →
+          Check a different wallet
         </button>
       </div>
+    );
+  }
 
-      {/* Persona view */}
-      {persona && (
-        <div className="mt-8 rounded-2xl border border-line bg-surface p-6 sm:p-8 grid gap-8 md:grid-cols-[auto_1fr] items-center text-left">
-          <div className="w-72 sm:w-[340px] max-w-full mx-auto">
-            <GradeCard
-              grade={persona.grade}
-              modifier={persona.modifier}
-              score={persona.score}
-              address={persona.address}
-              holder={persona.name}
-            />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-faint">Sample pass — illustrative</p>
-            <h2 className="mt-1 text-xl font-bold tracking-tight">
-              {persona.name}. <span className="text-muted font-semibold">{persona.tagline}</span>
-            </h2>
-            <ul className="mt-4 space-y-2.5">
-              {persona.drivers.map((d) => (
-                <li key={d} className="flex gap-2.5 text-sm text-muted leading-relaxed">
-                  <span className="mt-0.5 text-accent">●</span>
-                  <span>{d}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-muted">
-              <strong className="text-foreground">Next move:</strong> {persona.lever}{" "}
-              <Link href="/methodology#raise" className="text-accent hover:text-accent-strong font-medium whitespace-nowrap">
-                How to raise a rating →
-              </Link>
-            </p>
-          </div>
-        </div>
+  return (
+    <form onSubmit={lookup} className="w-full max-w-xl mx-auto">
+      <div className="flex gap-2">
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="0x… or Solana wallet address"
+          spellCheck={false}
+          className="flex-1 rounded-full border border-line-strong bg-surface px-5 py-3.5 font-mono text-sm placeholder:text-faint focus:outline-none focus:border-accent"
+          aria-label="Wallet address"
+        />
+        <button
+          type="submit"
+          disabled={state === "busy"}
+          className="rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60 whitespace-nowrap"
+        >
+          {state === "busy" ? "Reading chain…" : "See yours"}
+        </button>
+      </div>
+      {state === "error" && (
+        <p className="mt-3 text-sm text-center" style={{ color: "var(--grade-c)" }}>{message}</p>
       )}
-
-      {/* Your wallet */}
-      {tab === "you" && (
-        <div className="mt-8 rounded-2xl border border-line bg-surface p-6 sm:p-8">
-          {state === "ready" && preview ? (
-            <div className="grid gap-8 md:grid-cols-[auto_1fr] items-center text-left">
-              <div className="w-72 sm:w-[340px] max-w-full mx-auto">
-                <GradeCard
-                  grade={preview.grade}
-                  modifier={preview.modifier}
-                  score={preview.score}
-                  address={preview.address}
-                  tier={preview.tier}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-faint">Live — from real on-chain history</p>
-                <h2 className="mt-1 text-xl font-bold tracking-tight">This pass is yours.</h2>
-                <p className="mt-2 text-sm text-muted leading-relaxed">
-                  Pass <span className="font-mono">{preview.tokenId}</span> · {preview.tier} tier. Claiming puts it
-                  in your wallet — sealed to your address, updating as you transact. Be first in line:
-                </p>
-                <div className="mt-4">
-                  <EmailCapture source="claim" cta="Join the waitlist" wallet={preview.address} />
-                </div>
-                <button
-                  onClick={() => { setState("idle"); setValue(""); setPreview(null); }}
-                  className="mt-3 text-xs text-faint hover:text-muted"
-                >
-                  Check a different wallet
-                </button>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={lookup} className="w-full max-w-xl mx-auto">
-              <p className="text-sm text-muted mb-3">
-                Enter your address to preview the exact pass waiting for your wallet — live, from chain data.
-              </p>
-              <div className="flex gap-2">
-                <input
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  placeholder="0x… or Solana wallet address"
-                  spellCheck={false}
-                  className="flex-1 rounded-lg border border-line-strong bg-surface px-4 py-3 font-mono text-sm placeholder:text-faint focus:outline-none focus:border-accent"
-                  aria-label="Wallet address"
-                />
-                <button
-                  type="submit"
-                  disabled={state === "busy"}
-                  className="rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60 whitespace-nowrap"
-                >
-                  {state === "busy" ? "Reading chain…" : "Preview my pass"}
-                </button>
-              </div>
-              {state === "error" && (
-                <p className="mt-2 text-sm text-center" style={{ color: "var(--grade-c)" }}>{message}</p>
-              )}
-            </form>
-          )}
-        </div>
-      )}
-    </div>
+    </form>
   );
 }

@@ -160,51 +160,47 @@ export default function MethodologyPage() {
           The score only reads on-chain behavior, so every point has a lever you control. Each factor caps at
           weight × 10 points — here is what moves each one.
         </p>
-        <div className="mt-8 space-y-2.5">
+        <div className="mt-8 space-y-2">
           {[
-            { f: FACTORS[0], action: "Transact in more of the months you hold the wallet", how: "One tracked transaction a month is enough to count the month. Long gaps are what drag this down — a monthly rhythm beats a burst of activity followed by silence." },
-            { f: FACTORS[1], action: "Use more of the chain's top-10 tracked apps", how: "Breadth is the heaviest signal after Usage and Magnitude. Each additional tracked app you genuinely use lifts Reach — and at 5+ apps the +50 Full-Stack bonus kicks in on top." },
-            { f: FACTORS[2], action: "Transact more often", how: "Counted log-scale, so the climb from 10 to 100 transactions is worth as much as 100 to 1,000. Early transactions are the cheapest points on the whole scorecard." },
-            { f: FACTORS[3], action: "Route more of your real volume through tracked apps", how: "Also log-calibrated. Whales reach the ceiling on size alone; everyone else gains by consolidating activity they already do into the tracked app set." },
-            { f: FACTORS[4], action: "Let the wallet age — and keep tickets meaningful", how: "Tenure can't be rushed; it accrues on its own. Average ticket size is the half you control: many dust-sized transactions dilute it." },
-          ].map(({ f, action, how }) => (
-            <div key={f.letter} className="rounded-xl border border-line bg-surface px-5 py-4 flex gap-4">
+            { f: FACTORS[0], action: "Stay active every month" },
+            { f: FACTORS[1], action: "Use more tracked apps" },
+            { f: FACTORS[2], action: "Transact more often" },
+            { f: FACTORS[3], action: "Move more volume" },
+            { f: FACTORS[4], action: "Hold longer, transact bigger" },
+          ].map(({ f, action }) => (
+            <div key={f.letter} className="rounded-xl border border-line bg-surface px-5 py-4 flex items-center gap-4">
               <div
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base font-bold"
                 style={{ background: f.color, color: f.ink }}
               >
                 {f.letter}
               </div>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h3 className="font-semibold text-sm">{action}</h3>
-                  <span className="text-xs font-semibold tabular-nums" style={{ color: f.color }}>
-                    {f.name} · up to {f.weight * 10} pts
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-muted leading-relaxed">{how}</p>
+              <h3 className="flex-1 font-semibold">{action}</h3>
+              <span className="whitespace-nowrap text-right">
+                <span className="text-xs font-medium text-faint mr-1.5">up to</span>
+                <span className="text-2xl font-bold tabular-nums" style={{ color: f.color }}>{f.weight * 10}</span>
+              </span>
+            </div>
+          ))}
+          {[
+            { action: "Use 5+ apps", note: "Full-Stack boost" },
+            { action: "Verify your identity", note: "KYC attestation" },
+          ].map((b) => (
+            <div key={b.action} className="rounded-xl border border-line bg-surface px-5 py-4 flex items-center gap-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base font-bold text-white" style={{ background: "var(--grade-a)" }}>
+                ✓
               </div>
+              <h3 className="flex-1 font-semibold">
+                {b.action} <span className="ml-2 text-xs font-medium text-faint">{b.note}</span>
+              </h3>
+              <span className="text-2xl font-bold tabular-nums whitespace-nowrap" style={{ color: "var(--grade-a)" }}>
+                +50
+              </span>
             </div>
           ))}
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-line bg-surface px-5 py-4">
-            <h3 className="font-semibold text-sm" style={{ color: "var(--grade-a)" }}>+50 · Full-Stack bonus</h3>
-            <p className="mt-1 text-sm text-muted leading-relaxed">
-              Genuine activity in 5 or more tracked apps. Usually the single fastest jump for a wallet already
-              active in 3–4.
-            </p>
-          </div>
-          <div className="rounded-xl border border-line bg-surface px-5 py-4">
-            <h3 className="font-semibold text-sm" style={{ color: "var(--grade-a)" }}>+50 · KYC attestation</h3>
-            <p className="mt-1 text-sm text-muted leading-relaxed">
-              An identity attestation on the wallet — also the only way into the Verified and Prime tiers.
-            </p>
-          </div>
-        </div>
         <p className="mt-4 text-xs text-faint text-center">
-          What never helps: wash-trading and self-transfers read as dust-sized tickets and hurt Bedrock more than
-          they lift Usage. The rating is calibrated to reward ordinary, sustained, real use.
+          Wash-trading doesn&apos;t work — dust-sized transactions hurt more than they help.
         </p>
       </section>
 
