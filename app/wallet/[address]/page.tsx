@@ -111,13 +111,20 @@ export default async function WalletPage({ params }: { params: Promise<{ address
       <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr] items-start">
         <div className="rounded-xl border border-line bg-surface p-6 flex flex-col items-center text-center lg:w-96">
           <GradeCard
-            grade={result.grade}
-            modifier={result.modifier}
+            /* Sanctioned wallets carry the F strike, not a letter grade. */
+            grade={result.sanctions.listed ? "F" : result.grade}
+            modifier={result.sanctions.listed ? "" : result.modifier}
             score={result.score}
             address={result.address}
             /* Show the tier only when it's a signal (Prime/Verified/Restricted);
                otherwise the characterful archetype reads better than "Standard". */
-            holder={result.tier === "Standard" ? result.archetype : `${result.tier} tier`}
+            holder={
+              result.sanctions.listed
+                ? "Sanctioned"
+                : result.tier === "Standard"
+                  ? result.archetype
+                  : `${result.tier} tier`
+            }
           />
           <div className="mt-5 text-sm font-semibold">{gradeMeaning}</div>
           <div className="mt-3 flex flex-wrap justify-center gap-1.5">
@@ -246,7 +253,12 @@ export default async function WalletPage({ params }: { params: Promise<{ address
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-xl border border-line bg-surface p-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Identity (KYC)</h3>
+            <div className="flex items-center gap-2">
+              {result.kyc.verified && result.kyc.source.includes("Coinbase") && (
+                <AppLogo domain="coinbase.com" name="Coinbase" size={20} />
+              )}
+              <h3 className="font-semibold text-sm">Identity (KYC)</h3>
+            </div>
             <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
               style={{ borderColor: result.kyc.verified ? "var(--grade-a)" : "var(--border-strong)", color: result.kyc.verified ? "var(--grade-a)" : "var(--faint)" }}>
               {result.kyc.verified ? "✓ Verified" : "Unverified"}

@@ -1,10 +1,14 @@
 import type { Grade } from "@/lib/types";
 
+/** Grades the card can display: real grades plus F, the sanctioned strike. */
+export type CardGrade = Grade | "F";
+
 /* Grade accents bright enough to read on the deep-blue card face. */
-const CARD_GRADE_COLORS: Record<Grade, string> = {
+const CARD_GRADE_COLORS: Record<CardGrade, string> = {
   A: "#5EE39A",
   B: "#FFC24B",
   C: "#FF8A7A",
+  F: "#FF4D4D",
 };
 
 /** Wallet address in grouped form: 0xD8DA 6BF2 ···· 6045 */
@@ -31,7 +35,7 @@ export default function GradeCard({
   size = "md",
   className = "",
 }: {
-  grade: Grade;
+  grade: CardGrade;
   modifier?: string;
   score: number;
   address: string;

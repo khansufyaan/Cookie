@@ -92,7 +92,11 @@ export default function AppCoverage({ result, usedAppIds }: { result: ScoreResul
       </div>
 
       {/* Milestone boosts */}
-      <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+      <div className="mt-8 flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-lg font-semibold tracking-tight">Score boosters</h3>
+        <p className="text-xs text-faint">The checkpoints that move a rating — collect them all.</p>
+      </div>
+      <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
         {milestones.map((m) => (
           <div key={m.label} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
             <Check on={m.done} />

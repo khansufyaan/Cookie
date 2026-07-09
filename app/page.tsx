@@ -47,20 +47,24 @@ export default async function Home() {
         </p>
       </section>
 
-      {/* Rating passes */}
+      {/* Rating passes — each card is a real wallet; click through to its live report */}
       <section className="pb-16 flex flex-col items-center">
-        <div className="grid gap-6 sm:grid-cols-3 sm:gap-5 w-full max-w-2xl">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-4 sm:gap-4 w-full">
           {(
             [
-              ["A", "", 870, "Top decile", "0x7f3ba28c91d4e05a66f19c8e2b74d0a153c9ef21"],
-              ["B", "+", 645, "Established", "0x91af5507c26be4d380e12cf94a70b6a2e8fd03c4"],
-              ["C", "+", 365, "Developing", "0x5db07ee1a4c2f89b30d165a9cc84f01d92be476a"],
+              ["A", "+", 935, "Top decile", "0x2326d4fb2737666dda96bd6314e3d4418246cfe8"],
+              ["B", "+", 739, "Established", "0x2238c6f75deffad03f61537ce40c434a7c23a7a0"],
+              ["C", "+", 446, "Developing", "0x1f62e517b74904fb221c3eec6cec954473a89514"],
+              ["F", "", 0, "Sanctioned", "0x0330070fd38ec3bb94f58fa55d40368271e9e54a"],
             ] as const
           ).map(([g, mod, score, label, addr]) => (
-            <div key={g} className="flex flex-col items-center gap-3">
+            <Link key={g} href={`/wallet/${addr}`} className="flex flex-col items-center gap-2.5 group">
               <GradeCard grade={g} modifier={mod} score={score} address={addr} holder={label} size="sm" />
               <span className="text-sm text-muted font-medium">{label}</span>
-            </div>
+              <span className="-mt-1 text-xs text-accent opacity-80 group-hover:opacity-100">
+                View a real {g} wallet →
+              </span>
+            </Link>
           ))}
         </div>
         <p className="mt-8 text-sm text-muted max-w-sm text-center">
