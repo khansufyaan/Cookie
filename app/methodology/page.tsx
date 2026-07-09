@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AppLogo from "@/components/AppLogo";
 import GradeSeal from "@/components/GradeSeal";
 import { EVM_APPS, SOL_APPS } from "@/lib/apps";
@@ -126,15 +127,22 @@ export default function MethodologyPage() {
             </h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {g.apps.map((a) => (
-                <div key={a.id} className="rounded-xl border border-line bg-surface px-4 py-3 flex items-center gap-3">
+                <Link
+                  key={a.id}
+                  href={`/apps/${a.id}`}
+                  className="rounded-xl border border-line bg-surface px-4 py-3 flex items-center gap-3 hover:border-accent transition-colors group"
+                >
                   <AppLogo domain={a.domain} name={a.name} size={28} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm">{a.name}</div>
                     <div className="text-xs text-faint">
                       {a.category} · {a.chain}
                     </div>
                   </div>
-                </div>
+                  <span className="text-xs text-faint group-hover:text-accent whitespace-nowrap">
+                    Contracts →
+                  </span>
+                </Link>
               ))}
             </div>
           </div>

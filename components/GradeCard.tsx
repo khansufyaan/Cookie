@@ -5,10 +5,18 @@ export type CardGrade = Grade | "F";
 
 /* Grade accents bright enough to read on the deep-blue card face. */
 const CARD_GRADE_COLORS: Record<CardGrade, string> = {
-  A: "#5EE39A",
+  A: "#ffffff", // white pops on the gold face
   B: "#FFC24B",
   C: "#FF8A7A",
   F: "#FF4D4D",
+};
+
+/* Face treatment by grade — Visa tier language: gold A, black F, blue rest. */
+const CARD_FACE: Record<CardGrade, string> = {
+  A: "grade-card-gold",
+  B: "grade-card",
+  C: "grade-card",
+  F: "grade-card-black",
 };
 
 /** Wallet address in grouped form: 0xD8DA 6BF2 ···· 6045 */
@@ -49,7 +57,7 @@ export default function GradeCard({
   const sm = size === "sm";
   return (
     <div
-      className={`grade-card relative w-full ${sm ? "max-w-[240px] rounded-xl" : "max-w-[360px] rounded-2xl"} aspect-[1.586/1] text-white select-none overflow-hidden ${className}`}
+      className={`${CARD_FACE[grade]} relative w-full ${sm ? "max-w-[240px] rounded-xl" : "max-w-[360px] rounded-2xl"} aspect-[1.586/1] text-white select-none overflow-hidden ${className}`}
       aria-label={`Visa Wallet Rating pass: grade ${grade}${modifier}, score ${score} of 1000`}
     >
       <div className={`absolute inset-0 flex flex-col justify-between ${sm ? "p-3.5" : "p-5"}`}>

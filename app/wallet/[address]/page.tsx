@@ -72,9 +72,11 @@ export default async function WalletPage({ params }: { params: Promise<{ address
   const { result, profile, history } = report;
   const stableMix = report.stableMix.filter((s) => s.usd >= 1);
   const stableTotal = stableMix.reduce((t, s) => t + s.usd, 0);
+  // Pseudo-domains resolved by the logo proxy to each coin's official mark
+  // (an issuer favicon — Circle, Sky, PayPal — is not the coin's logo).
   const STABLE_DOMAINS: Record<string, string> = {
-    USDC: "circle.com", USDT: "tether.to", DAI: "sky.money", USDE: "ethena.fi",
-    PYUSD: "paypal.com", USDS: "sky.money", FDUSD: "firstdigitallabs.com",
+    USDC: "usdc.token", USDT: "usdt.token", DAI: "dai.token", USDE: "usde.token",
+    PYUSD: "pyusd.token", USDS: "usds.token", FDUSD: "fdusd.token",
   };
   const active = profile.activities.filter((a) => a.txCount > 0);
   const usedAppIds = active.map((a) => a.appId);
