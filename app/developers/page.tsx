@@ -65,32 +65,28 @@ export default function DevelopersPage() {
     <div className="mx-auto max-w-4xl px-5 pt-10">
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
       <p className="mt-3 text-muted max-w-2xl">
-        Two sides, one engine: pull ratings out, or push your users&apos; activity in.
+        Look up any wallet&apos;s rating, or report your own data. Two prices:
       </p>
 
-      {/* At-a-glance: what you can do here */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <a href="#read" className="rounded-xl border border-line bg-surface p-5 hover:border-accent transition-colors group">
-          <div className="flex items-center gap-2.5">
-            <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
-            <h2 className="font-semibold">Read — look up any wallet</h2>
+      {/* One block: FREE vs PAID, the deal front and center */}
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        {/* PAID */}
+        <div className="rounded-2xl border border-line bg-surface p-6">
+          <div className="text-xs font-semibold uppercase tracking-widest text-faint">Read only</div>
+          <div className="mt-1 text-2xl font-bold">Paid</div>
+          <p className="mt-3 text-sm text-muted">Look up wallet ratings. 1,000 free lookups a day, then usage-based.</p>
+          <a href="#read" className="mt-4 inline-block text-sm font-medium text-accent hover:text-accent-strong">See the read API →</a>
+        </div>
+        {/* FREE */}
+        <div className="rounded-2xl border-2 bg-surface p-6" style={{ borderColor: "var(--accent)" }}>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-semibold uppercase tracking-widest text-accent">Report + read</div>
+            <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Best value</span>
           </div>
-          <p className="mt-2 text-sm text-muted">
-            Score, grade, tier, app activity, KYC + sanctions flags in one call. Free key: 1,000/day.
-          </p>
-          <span className="mt-2 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">Jump to read API →</span>
-        </a>
-        <a href="#write" className="rounded-xl border-2 bg-surface p-5 transition-colors group" style={{ borderColor: "var(--accent)" }}>
-          <div className="flex items-center gap-2.5">
-            <span className="rounded bg-accent px-2 py-0.5 font-mono text-xs text-white">POST</span>
-            <h2 className="font-semibold">Write — report your data</h2>
-          </div>
-          <p className="mt-2 text-sm text-muted">
-            Push activity, outcomes, and fraud flags. <strong className="text-foreground">Partners who write read
-            free</strong> — data is the payment.
-          </p>
-          <span className="mt-2 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">Jump to write API →</span>
-        </a>
+          <div className="mt-1 text-2xl font-bold" style={{ color: "var(--accent)" }}>Free</div>
+          <p className="mt-3 text-sm text-muted">Report data on your wallets and reading is free — unlimited.</p>
+          <a href="#write" className="mt-4 inline-block text-sm font-medium text-accent hover:text-accent-strong">See the report API →</a>
+        </div>
       </div>
 
       {/* Live playground */}

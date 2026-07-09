@@ -8,11 +8,11 @@ export const metadata = { title: "Methodology — Visa Wallet Rating" };
 // Reference categorical palette (validated for the light surface); identity
 // is carried by direct labels.
 const FACTORS = [
-  { letter: "C", name: "Consistency", weight: 15, color: "#2a78d6", ink: "#ffffff", d: "Share of months active since first seen — sustained use beats one spike." },
-  { letter: "R", name: "Reach", weight: 20, color: "#1baf7a", ink: "#101828", d: "Breadth across the chain's top-10 apps — the strongest sybil-resistance signal." },
-  { letter: "U", name: "Usage", weight: 25, color: "#eda100", ink: "#101828", d: "Transaction count, log-calibrated." },
-  { letter: "M", name: "Magnitude", weight: 25, color: "#008300", ink: "#ffffff", d: "USD volume, log-calibrated — equal weight to Usage, so whales and power users both reach A." },
-  { letter: "B", name: "Bedrock", weight: 15, color: "#4a3aa7", ink: "#ffffff", d: "Wallet tenure plus average ticket size — costly to fake at scale." },
+  { letter: "C", name: "Consistency", weight: 15, color: "#2a78d6", ink: "#ffffff", d: "How many months you stay active." },
+  { letter: "R", name: "Reach", weight: 20, color: "#1baf7a", ink: "#101828", d: "How many tracked apps you use." },
+  { letter: "U", name: "Usage", weight: 25, color: "#eda100", ink: "#101828", d: "How often you transact." },
+  { letter: "M", name: "Magnitude", weight: 25, color: "#008300", ink: "#ffffff", d: "How much volume you move." },
+  { letter: "B", name: "Bedrock", weight: 15, color: "#4a3aa7", ink: "#ffffff", d: "How long you've held, and how big your transactions are." },
 ];
 
 // Rendered best-first: A on the left, descending to C.

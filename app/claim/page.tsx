@@ -1,16 +1,7 @@
 import ClaimExperience from "@/components/ClaimExperience";
-import GradeCard from "@/components/GradeCard";
 import PassEvolution from "@/components/PassEvolution";
 
 export const metadata = { title: "Claim your pass — Visa Wallet Rating" };
-
-/* Sample passes — real grade shapes, illustrative numbers. One line each. */
-const SAMPLES = [
-  { name: "The Power User", grade: "A" as const, modifier: "", score: 870, address: "0x7f3ba28c91d4e05a66f19c8e2b74d0a153c9ef21", line: "Every month, everywhere." },
-  { name: "The Whale", grade: "A" as const, modifier: "−", score: 815, address: "0x2ce84b90f16da3341f0c9d7ab52ee08e174ab5d9", line: "Few transactions, serious size." },
-  { name: "The Regular", grade: "B" as const, modifier: "+", score: 645, address: "0x91af5507c26be4d380e12cf94a70b6a2e8fd03c4", line: "Steady, three apps deep." },
-  { name: "The Newcomer", grade: "C" as const, modifier: "+", score: 365, address: "0x5db07ee1a4c2f89b30d165a9cc84f01d92be476a", line: "Three months in, climbing." },
-];
 
 export default function ClaimPage() {
   return (
@@ -35,17 +26,37 @@ export default function ClaimPage() {
         </p>
       </div>
 
-      {/* Sample gallery — show, don't switch */}
-      <section className="mt-20">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-widest text-faint">Sample passes</h2>
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
-          {SAMPLES.map((s) => (
-            <div key={s.name} className="flex flex-col items-center text-center gap-2">
-              <GradeCard grade={s.grade} modifier={s.modifier} score={s.score} address={s.address} holder={s.name} size="sm" />
-              <div className="text-sm font-semibold">{s.name}</div>
-              <div className="-mt-1.5 text-xs text-faint">{s.line}</div>
+      {/* What claiming actually does for you */}
+      <section className="mt-24">
+        <h2 className="text-center text-3xl font-bold tracking-tight">What claiming unlocks</h2>
+
+        <div className="mt-10 space-y-4">
+          {/* The honest score-increase lever */}
+          <div className="rounded-2xl border-2 bg-surface p-6 flex items-center gap-5" style={{ borderColor: "var(--grade-a)" }}>
+            <div className="text-4xl font-bold tabular-nums whitespace-nowrap" style={{ color: "var(--grade-a)" }}>+50</div>
+            <div>
+              <h3 className="font-semibold text-lg">Verify your identity, score goes up</h3>
+              <p className="mt-1 text-sm text-muted">
+                Add a verified identity as you claim and your score rises +50 — enough to move a tier, into Verified
+                or Prime. It&apos;s the one boost that isn&apos;t just waiting for more on-chain activity.
+              </p>
             </div>
-          ))}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-line bg-surface p-6">
+              <h3 className="font-semibold text-lg">It lives in your wallet</h3>
+              <p className="mt-1 text-sm text-muted">
+                One signature, no gas. The pass sits next to your tokens and goes wherever your wallet goes.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-line bg-surface p-6">
+              <h3 className="font-semibold text-lg">It stays current</h3>
+              <p className="mt-1 text-sm text-muted">
+                Keeps re-scoring as you transact — the grade on the pass is never stale, and never needs re-issuing.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
