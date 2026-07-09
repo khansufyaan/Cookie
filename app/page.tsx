@@ -66,7 +66,7 @@ export default async function Home() {
         {[
           { who: "For wallet owners", t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
           { who: "For apps & exchanges", t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
-          { who: "For credential holders", t: "Claim your card", d: "Mint your rating as a soulbound credential you own and carry anywhere.", href: "/claim", cta: "Preview your card" },
+          { who: "For rated wallets", t: "Claim your pass", d: "Put your rating in your wallet as a living pass that upgrades itself as you transact.", href: "/claim", cta: "Preview your pass" },
         ].map((x) => (
           <Link
             key={x.t}
@@ -88,7 +88,7 @@ export default async function Home() {
           href="/claim"
           className="inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
         >
-          Claim your card
+          Claim your pass
         </Link>
         <p className="mt-3 text-xs text-faint">
           Free for wallet owners. <Link href="/developers" className="underline hover:text-muted">API for apps →</Link>

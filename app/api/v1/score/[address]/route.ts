@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { meter } from "@/lib/apikeys";
+import { APP_BY_ID } from "@/lib/apps";
 import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
 
 export const maxDuration = 60;
@@ -58,12 +59,38 @@ export async function GET(
       );
     case "ok": {
       const { report } = resolution;
+      const { result } = report;
+
+      const apps = report.profile.activities
+        .filter((a) => a.txCount > 0)
+        .sort((a, b) => b.txCount - a.txCount)
+        .map((a) => ({
+          id: a.appId,
+          name: APP_BY_ID.get(a.appId)?.name ?? a.appId,
+          txCount: a.txCount,
+          volumeUsd: Math.round(a.volumeUsd),
+          firstTx: a.firstTx,
+          lastTx: a.lastTx,
+        }));
+
+      const stableTotal = report.stableMix.reduce((t, s) => t + s.usd, 0);
+      const stablecoins = report.stableMix
+        .filter((s) => s.usd >= 1)
+        .sort((a, b) => b.usd - a.usd)
+        .map((s) => ({
+          asset: s.asset,
+          volumeUsd: Math.round(s.usd),
+          share: stableTotal > 0 ? Number((s.usd / stableTotal).toFixed(3)) : 0,
+        }));
+
+      const averageTransactionUsd =
+        result.totals.txCount > 0 ? Math.round(result.totals.volumeUsd / result.totals.txCount) : 0;
+
       return NextResponse.json({
-        data: { ...report.result, history: report.history },
+        data: { ...result, averageTransactionUsd, apps, stablecoins, history: report.history },
         meta: {
           engine: "vwr-v0.4",
           dataSource: "live",
-          chainSource: report.source,
           note: liveCoverageNote(report),
         },
       });

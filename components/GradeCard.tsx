@@ -73,7 +73,7 @@ export default function GradeCard({
               Visa Wallet Rating
             </div>
             <div className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
-              Soulbound credential
+              Living wallet pass
             </div>
           </div>
           <div className="flex flex-col items-end leading-none">

@@ -123,7 +123,7 @@ export default function ClaimExperience() {
   return (
     <div>
       {/* Persona tabs */}
-      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Sample credentials">
+      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Sample passes">
         {PERSONAS.map((p) => (
           <button
             key={p.id}
@@ -166,7 +166,7 @@ export default function ClaimExperience() {
             />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-widest text-faint">Sample credential — illustrative</p>
+            <p className="text-xs uppercase tracking-widest text-faint">Sample pass — illustrative</p>
             <h2 className="mt-1 text-xl font-bold tracking-tight">
               {persona.name}. <span className="text-muted font-semibold">{persona.tagline}</span>
             </h2>
@@ -204,10 +204,10 @@ export default function ClaimExperience() {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-faint">Live — from real on-chain history</p>
-                <h2 className="mt-1 text-xl font-bold tracking-tight">This card is yours.</h2>
+                <h2 className="mt-1 text-xl font-bold tracking-tight">This pass is yours.</h2>
                 <p className="mt-2 text-sm text-muted leading-relaxed">
-                  Credential <span className="font-mono">{preview.tokenId}</span> · {preview.tier} tier. Claiming
-                  seals it to your wallet as a soulbound credential — be first in line:
+                  Pass <span className="font-mono">{preview.tokenId}</span> · {preview.tier} tier. Claiming puts it
+                  in your wallet — sealed to your address, updating as you transact. Be first in line:
                 </p>
                 <div className="mt-4">
                   <EmailCapture source="claim" cta="Join the waitlist" wallet={preview.address} />
@@ -223,7 +223,7 @@ export default function ClaimExperience() {
           ) : (
             <form onSubmit={lookup} className="w-full max-w-xl mx-auto">
               <p className="text-sm text-muted mb-3">
-                Enter your address to preview the exact card waiting for your wallet — live, from chain data.
+                Enter your address to preview the exact pass waiting for your wallet — live, from chain data.
               </p>
               <div className="flex gap-2">
                 <input
@@ -239,7 +239,7 @@ export default function ClaimExperience() {
                   disabled={state === "busy"}
                   className="rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60 whitespace-nowrap"
                 >
-                  {state === "busy" ? "Reading chain…" : "Preview my card"}
+                  {state === "busy" ? "Reading chain…" : "Preview my pass"}
                 </button>
               </div>
               {state === "error" && (
