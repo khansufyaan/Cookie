@@ -115,7 +115,9 @@ export default async function WalletPage({ params }: { params: Promise<{ address
             modifier={result.modifier}
             score={result.score}
             address={result.address}
-            tier={result.tier}
+            /* Show the tier only when it's a signal (Prime/Verified/Restricted);
+               otherwise the characterful archetype reads better than "Standard". */
+            holder={result.tier === "Standard" ? result.archetype : `${result.tier} tier`}
           />
           <div className="mt-5 text-sm font-semibold">{gradeMeaning}</div>
           <div className="mt-3 flex flex-wrap justify-center gap-1.5">
