@@ -6,7 +6,7 @@ import LookupForm from "@/components/LookupForm";
 import ScoreHistory, { HistoryTable } from "@/components/ScoreHistory";
 import AppLogo from "@/components/AppLogo";
 import { APP_BY_ID } from "@/lib/apps";
-import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
+import { liveCoverageNote, resolveWalletCached } from "@/lib/wallets";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -20,7 +20,7 @@ const TIER_STYLE: Record<string, { color: string; blurb: string }> = {
 
 export default async function WalletPage({ params }: { params: Promise<{ address: string }> }) {
   const { address } = await params;
-  const resolution = await resolveWallet(decodeURIComponent(address));
+  const resolution = await resolveWalletCached(decodeURIComponent(address));
   if (resolution.kind === "invalid") notFound();
 
   if (resolution.kind === "custodial") {

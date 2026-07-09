@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { buildProfileFromMatched, checkKycAttestation, fetchLiveEvmLookup, fetchLiveSolLookup } from "./live";
 import { custodialLabel } from "./entities";
 import { isOfacSanctioned, OFAC_ENTRY_COUNT, OFAC_LIST_NAME } from "./ofac";
@@ -122,6 +123,33 @@ export async function resolveWallet(address: string): Promise<Resolution> {
       stableMix: live.stableMix ?? [],
     },
   };
+}
+
+/**
+ * Cached wallet resolution for unauthenticated read surfaces (the report page,
+ * OG image, badge). Every uncached lookup runs a full live chain scan — up to
+ * ~10 serial Alchemy pages — so a report view, its embedded badge, and every
+ * crawler hit each pay that cost independently. This collapses repeat lookups
+ * of the same address to one scan per revalidate window.
+ *
+ * Only successful ("ok") reports are cached; custodial/invalid/unavailable
+ * resolutions are cheap or transient and always resolved fresh, so a momentary
+ * source outage is never cached as a sticky failure. Do NOT use this on the
+ * metered API paths — CDN/data-cache reuse would bypass per-key metering.
+ */
+const cachedOkReport = unstable_cache(
+  async (address: string): Promise<WalletReport | null> => {
+    const r = await resolveWallet(address);
+    return r.kind === "ok" ? r.report : null;
+  },
+  ["wallet-ok-report-v1"],
+  { revalidate: 300 },
+);
+
+export async function resolveWalletCached(address: string): Promise<Resolution> {
+  const report = await cachedOkReport(address).catch(() => null);
+  if (report) return { kind: "ok", report };
+  return resolveWallet(address);
 }
 
 export function liveCoverageNote(report: WalletReport): string {

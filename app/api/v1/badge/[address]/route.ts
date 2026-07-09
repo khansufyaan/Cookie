@@ -1,5 +1,5 @@
 import { meter } from "@/lib/apikeys";
-import { resolveWallet } from "@/lib/wallets";
+import { resolveWalletCached } from "@/lib/wallets";
 
 export const maxDuration = 60;
 
@@ -23,7 +23,7 @@ export async function GET(
     });
   }
   const { address } = await params;
-  const resolution = await resolveWallet(decodeURIComponent(address));
+  const resolution = await resolveWalletCached(decodeURIComponent(address));
   if (resolution.kind !== "ok") {
     return new Response("Badge unavailable for this address.", { status: resolution.kind === "invalid" ? 400 : 503 });
   }
