@@ -55,7 +55,7 @@ export default function GradeCard({
       <div className={`absolute inset-0 flex flex-col justify-between ${sm ? "p-3.5" : "p-5"}`}>
         {/* Top row: brand + grade */}
         <div className="flex items-start justify-between">
-          <div className={`font-semibold uppercase text-white/75 ${sm ? "text-[8px] tracking-[0.18em]" : "text-[10px] tracking-[0.24em]"}`}>
+          <div className={`font-semibold uppercase text-white/75 whitespace-nowrap ${sm ? "text-[7px] tracking-[0.14em]" : "text-[10px] tracking-[0.24em]"}`}>
             Visa Wallet Rating
           </div>
           <div className="flex flex-col items-end leading-none">
@@ -63,7 +63,7 @@ export default function GradeCard({
               {grade}
               {modifier && <span className="align-super text-[0.45em]">{modifier}</span>}
             </span>
-            <span className={`mt-1 font-semibold tracking-[0.14em] text-white/70 tabular-nums ${sm ? "text-[8px]" : "text-[11px]"}`}>
+            <span className={`mt-1 font-semibold tracking-[0.14em] text-white/70 tabular-nums whitespace-nowrap ${sm ? "text-[8px]" : "text-[11px]"}`}>
               {score} / 1000
             </span>
           </div>
