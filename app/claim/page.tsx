@@ -49,8 +49,8 @@ export default function ClaimPage() {
       {/* How it works — three beats */}
       <section className="mt-16 grid gap-6 sm:grid-cols-3 text-center">
         {[
-          { n: "1", t: "Connect", d: "Email, social, or any wallet." },
-          { n: "2", t: "Mint", d: "One tap. We sponsor the gas." },
+          { n: "1", t: "Connect", d: "Sign with the wallet that earned the score — proves it's yours." },
+          { n: "2", t: "Mint", d: "Minted to that wallet. We sponsor the gas." },
           { n: "3", t: "Done", d: "The pass sits in your wallet and updates itself." },
         ].map((s) => (
           <div key={s.n}>

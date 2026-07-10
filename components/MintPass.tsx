@@ -128,9 +128,9 @@ function MintInner() {
               disabled={phase === "minting"}
               className="mt-5 rounded-full bg-accent px-8 py-3.5 text-base font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60"
             >
-              {phase === "minting" ? "Minting…" : "Mint your pass — free"}
+              {phase === "minting" ? "Minting…" : "Mint to this wallet — free"}
             </button>
-            <p className="mt-2 text-xs text-faint">Gas sponsored · soulbound · one per wallet</p>
+            <p className="mt-2 text-xs text-faint">Minted to your connected wallet · gas sponsored · soulbound</p>
           </>
         )}
         {msg && <p className="mt-3 text-sm" style={{ color: "var(--grade-c)" }}>{msg}</p>}
@@ -149,9 +149,11 @@ function MintInner() {
         disabled={!ready}
         className="rounded-full bg-accent px-8 py-3.5 text-base font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60"
       >
-        {ready ? "Connect wallet to mint" : "Starting wallet…"}
+        {ready ? "Connect your wallet" : "Starting wallet…"}
       </button>
-      <p className="mt-2 text-xs text-faint">Email, social, or any wallet · gas on us</p>
+      <p className="mt-2 text-xs text-faint">
+        MetaMask, Coinbase, Phantom &amp; more · you sign to prove it&apos;s yours · gas on us
+      </p>
 
       <form onSubmit={previewTyped} className="mt-6 w-full max-w-md">
         <p className="text-center text-xs text-faint mb-2">Just looking? Preview any wallet</p>
@@ -195,8 +197,19 @@ export default function MintPass() {
     <PrivyProvider
       appId={APP_ID}
       config={{
-        appearance: { theme: "light", accentColor: "#1434CB", walletChainType: "ethereum-and-solana" },
-        embeddedWallets: { ethereum: { createOnLogin: "users-without-wallets" } },
+        // External wallets only: the pass must mint to the wallet that EARNED
+        // the score. Never create an embedded wallet (it would have 0 history).
+        loginMethods: ["wallet"],
+        embeddedWallets: {
+          ethereum: { createOnLogin: "off" },
+          solana: { createOnLogin: "off" },
+        },
+        appearance: {
+          theme: "light",
+          accentColor: "#1434CB",
+          walletChainType: "ethereum-and-solana",
+          showWalletLoginFirst: true,
+        },
       }}
     >
       <MintInner />
