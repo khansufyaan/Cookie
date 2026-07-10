@@ -1,7 +1,7 @@
-import ClaimExperience from "@/components/ClaimExperience";
+import MintPass from "@/components/MintPass";
 import PassEvolution from "@/components/PassEvolution";
 
-export const metadata = { title: "Claim your pass — Visa Wallet Rating" };
+export const metadata = { title: "Mint your pass — Visa Wallet Rating" };
 
 export default function ClaimPage() {
   return (
@@ -18,53 +18,39 @@ export default function ClaimPage() {
         <PassEvolution />
       </div>
 
-      {/* The one action: see yours. Always visible, nothing to switch. */}
+      {/* The action: connect and mint. */}
       <div className="mt-14">
-        <ClaimExperience />
-        <p className="mt-3 text-center text-xs text-faint">
-          Live from real chain data · free · nothing is minted until you claim
+        <MintPass />
+        <p className="mt-4 text-center text-xs text-faint">
+          Live from real chain data · soulbound · nothing leaves your wallet
         </p>
       </div>
 
-      {/* What claiming actually does for you */}
+      {/* What minting does for you — two honest benefits */}
       <section className="mt-24">
-        <h2 className="text-center text-3xl font-bold tracking-tight">What claiming unlocks</h2>
-
-        <div className="mt-10 space-y-4">
-          {/* The honest score-increase lever */}
-          <div className="rounded-2xl border-2 bg-surface p-6 flex items-center gap-5" style={{ borderColor: "var(--grade-a)" }}>
-            <div className="text-4xl font-bold tabular-nums whitespace-nowrap" style={{ color: "var(--grade-a)" }}>+50</div>
-            <div>
-              <h3 className="font-semibold text-lg">Verify your identity, score goes up</h3>
-              <p className="mt-1 text-sm text-muted">
-                Add a verified identity as you claim and your score rises +50 — enough to move a tier, into Verified
-                or Prime. It&apos;s the one boost that isn&apos;t just waiting for more on-chain activity.
-              </p>
-            </div>
+        <h2 className="text-center text-3xl font-bold tracking-tight">What minting unlocks</h2>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-line bg-surface p-6">
+            <h3 className="font-semibold text-lg">It lives in your wallet</h3>
+            <p className="mt-1 text-sm text-muted">
+              One signature, no gas. The pass sits next to your tokens and goes wherever your wallet goes — show it
+              anywhere, use it at partner apps.
+            </p>
           </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-line bg-surface p-6">
-              <h3 className="font-semibold text-lg">It lives in your wallet</h3>
-              <p className="mt-1 text-sm text-muted">
-                One signature, no gas. The pass sits next to your tokens and goes wherever your wallet goes.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-line bg-surface p-6">
-              <h3 className="font-semibold text-lg">It stays current</h3>
-              <p className="mt-1 text-sm text-muted">
-                Keeps re-scoring as you transact — the grade on the pass is never stale, and never needs re-issuing.
-              </p>
-            </div>
+          <div className="rounded-2xl border border-line bg-surface p-6">
+            <h3 className="font-semibold text-lg">It stays current</h3>
+            <p className="mt-1 text-sm text-muted">
+              Keeps re-scoring as you transact — the grade on the pass is never stale, and never needs re-issuing.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* How claiming works — three beats, few words */}
+      {/* How it works — three beats */}
       <section className="mt-16 grid gap-6 sm:grid-cols-3 text-center">
         {[
-          { n: "1", t: "Preview", d: "See your live score and reserved pass." },
-          { n: "2", t: "Sign", d: "One signature proves it's your wallet. No gas." },
+          { n: "1", t: "Connect", d: "Email, social, or any wallet." },
+          { n: "2", t: "Mint", d: "One tap. We sponsor the gas." },
           { n: "3", t: "Done", d: "The pass sits in your wallet and updates itself." },
         ].map((s) => (
           <div key={s.n}>

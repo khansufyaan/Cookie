@@ -44,3 +44,27 @@ export async function addSubscriber(email: string, source: string, wallet?: stri
   );
   return true;
 }
+
+let mintsReady = false;
+
+/** Records a mint reservation for a connected wallet (one row per wallet). */
+export async function reserveMint(wallet: string, grade: string, score: number): Promise<number | null> {
+  const p = getPool();
+  if (!p) return null;
+  if (!mintsReady) {
+    await p.query(`CREATE TABLE IF NOT EXISTS mint_reservations (
+      wallet TEXT PRIMARY KEY,
+      grade TEXT,
+      score INT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+    mintsReady = true;
+  }
+  await p.query(
+    `INSERT INTO mint_reservations (wallet, grade, score) VALUES ($1, $2, $3)
+     ON CONFLICT (wallet) DO UPDATE SET grade = EXCLUDED.grade, score = EXCLUDED.score`,
+    [wallet.toLowerCase(), grade, score],
+  );
+  const { rows } = await p.query(`SELECT count(*)::int AS n FROM mint_reservations`);
+  return rows[0].n as number;
+}

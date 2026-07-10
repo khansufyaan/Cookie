@@ -52,9 +52,9 @@ export default async function Home() {
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-4 sm:gap-4 w-full">
           {(
             [
-              ["A", "+", 935, "Top decile", "0x2326d4fb2737666dda96bd6314e3d4418246cfe8"],
-              ["B", "+", 739, "Established", "0x2238c6f75deffad03f61537ce40c434a7c23a7a0"],
-              ["C", "+", 446, "Developing", "0x1f62e517b74904fb221c3eec6cec954473a89514"],
+              ["A", "+", 935, "Blue Chip", "0x2326d4fb2737666dda96bd6314e3d4418246cfe8"],
+              ["B", "+", 784, "Whale", "0x42087c28f296d3b2dab56e3f5d1aca1388f2be5b"],
+              ["C", "+", 446, "Explorer", "0x1f62e517b74904fb221c3eec6cec954473a89514"],
               ["F", "", 0, "Sanctioned", "0x0330070fd38ec3bb94f58fa55d40368271e9e54a"],
             ] as const
           ).map(([g, mod, score, label, addr]) => (
@@ -76,7 +76,7 @@ export default async function Home() {
         {[
           { who: "For wallet owners", t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "/", cta: "Look up a wallet" },
           { who: "For apps & exchanges", t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
-          { who: "For rated wallets", t: "Claim your pass", d: "Put your rating in your wallet as a living pass that upgrades itself as you transact.", href: "/claim", cta: "Preview your pass" },
+          { who: "For rated wallets", t: "Mint your pass", d: "Put your rating in your wallet as a living pass that upgrades itself as you transact.", href: "/claim", cta: "Connect & mint" },
         ].map((x) => (
           <Link
             key={x.t}
@@ -98,7 +98,7 @@ export default async function Home() {
           href="/claim"
           className="inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
         >
-          Claim your pass
+          Mint your pass
         </Link>
         <p className="mt-3 text-xs text-faint">
           Free for wallet owners. <Link href="/developers" className="underline hover:text-muted">API for apps →</Link>
