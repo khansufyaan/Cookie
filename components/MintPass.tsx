@@ -35,6 +35,55 @@ async function fetchPass(addr: string): Promise<Pass | { error: string }> {
   }
 }
 
+/* Confetti burst — 140 pieces in brand colors, trajectories via CSS vars. */
+const CONFETTI_COLORS = ["#1434CB", "#5EE39A", "#FFC24B", "#d9b04c", "#ffffff", "#8fa3ff"];
+function Confetti() {
+  const pieces = Array.from({ length: 140 }, (_, i) => {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 120 + Math.random() * 480;
+    return {
+      id: i,
+      tx: `${Math.cos(angle) * dist}px`,
+      ty: `${Math.sin(angle) * dist * 0.6 + 260 + Math.random() * 240}px`,
+      rot: `${(Math.random() - 0.5) * 1080}deg`,
+      dur: `${1.4 + Math.random() * 1.4}s`,
+      delay: `${Math.random() * 0.35}s`,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      w: 6 + Math.random() * 8,
+      h: 8 + Math.random() * 10,
+    };
+  });
+  return (
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden" aria-hidden>
+      {pieces.map((p) => (
+        <span
+          key={p.id}
+          className="confetti-piece"
+          style={{
+            "--tx": p.tx, "--ty": p.ty, "--rot": p.rot, "--dur": p.dur, "--delay": p.delay,
+            background: p.color, width: p.w, height: p.h,
+          } as React.CSSProperties}
+        />
+      ))}
+    </div>
+  );
+}
+
+function CopyField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => { navigator.clipboard?.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+      className="flex w-full items-center justify-between gap-3 rounded-lg border border-line bg-surface-2 px-3 py-2 text-left hover:border-accent transition-colors"
+      title="Copy"
+    >
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-faint whitespace-nowrap">{label}</span>
+      <span className="font-mono text-xs truncate">{value}</span>
+      <span className="text-xs text-accent whitespace-nowrap">{copied ? "✓ copied" : "copy"}</span>
+    </button>
+  );
+}
+
 function DisconnectButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
@@ -59,6 +108,9 @@ function MintInner() {
   const [pass, setPass] = useState<Pass | null>(null);
   const [msg, setMsg] = useState("");
   const [phase, setPhase] = useState<"idle" | "loading" | "minting" | "minted">("idle");
+  const [onchain, setOnchain] = useState<{
+    chain: string; contract: string; tokenId: string; explorerTx: string | null; alreadyMinted: boolean;
+  } | null>(null);
 
   // Preview-any-address mode (no connect required)
   const [typed, setTyped] = useState("");
@@ -94,6 +146,7 @@ function MintInner() {
       });
       const json = await res.json();
       if (!res.ok) { setMsg(json.error ?? "Mint failed."); setPhase("idle"); return; }
+      setOnchain(json.data.onchain ?? null);
       setPhase("minted");
     } catch {
       setMsg("Network error — try again."); setPhase("idle");
@@ -105,6 +158,7 @@ function MintInner() {
     setPhase("idle");
     setPass(null);
     setMsg("");
+    setOnchain(null);
   }
 
   // Connected (or just minted): full-screen takeover — nothing but YOUR card.
@@ -114,11 +168,12 @@ function MintInner() {
       <div className="fixed inset-0 z-40 bg-background flex flex-col items-center justify-center overflow-hidden px-5">
         {phase === "loading" && <div className="text-sm text-faint">Reading your wallet…</div>}
 
+        {minted && <Confetti />}
         {pass && (
           <>
             <div className="relative w-full max-w-[640px]">
               {minted && <div className="card-glow" />}
-              <div className={minted ? "card-birth" : ""}>
+              <div className={`relative ${minted ? "card-birth" : ""}`}>
                 <GradeCard
                   grade={pass.grade}
                   modifier={pass.modifier}
@@ -128,19 +183,50 @@ function MintInner() {
                   size="lg"
                   className="mx-auto shadow-2xl"
                 />
+                {minted && <div className="card-shine" />}
               </div>
             </div>
 
             {minted ? (
               <div className="rise-in flex flex-col items-center text-center">
-                <div className="mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white" style={{ background: "var(--grade-a)" }}>
-                  ✓ Yours — reserved
+                <div className="mt-7 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white" style={{ background: "var(--grade-a)" }}>
+                  {onchain ? `✓ Minted on ${onchain.chain}` : "✓ Yours — reserved"}
                 </div>
-                <p className="mt-4 text-sm text-muted max-w-md">
-                  Pass <span className="font-mono">{pass.tokenId}</span> is sealed to this wallet. It appears in
-                  your wallet when it issues on-chain on Base at launch — gas on us, nothing else to do.
-                </p>
-                <div className="mt-6">
+
+                {onchain ? (
+                  <>
+                    <p className="mt-3 text-sm text-muted max-w-md">
+                      {onchain.alreadyMinted
+                        ? "This wallet already holds its pass — soulbound, one per wallet."
+                        : "Your pass is on-chain, sealed to this wallet forever. Gas was on us."}
+                    </p>
+                    {onchain.explorerTx && (
+                      <a
+                        href={onchain.explorerTx}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-block rounded-full border border-line-strong px-5 py-2 text-sm font-medium text-accent hover:border-accent"
+                      >
+                        View the transaction ↗
+                      </a>
+                    )}
+                    <div className="mt-4 w-full max-w-md space-y-1.5">
+                      <p className="text-xs text-faint">
+                        See it in MetaMask: switch to <strong className="text-muted">{onchain.chain}</strong> → NFTs
+                        → Import NFT:
+                      </p>
+                      <CopyField label="Contract" value={onchain.contract} />
+                      <CopyField label="Token ID" value={onchain.tokenId} />
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-3 text-sm text-muted max-w-md">
+                    Pass <span className="font-mono">{pass.tokenId}</span> is sealed to this wallet. It appears in
+                    your wallet when it issues on-chain on Base at launch — gas on us, nothing else to do.
+                  </p>
+                )}
+
+                <div className="mt-5">
                   <DisconnectButton onClick={disconnect} label="Disconnect" />
                 </div>
               </div>

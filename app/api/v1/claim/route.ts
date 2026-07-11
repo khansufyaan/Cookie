@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { reserveMint } from "@/lib/db";
+import { mintPassOnChain, PASS_CHAIN, passChainConfigured } from "@/lib/passchain";
 import { detectFamily, resolveWallet } from "@/lib/wallets";
+
+export const maxDuration = 60;
 
 /**
  * POST /api/v1/claim — reserve a mint for a connected wallet.
@@ -37,9 +40,44 @@ export async function POST(req: Request) {
 
   await reserveMint(wallet, `${result.grade}${result.modifier}`, result.score);
 
+  // Real on-chain mint when the contract + relayer are configured.
+  // EVM wallets only — the demo contract lives on Base Sepolia.
+  if (passChainConfigured() && result.family === "evm") {
+    try {
+      const minted = await mintPassOnChain(
+        result.address as `0x${string}`,
+        `${result.grade}${result.modifier}`,
+        result.score,
+      );
+      return NextResponse.json({
+        data: {
+          reserved: true,
+          minted: true,
+          wallet: result.address,
+          grade: `${result.grade}${result.modifier}`,
+          score: result.score,
+          tokenId: result.sbt.tokenId,
+          onchain: {
+            chain: PASS_CHAIN.name,
+            contract: minted.contract,
+            tokenId: minted.tokenId,
+            txHash: minted.txHash,
+            explorerTx: minted.explorerTx,
+            alreadyMinted: minted.alreadyMinted,
+          },
+        },
+        meta: { note: "Soulbound pass minted on-chain — gas sponsored by the relayer." },
+      });
+    } catch (err) {
+      console.error("on-chain mint failed (reservation kept):", err);
+      // fall through to reservation-only response
+    }
+  }
+
   return NextResponse.json({
     data: {
       reserved: true,
+      minted: false,
       wallet: result.address,
       grade: `${result.grade}${result.modifier}`,
       score: result.score,
