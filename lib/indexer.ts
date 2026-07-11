@@ -1,5 +1,6 @@
 import { EVM_APPS } from "./apps";
 import { getPool } from "./db";
+import { deliverWebhooks } from "./webhooks";
 import { resolveWallet } from "./wallets";
 
 /**
@@ -212,6 +213,8 @@ export async function rateStep(batch = RATE_BATCH): Promise<RateResult> {
           return;
         }
         const r = resolution.report.result;
+        // Previous grade (if any) so subscribed apps get grade-change pushes.
+        const prev = await p.query(`SELECT grade, modifier, sanctioned FROM ratings WHERE address = $1`, [address]);
         await p.query(
           `INSERT INTO ratings (address, family, score, grade, modifier, tier, archetype, tx_count, volume_usd, apps_used, kyc_verified, sanctioned, history, updated_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now())
@@ -239,6 +242,23 @@ export async function rateStep(batch = RATE_BATCH): Promise<RateResult> {
         );
         await p.query(`UPDATE wallets SET status = 'rated' WHERE address = $1`, [address]);
         rated++;
+
+        // Push notifications: grade moved, or wallet newly sanctions-listed.
+        const old = prev.rows[0] as { grade: string; modifier: string; sanctioned: boolean } | undefined;
+        if (old && `${old.grade}${old.modifier}` !== `${r.grade}${r.modifier}`) {
+          await deliverWebhooks("grade.changed", {
+            wallet: r.address,
+            from: `${old.grade}${old.modifier}`,
+            to: `${r.grade}${r.modifier}`,
+            score: r.score,
+          }).catch(() => {});
+        }
+        if (r.sanctions.listed && !(old?.sanctioned ?? false)) {
+          await deliverWebhooks("sanctions.listed", {
+            wallet: r.address,
+            list: r.sanctions.list,
+          }).catch(() => {});
+        }
       } catch (err) {
         console.error(`indexer: rating failed for ${address}:`, err);
         await p.query(`UPDATE wallets SET status = 'error' WHERE address = $1`, [address]).catch(() => {});

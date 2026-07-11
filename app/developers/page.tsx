@@ -1,4 +1,5 @@
 import ApiPlayground from "@/components/ApiPlayground";
+import ApiTabs from "@/components/ApiTabs";
 
 export const metadata = { title: "API — Visa Wallet Rating" };
 
@@ -52,6 +53,25 @@ const INGEST_RESPONSE = `{
   "meta": { "engine": "vwr-v0.4" }
 }`;
 
+const WEBHOOK_EXAMPLE = `curl -X POST https://visa-wallet-rating.vercel.app/api/v1/webhooks \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://your-app.com/hooks/vwr",
+    "events": ["grade.changed", "sanctions.listed"]
+  }'
+
+// → { "data": { "id": 1, "secret": "whsec_…" } }   secret shown once`;
+
+const WEBHOOK_DELIVERY = `POST https://your-app.com/hooks/vwr      // what we send you
+X-VWR-Event: grade.changed
+X-VWR-Signature: hmac-sha256(secret, body)
+
+{
+  "event": "grade.changed",
+  "timestamp": "2026-07-10T04:12:00Z",
+  "data": { "wallet": "0xabc…", "from": "B+", "to": "A-", "score": 815 }
+}`;
+
 function Code({ children }: { children: string }) {
   return (
     <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-surface-2 p-4 text-xs leading-relaxed font-mono text-muted">
@@ -60,102 +80,27 @@ function Code({ children }: { children: string }) {
   );
 }
 
-export default function DevelopersPage() {
+/* ---------- FREE tab: report your data, everything's free ---------- */
+
+function FreeDocs() {
   return (
-    <div className="mx-auto max-w-4xl px-5 pt-10">
-      <h1 className="text-3xl font-bold tracking-tight">API</h1>
-      <p className="mt-3 text-muted max-w-2xl">
-        Look up any wallet&apos;s rating, or report your own data. Two prices:
-      </p>
-
-      {/* One block: FREE vs PAID, the deal front and center */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {/* PAID */}
-        <div className="rounded-2xl border border-line bg-surface p-6">
-          <div className="text-xs font-semibold uppercase tracking-widest text-faint">Read only</div>
-          <div className="mt-1 text-2xl font-bold">Paid</div>
-          <p className="mt-3 text-sm text-muted">Look up wallet ratings. 1,000 free lookups a day, then usage-based.</p>
-          <a href="#read" className="mt-4 inline-block text-sm font-medium text-accent hover:text-accent-strong">See the read API →</a>
-        </div>
-        {/* FREE */}
-        <div className="rounded-2xl border-2 bg-surface p-6" style={{ borderColor: "var(--accent)" }}>
-          <div className="flex items-center gap-2">
-            <div className="text-xs font-semibold uppercase tracking-widest text-accent">Report + read</div>
-            <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Best value</span>
-          </div>
-          <div className="mt-1 text-2xl font-bold" style={{ color: "var(--accent)" }}>Free</div>
-          <p className="mt-3 text-sm text-muted">Report data on your wallets and reading is free — unlimited.</p>
-          <a href="#write" className="mt-4 inline-block text-sm font-medium text-accent hover:text-accent-strong">See the report API →</a>
-        </div>
-      </div>
-
-      {/* Live playground */}
-      <section className="mt-8">
-        <div className="flex items-baseline gap-3 mb-3">
-          <h2 className="font-semibold">Try it live</h2>
-          <span className="text-xs text-faint">Real request, real chain data — no key required in beta</span>
-        </div>
-        <ApiPlayground />
-      </section>
-
-      <section id="read" className="mt-12 scroll-mt-20">
-        <div className="flex items-center gap-3">
-          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
-          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/score/:address</h2>
-        </div>
-        <p className="mt-2 text-sm text-muted max-w-2xl">
-          The read side. Returns score, grade, trust tier, factor decomposition, named app activity, stablecoin mix,
-          KYC + sanctions flags, totals, and <code className="font-mono text-xs">history[]</code> — month-end score
-          snapshots. Ethereum and Solana are both live. Errors are explicit:{" "}
-          <code className="font-mono text-xs">400</code> invalid address,{" "}
-          <code className="font-mono text-xs">503</code> chain source unreachable.
-        </p>
-      </section>
-
-      <section id="write" className="mt-12 scroll-mt-20">
-        <div className="flex items-center gap-3">
-          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">POST</span>
-          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/ingest</h2>
-        </div>
-        <p className="mt-2 text-sm text-muted max-w-2xl">
-          The write side. Report wallet activity in batches of up to 500 and receive tiered ratings back in the same
-          call. Every submitted wallet is screened against the OFAC snapshot. Partners may assert{" "}
-          <code className="font-mono text-xs">kycVerified</code> per wallet.
-        </p>
-        <Code>{INGEST_EXAMPLE}</Code>
-        <Code>{INGEST_RESPONSE}</Code>
-      </section>
-
-      <section className="mt-12">
-        <div className="flex items-center gap-3">
-          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
-          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/stats</h2>
-        </div>
-        <p className="mt-2 text-sm text-muted">Live cumulative activity totals for every tracked contract.</p>
-      </section>
-
-      {/* Data partnership — the give-to-get model */}
-      <section className="mt-14 rounded-2xl border-2 p-6 sm:p-8" style={{ borderColor: "var(--accent)" }}>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-xl font-bold tracking-tight">Report data, read free</h2>
-          <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">Data partnership</span>
-        </div>
+    <div>
+      <section className="rounded-2xl border-2 p-6 sm:p-8" style={{ borderColor: "var(--accent)" }}>
+        <h2 className="text-xl font-bold tracking-tight">How the free tier works</h2>
         <p className="mt-3 text-sm text-muted max-w-2xl leading-relaxed">
-          The rating gets smarter with data only apps have — what happened <em>after</em> the transaction. Partners
-          who report qualifying off-chain data get the read API <strong className="text-foreground">free at the
-          Growth tier</strong>, credit-bureau style: contributors read the network&apos;s pooled signal at no cost;
-          non-contributors pay per call.
+          Your app&apos;s users have wallets. When those wallets interact with your app, you see things the chain
+          can&apos;t — report that, and everything here is free.
         </p>
 
         <h3 className="mt-6 font-semibold text-sm">What to send us</h3>
         <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
           {[
-            { t: "Outcomes", d: "Loan repaid / defaulted / liquidated; trade settled or reversed — the labels no chain scan contains." },
-            { t: "Fraud & abuse flags", d: "Accounts you banned, Sybil clusters you caught, phishing or exploit wallets you traced." },
-            { t: "Payment results", d: "Fiat chargebacks, failed off-ramps, refund abuse tied to a wallet." },
-            { t: "Identity attestations", d: "Your own KYC pass/fail per wallet (asserted, or as an EAS attestation we verify)." },
-            { t: "Custodial mappings", d: "Which of your omnibus addresses are pools vs. user wallets, so deposits are never misread." },
-            { t: "App activity", d: "Off-chain or L2 usage we can't see: sessions, order flow, loyalty status per wallet." },
+            { t: "Outcomes", d: "Loan repaid / defaulted / liquidated; trade settled or reversed." },
+            { t: "Fraud & abuse flags", d: "Accounts you banned, Sybil clusters, exploit wallets." },
+            { t: "Payment results", d: "Fiat chargebacks, failed off-ramps, refund abuse." },
+            { t: "Identity attestations", d: "Your own KYC pass/fail per wallet." },
+            { t: "Custodial mappings", d: "Which of your addresses are pools vs. user wallets." },
+            { t: "App activity", d: "Off-chain or L2 usage we can't see from the chain." },
           ].map((x) => (
             <div key={x.t} className="rounded-xl border border-line bg-surface px-4 py-3">
               <div className="font-semibold text-sm">{x.t}</div>
@@ -163,20 +108,95 @@ export default function DevelopersPage() {
             </div>
           ))}
         </div>
+      </section>
 
-        <h3 className="mt-6 font-semibold text-sm">One envelope for every event type</h3>
+      <section className="mt-10">
+        <div className="flex items-center gap-3">
+          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">POST</span>
+          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/ingest</h2>
+        </div>
+        <p className="mt-2 text-sm text-muted max-w-2xl">
+          Report wallet activity in batches of up to 500 and receive ratings back in the same call. Every wallet is
+          screened against the OFAC snapshot.
+        </p>
+        <Code>{INGEST_EXAMPLE}</Code>
+        <Code>{INGEST_RESPONSE}</Code>
+      </section>
+
+      <section className="mt-10">
+        <h3 className="font-semibold text-sm">One envelope for every off-chain event</h3>
         <p className="mt-1 text-xs text-muted max-w-2xl">
-          Ingest accepts a typed event stream — same endpoint, same shape, open vocabulary. Send what you have;
-          fields you don&apos;t have, omit. New event types don&apos;t require an API change.
+          Same endpoint, open vocabulary — send what you have, omit what you don&apos;t. New event types need no API
+          change.
         </p>
         <Code>{DATA_EVENTS_EXAMPLE}</Code>
         <p className="mt-2 text-xs text-faint">
-          Every event: <code className="font-mono">type</code> + <code className="font-mono">wallet</code> +{" "}
-          <code className="font-mono">observedAt</code> + a type-specific <code className="font-mono">payload</code>.
           Reported data feeds the network model; it is never resold row-level.
         </p>
       </section>
+    </div>
+  );
+}
 
+/* ---------- PAID tab: read APIs + webhooks + live test ---------- */
+
+function PaidDocs() {
+  return (
+    <div>
+      <section>
+        <div className="flex items-baseline gap-3 mb-3">
+          <h2 className="font-semibold">Try it live</h2>
+          <span className="text-xs text-faint">Real request, real chain data</span>
+        </div>
+        <ApiPlayground />
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-center gap-3">
+          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
+          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/score/:address</h2>
+        </div>
+        <p className="mt-2 text-sm text-muted max-w-2xl">
+          Score, grade, trust tier, factor decomposition, named app activity, stablecoin mix, KYC + sanctions flags,
+          totals, and <code className="font-mono text-xs">history[]</code> — month-end snapshots. Ethereum and
+          Solana. Errors: <code className="font-mono text-xs">400</code> invalid address,{" "}
+          <code className="font-mono text-xs">503</code> chain source unreachable.
+        </p>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-center gap-3">
+          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">GET</span>
+          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/stats</h2>
+        </div>
+        <p className="mt-2 text-sm text-muted">Live cumulative activity totals for every tracked contract.</p>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-center gap-3">
+          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">POST</span>
+          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/webhooks</h2>
+          <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-faint">New</span>
+        </div>
+        <p className="mt-2 text-sm text-muted max-w-2xl">
+          Don&apos;t poll — we notify you. Subscribe a URL and we push{" "}
+          <code className="font-mono text-xs">grade.changed</code> and{" "}
+          <code className="font-mono text-xs">sanctions.listed</code> events as the rating engine re-scores wallets.
+          Every delivery is signed so you can verify it came from us.
+        </p>
+        <Code>{WEBHOOK_EXAMPLE}</Code>
+        <Code>{WEBHOOK_DELIVERY}</Code>
+      </section>
+    </div>
+  );
+}
+
+export default function DevelopersPage() {
+  return (
+    <div className="mx-auto max-w-4xl px-5 pt-10 pb-8">
+      <h1 className="text-3xl font-bold tracking-tight">API</h1>
+      <p className="mt-3 text-muted max-w-2xl">Two prices. Pick your side:</p>
+      <ApiTabs free={<FreeDocs />} paid={<PaidDocs />} />
     </div>
   );
 }

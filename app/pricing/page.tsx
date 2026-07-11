@@ -4,19 +4,19 @@ export const metadata = { title: "Pricing — Visa Wallet Rating" };
 
 const TIERS = [
   {
-    name: "Sandbox",
+    name: "Data Partner",
     price: "$0",
     period: "",
-    blurb: "Evaluate the rating engine.",
-    features: ["1,000 verifications / day", "Full rating + factor breakdown", "Score history + OFAC/KYC flags", "Test seals and badges"],
+    blurb: "Report off-chain data on your users' wallets — read free.",
+    features: ["Report outcomes, fraud flags, KYC via ingest", "Unlimited verifications while you report", "Full rating + factor breakdown", "Grade-change webhooks"],
     highlight: false,
   },
   {
     name: "Commercial",
     price: "$0.002",
     period: "/ verification",
-    blurb: "Wallet providers and dApps in production.",
-    features: ["Volume tiers, $2,500 / mo minimum", "25,000+ verifications / day", "Deposit + transfer-time screening", "Grade-change webhooks (soon)", "Priority ingest for contributed signals"],
+    blurb: "Read-only. Priced from the first call.",
+    features: ["Volume tiers, $2,500 / mo minimum", "25,000+ verifications / day", "Deposit + transfer-time screening", "Grade-change webhooks", "Score history + OFAC/KYC flags"],
     highlight: true,
   },
   {
@@ -57,7 +57,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            {t.name !== "Sandbox" && (
+            {t.name !== "Data Partner" && (
               <a
                 href={`mailto:khansufyaan@gmail.com?subject=${encodeURIComponent(`Visa Wallet Rating ${t.name} plan`)}`}
                 className={`mt-5 rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${t.highlight ? "bg-accent text-white hover:bg-accent-strong" : "border border-line-strong hover:border-accent"}`}
@@ -65,7 +65,7 @@ export default function PricingPage() {
                 Talk to us
               </a>
             )}
-            {t.name === "Sandbox" && <div className="mt-5"><KeyGenerator /></div>}
+            {t.name === "Data Partner" && <div className="mt-5"><KeyGenerator /></div>}
           </div>
         ))}
       </div>

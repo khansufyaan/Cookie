@@ -45,6 +45,58 @@ export async function addSubscriber(email: string, source: string, wallet?: stri
   return true;
 }
 
+let webhooksReady = false;
+
+export const WEBHOOK_EVENTS = ["grade.changed", "sanctions.listed"] as const;
+export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number];
+
+export interface Webhook {
+  id: number;
+  url: string;
+  events: string[];
+  secret: string;
+}
+
+async function ensureWebhooks(): Promise<boolean> {
+  const p = getPool();
+  if (!p) return false;
+  if (webhooksReady) return true;
+  await p.query(`CREATE TABLE IF NOT EXISTS webhooks (
+    id SERIAL PRIMARY KEY,
+    url TEXT NOT NULL,
+    events TEXT[] NOT NULL,
+    secret TEXT NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  )`);
+  webhooksReady = true;
+  return true;
+}
+
+export async function registerWebhook(url: string, events: WebhookEvent[], secret: string): Promise<number | null> {
+  if (!(await ensureWebhooks())) return null;
+  const p = getPool()!;
+  const { rows } = await p.query(
+    `INSERT INTO webhooks (url, events, secret) VALUES ($1, $2, $3) RETURNING id`,
+    [url, events, secret],
+  );
+  return rows[0].id as number;
+}
+
+export async function removeWebhook(id: number, secret: string): Promise<boolean> {
+  if (!(await ensureWebhooks())) return false;
+  const p = getPool()!;
+  const res = await p.query(`UPDATE webhooks SET active = false WHERE id = $1 AND secret = $2 AND active`, [id, secret]);
+  return (res.rowCount ?? 0) > 0;
+}
+
+export async function webhooksForEvent(event: WebhookEvent): Promise<Webhook[]> {
+  if (!(await ensureWebhooks())) return [];
+  const p = getPool()!;
+  const { rows } = await p.query(`SELECT id, url, events, secret FROM webhooks WHERE active AND $1 = ANY(events) LIMIT 100`, [event]);
+  return rows as Webhook[];
+}
+
 let mintsReady = false;
 
 /** Records a mint reservation for a connected wallet (one row per wallet). */

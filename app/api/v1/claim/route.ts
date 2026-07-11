@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "This wallet is sanctioned and cannot mint." }, { status: 403 });
   }
 
-  const position = await reserveMint(wallet, `${result.grade}${result.modifier}`, result.score);
+  await reserveMint(wallet, `${result.grade}${result.modifier}`, result.score);
 
   return NextResponse.json({
     data: {
@@ -44,7 +44,6 @@ export async function POST(req: Request) {
       grade: `${result.grade}${result.modifier}`,
       score: result.score,
       tokenId: result.sbt.tokenId,
-      position,
     },
     meta: {
       note: "Mint reserved. The soulbound credential is issued on Base at launch — gas sponsored, no action needed from you.",

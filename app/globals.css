@@ -86,6 +86,37 @@ body {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 -1px 0 rgba(255, 255, 255, 0.18);
 }
 
+/* Mint moment — the card is born: flips in from nothing, settles with a
+   soft landing; a glow blooms behind it. */
+@keyframes card-birth {
+  0% { opacity: 0; transform: perspective(1200px) rotateY(140deg) scale(0.55) translateY(60px); }
+  55% { opacity: 1; transform: perspective(1200px) rotateY(-14deg) scale(1.04) translateY(-6px); }
+  75% { transform: perspective(1200px) rotateY(6deg) scale(0.99) translateY(2px); }
+  100% { opacity: 1; transform: perspective(1200px) rotateY(0deg) scale(1) translateY(0); }
+}
+@keyframes glow-bloom {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; }
+  100% { opacity: 0.6; transform: scale(1); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card-birth { animation: card-birth 1.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.card-glow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(20, 52, 203, 0.35), rgba(20, 52, 203, 0));
+  animation: glow-bloom 1.6s ease-out both;
+  pointer-events: none;
+}
+.rise-in { animation: rise-in 0.6s ease-out 0.9s both; }
+@media (prefers-reduced-motion: reduce) {
+  .card-birth, .card-glow, .rise-in { animation: none; opacity: 1; }
+}
+
 /* Logo marquee */
 @keyframes marquee {
   from { transform: translateX(0); }

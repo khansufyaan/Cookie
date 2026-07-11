@@ -35,6 +35,22 @@ async function fetchPass(addr: string): Promise<Pass | { error: string }> {
   }
 }
 
+function DisconnectButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface px-5 py-2.5 text-sm font-medium text-muted hover:border-accent hover:text-foreground transition-colors"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="M16 17l5-5-5-5" />
+        <path d="M21 12H9" />
+      </svg>
+      {label}
+    </button>
+  );
+}
+
 function MintInner() {
   const { ready, authenticated, login, logout } = usePrivy();
   const { wallets } = useWallets();
@@ -43,14 +59,13 @@ function MintInner() {
   const [pass, setPass] = useState<Pass | null>(null);
   const [msg, setMsg] = useState("");
   const [phase, setPhase] = useState<"idle" | "loading" | "minting" | "minted">("idle");
-  const [minted, setMinted] = useState<{ position: number | null } | null>(null);
 
   // Preview-any-address mode (no connect required)
   const [typed, setTyped] = useState("");
 
   // When a wallet connects, load its pass automatically.
   useEffect(() => {
-    if (!authenticated || !wallet) { setPass(null); setMinted(null); return; }
+    if (!authenticated || !wallet) { setPass(null); return; }
     setPhase("loading"); setMsg("");
     fetchPass(wallet).then((r) => {
       if ("error" in r) { setMsg(r.error); setPass(null); }
@@ -79,64 +94,85 @@ function MintInner() {
       });
       const json = await res.json();
       if (!res.ok) { setMsg(json.error ?? "Mint failed."); setPhase("idle"); return; }
-      setMinted({ position: json.data.position ?? null });
       setPhase("minted");
     } catch {
       setMsg("Network error — try again."); setPhase("idle");
     }
   }
 
-  // Success
-  if (phase === "minted" && pass && minted) {
-    return (
-      <div className="flex flex-col items-center text-center">
-        <div className="w-72 sm:w-[340px] max-w-full">
-          <GradeCard grade={pass.grade} modifier={pass.modifier} score={pass.score} address={pass.address} tier={pass.tier} />
-        </div>
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-white" style={{ background: "var(--grade-a)" }}>
-          ✓ Minted
-        </div>
-        <h2 className="mt-4 text-2xl font-bold tracking-tight">Your pass is reserved.</h2>
-        <p className="mt-2 text-sm text-muted max-w-sm">
-          Pass <span className="font-mono">{pass.tokenId}</span> is sealed to your wallet
-          {minted.position ? <> — holder <span className="font-semibold text-foreground">#{minted.position}</span></> : null}. It
-          issues on Base at launch, gas on us. Nothing else to do.
-        </p>
-        <button onClick={() => { logout(); setPhase("idle"); setPass(null); setMinted(null); }} className="mt-4 text-xs text-faint hover:text-muted">
-          Disconnect
-        </button>
-      </div>
-    );
+  function disconnect() {
+    logout();
+    setPhase("idle");
+    setPass(null);
+    setMsg("");
   }
 
-  // Connected — show pass + mint
+  // Connected (or just minted): full-screen takeover — nothing but YOUR card.
   if (authenticated && wallet) {
+    const minted = phase === "minted";
     return (
-      <div className="flex flex-col items-center text-center">
-        {phase === "loading" && <div className="text-sm text-faint py-10">Reading your wallet…</div>}
+      <div className="fixed inset-0 z-40 bg-background flex flex-col items-center justify-center overflow-hidden px-5">
+        {phase === "loading" && <div className="text-sm text-faint">Reading your wallet…</div>}
+
         {pass && (
           <>
-            <div className="w-72 sm:w-[340px] max-w-full">
-              <GradeCard grade={pass.grade} modifier={pass.modifier} score={pass.score} address={pass.address} tier={pass.tier} />
+            <div className="relative w-full max-w-[640px]">
+              {minted && <div className="card-glow" />}
+              <div className={minted ? "card-birth" : ""}>
+                <GradeCard
+                  grade={pass.grade}
+                  modifier={pass.modifier}
+                  score={pass.score}
+                  address={pass.address}
+                  tier={pass.tier}
+                  size="lg"
+                  className="mx-auto shadow-2xl"
+                />
+              </div>
             </div>
-            <p className="mt-4 text-sm text-muted">
-              Grade <span className="font-semibold text-foreground">{pass.grade}{pass.modifier}</span> · pass{" "}
-              <span className="font-mono">{pass.tokenId}</span>
-            </p>
-            <button
-              onClick={mint}
-              disabled={phase === "minting"}
-              className="mt-5 rounded-full bg-accent px-8 py-3.5 text-base font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60"
-            >
-              {phase === "minting" ? "Minting…" : "Mint to this wallet — free"}
-            </button>
-            <p className="mt-2 text-xs text-faint">Minted to your connected wallet · gas sponsored · soulbound</p>
+
+            {minted ? (
+              <div className="rise-in flex flex-col items-center text-center">
+                <div className="mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white" style={{ background: "var(--grade-a)" }}>
+                  ✓ Yours — reserved
+                </div>
+                <p className="mt-4 text-sm text-muted max-w-md">
+                  Pass <span className="font-mono">{pass.tokenId}</span> is sealed to this wallet. It appears in
+                  your wallet when it issues on-chain on Base at launch — gas on us, nothing else to do.
+                </p>
+                <div className="mt-6">
+                  <DisconnectButton onClick={disconnect} label="Disconnect" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                <p className="mt-8 text-lg font-semibold">
+                  This is your pass.
+                </p>
+                <button
+                  onClick={mint}
+                  disabled={phase === "minting"}
+                  className="mt-4 rounded-full bg-accent px-10 py-4 text-lg font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60"
+                >
+                  {phase === "minting" ? "Minting…" : "Mint it — free"}
+                </button>
+                <p className="mt-2.5 text-xs text-faint">Minted to this wallet · gas sponsored · soulbound</p>
+                <div className="mt-6">
+                  <DisconnectButton onClick={disconnect} label={`${wallet.slice(0, 6)}…${wallet.slice(-4)} · disconnect`} />
+                </div>
+              </div>
+            )}
           </>
         )}
-        {msg && <p className="mt-3 text-sm" style={{ color: "var(--grade-c)" }}>{msg}</p>}
-        <button onClick={logout} className="mt-4 text-xs text-faint hover:text-muted">
-          Connected {wallet.slice(0, 6)}…{wallet.slice(-4)} · disconnect
-        </button>
+
+        {!pass && phase !== "loading" && (
+          <div className="flex flex-col items-center text-center">
+            {msg && <p className="text-sm" style={{ color: "var(--grade-c)" }}>{msg}</p>}
+            <div className="mt-6">
+              <DisconnectButton onClick={disconnect} label="Disconnect" />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
