@@ -17,8 +17,8 @@ const SAMPLE_WALLET = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"; // vitalik.e
 // the pinned values are only a fallback if a resolve fails at build time.
 const SAMPLES: { addr: string; label: string; grade: CardGrade; modifier: string; score: number }[] = [
   { addr: "0x2326d4fb2737666dda96bd6314e3d4418246cfe8", label: "Blue Chip", grade: "A", modifier: "+", score: 990 },
-  { addr: "0x42087c28f296d3b2dab56e3f5d1aca1388f2be5b", label: "Whale", grade: "B", modifier: "+", score: 784 },
-  { addr: "0x1f62e517b74904fb221c3eec6cec954473a89514", label: "Explorer", grade: "C", modifier: "+", score: 446 },
+  { addr: "0x42087c28f296d3b2dab56e3f5d1aca1388f2be5b", label: "Whale", grade: "B", modifier: "+", score: 797 },
+  { addr: "0x507e04f5072ff20a3619abca832b02f01567f8de", label: "Regular", grade: "C", modifier: "+", score: 312 },
   { addr: "0x0330070fd38ec3bb94f58fa55d40368271e9e54a", label: "Sanctioned", grade: "F", modifier: "", score: 0 },
 ];
 
