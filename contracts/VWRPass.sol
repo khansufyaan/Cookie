@@ -106,6 +106,8 @@ contract VWRPass {
         return string(abi.encodePacked("data:application/json;base64,", _b64(bytes(json))));
     }
 
+    /// @dev Square canvas (wallets crop thumbnails square) with the card
+    ///      centered inside on a dark backdrop — nothing gets cut off.
     function _svg(address holder, string memory grade, string memory scoreStr) internal pure returns (string memory) {
         bytes1 band = bytes(grade)[0];
         // Gold face for A, black for F (never minted), Visa blue otherwise.
@@ -114,16 +116,19 @@ contract VWRPass {
             : ("#2247e8", "#0c2189", band == "B" ? "#FFC24B" : "#FF8A7A");
         return string(
             abi.encodePacked(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="378" viewBox="0 0 600 378">',
-                '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">',
+                '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">',
+                '<defs><radialGradient id="bg" cx="0.5" cy="0.42" r="0.8">',
+                '<stop offset="0" stop-color="#1b2650"/><stop offset="1" stop-color="#0a0e21"/></radialGradient>',
+                '<linearGradient id="g" x1="0" y1="0" x2="1" y2="1">',
                 '<stop offset="0" stop-color="', c1, '"/><stop offset="1" stop-color="', c2, '"/></linearGradient></defs>',
-                '<rect width="600" height="378" rx="28" fill="url(#g)"/>',
-                '<text x="40" y="64" font-family="Helvetica,Arial" font-size="20" letter-spacing="6" fill="rgba(255,255,255,0.8)" font-weight="600">VISA WALLET RATING</text>',
-                '<text x="560" y="110" text-anchor="end" font-family="Helvetica,Arial" font-size="88" font-weight="700" fill="', gc, '">', grade, "</text>",
-                '<text x="560" y="150" text-anchor="end" font-family="Helvetica,Arial" font-size="24" fill="rgba(255,255,255,0.75)">', scoreStr, " / 1000</text>",
-                '<text x="40" y="290" font-family="Courier New,monospace" font-size="26" letter-spacing="3" fill="rgba(255,255,255,0.95)">', _shortAddr(holder), "</text>",
-                '<text x="40" y="336" font-family="Helvetica,Arial" font-size="16" letter-spacing="4" fill="rgba(255,255,255,0.6)">SOULBOUND</text>',
-                '<text x="560" y="340" text-anchor="end" font-family="Helvetica,Arial" font-size="38" font-style="italic" font-weight="800" fill="#ffffff">VISA</text>',
+                '<rect width="600" height="600" fill="url(#bg)"/>',
+                '<rect x="40" y="136" width="520" height="328" rx="24" fill="url(#g)"/>',
+                '<text x="66" y="192" font-family="Helvetica,Arial" font-size="17" letter-spacing="5" fill="rgba(255,255,255,0.8)" font-weight="600">VISA WALLET RATING</text>',
+                '<text x="534" y="232" text-anchor="end" font-family="Helvetica,Arial" font-size="76" font-weight="700" fill="', gc, '">', grade, "</text>",
+                '<text x="534" y="266" text-anchor="end" font-family="Helvetica,Arial" font-size="20" fill="rgba(255,255,255,0.75)">', scoreStr, " / 1000</text>",
+                '<text x="66" y="388" font-family="Courier New,monospace" font-size="23" letter-spacing="2" fill="rgba(255,255,255,0.95)">', _shortAddr(holder), "</text>",
+                '<text x="66" y="432" font-family="Helvetica,Arial" font-size="14" letter-spacing="4" fill="rgba(255,255,255,0.6)">SOULBOUND</text>',
+                '<text x="534" y="436" text-anchor="end" font-family="Helvetica,Arial" font-size="32" font-style="italic" font-weight="800" fill="#ffffff">VISA</text>',
                 "</svg>"
             )
         );

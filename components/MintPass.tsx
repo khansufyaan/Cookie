@@ -165,13 +165,15 @@ function MintInner() {
   if (authenticated && wallet) {
     const minted = phase === "minted";
     return (
-      <div className="fixed inset-0 z-40 bg-background flex flex-col items-center justify-center overflow-hidden px-5">
+      <div className="fixed inset-0 z-40 bg-background flex flex-col items-center justify-center overflow-y-auto px-5 py-8">
         {phase === "loading" && <div className="text-sm text-faint">Reading your wallet…</div>}
 
         {minted && <Confetti />}
         {pass && (
           <>
-            <div className="relative w-full max-w-[640px]">
+            {/* Big and grand before minting; compact after so the success
+                panel fits one screen with no scrolling. */}
+            <div className={`relative w-full ${minted ? "max-w-[360px]" : "max-w-[560px]"} shrink-0`}>
               {minted && <div className="card-glow" />}
               <div className={`relative ${minted ? "card-birth" : ""}`}>
                 <GradeCard
@@ -180,7 +182,7 @@ function MintInner() {
                   score={pass.score}
                   address={pass.address}
                   tier={pass.tier}
-                  size="lg"
+                  size={minted ? "md" : "lg"}
                   className="mx-auto shadow-2xl"
                 />
                 {minted && <div className="card-shine" />}
@@ -189,7 +191,7 @@ function MintInner() {
 
             {minted ? (
               <div className="rise-in flex flex-col items-center text-center">
-                <div className="mt-7 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white" style={{ background: "var(--grade-a)" }}>
+                <div className="mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white" style={{ background: "var(--grade-a)" }}>
                   {onchain ? `✓ Minted on ${onchain.chain}` : "✓ Yours — reserved"}
                 </div>
 
