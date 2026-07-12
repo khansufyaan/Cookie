@@ -44,3 +44,6 @@ next-env.d.ts
 _*.mjs
 
 # chain artifacts
+
+# MCP server deps
+mcp/node_modules

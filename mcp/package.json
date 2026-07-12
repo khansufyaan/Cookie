@@ -1,0 +1,19 @@
+{
+  "name": "visa-wallet-rating-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Model Context Protocol server for Visa Wallet Rating — rate crypto wallets and screen for sanctions from any MCP client.",
+  "type": "module",
+  "bin": {
+    "visa-wallet-rating-mcp": "./server.mjs"
+  },
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  }
+}
