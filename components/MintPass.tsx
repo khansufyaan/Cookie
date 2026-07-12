@@ -214,16 +214,21 @@ function MintInner() {
                     )}
                     <div className="mt-5 w-full max-w-md rounded-2xl border border-line bg-surface p-4 text-left">
                       <p className="text-xs font-semibold uppercase tracking-widest text-faint text-center">
-                        See it in MetaMask
+                        See it in your wallet
                       </p>
-                      <ol className="mt-3 space-y-2 text-sm">
+                      <p className="mt-2 text-sm text-muted text-center">
+                        Most wallets (Coinbase Wallet, Rainbow, Phantom) show it automatically on{" "}
+                        <strong>{onchain.chain}</strong> within a few minutes.
+                      </p>
+                      <p className="mt-3 text-sm font-medium">If yours needs a manual import (e.g. MetaMask):</p>
+                      <ol className="mt-2 space-y-2 text-sm">
                         <li className="flex items-center gap-2.5">
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">1</span>
                           Switch network to <strong>{onchain.chain}</strong>
                         </li>
                         <li className="flex items-center gap-2.5">
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">2</span>
-                          <span><strong>NFTs</strong> tab → <strong>Import NFT</strong></span>
+                          <span>Open <strong>NFTs</strong> → <strong>Import NFT</strong></span>
                         </li>
                         <li className="flex items-center gap-2.5">
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">3</span>
