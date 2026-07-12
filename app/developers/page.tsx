@@ -1,7 +1,9 @@
+import Link from "next/link";
 import ApiPlayground from "@/components/ApiPlayground";
 import ApiTabs from "@/components/ApiTabs";
+import { TIERS } from "@/lib/pricing";
 
-export const metadata = { title: "API — Visa Wallet Rating" };
+export const metadata = { title: "For developers — Visa Wallet Rating" };
 
 const INGEST_EXAMPLE = `curl -X POST https://visa-wallet-rating.vercel.app/api/v1/ingest \\
   -H "Content-Type: application/json" \\
@@ -239,6 +241,38 @@ function WebhooksSection() {
   );
 }
 
+/* ---------- Pricing recap — merged into the developer journey ---------- */
+
+function PricingSection() {
+  return (
+    <section id="pricing" className="mt-16 scroll-mt-20 border-t border-line pt-12">
+      <h2 className="text-2xl font-bold tracking-tight">Pricing</h2>
+      <p className="mt-3 text-sm text-muted max-w-2xl">
+        Priced per verification, like the network you already know. Contributing signals is free on every tier.
+      </p>
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        {TIERS.map((t) => (
+          <div
+            key={t.name}
+            className={`rounded-2xl border bg-surface p-5 flex flex-col ${t.highlight ? "border-accent" : "border-line"}`}
+          >
+            {t.highlight && <span className="self-start rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">Popular</span>}
+            <h3 className={`font-semibold ${t.highlight ? "mt-2" : ""}`}>{t.name}</h3>
+            <div className="mt-1.5 flex items-baseline gap-1">
+              <span className="text-2xl font-bold">{t.price}</span>
+              <span className="text-xs text-faint">{t.period}</span>
+            </div>
+            <p className="mt-1 text-xs text-muted">{t.blurb}</p>
+          </div>
+        ))}
+      </div>
+      <Link href="/pricing" className="mt-5 inline-block text-sm font-medium text-accent hover:text-accent-strong">
+        Full pricing + get a free key →
+      </Link>
+    </section>
+  );
+}
+
 /* ---------- MCP — let any AI agent read the ratings ---------- */
 
 function McpSection() {
@@ -291,12 +325,14 @@ export default function DevelopersPage() {
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
         <a href="#webhooks" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">Webhooks →</a>
         <a href="#mcp" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">MCP server →</a>
+        <a href="#pricing" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">Pricing →</a>
       </div>
 
       <ApiTabs free={<FreeDocs />} paid={<PaidDocs />} />
 
       <WebhooksSection />
       <McpSection />
+      <PricingSection />
     </div>
   );
 }

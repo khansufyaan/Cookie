@@ -28,11 +28,13 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
+// Audience-first: how it works · the strategy · the integration surface · mint.
+// Pricing is merged into the developer journey (recap + link on /developers).
+// Research tab hidden for now — page still lives at /research if we relink it.
 const NAV = [
-  // Research tab hidden for now — page still lives at /research if we relink it.
-  { href: "/methodology", label: "Methodology" },
-  { href: "/developers", label: "API" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/methodology", label: "How it works" },
+  { href: "/why", label: "Why Visa" },
+  { href: "/developers", label: "For developers" },
   { href: "/claim", label: "Mint" },
 ];
 
@@ -61,6 +63,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="border-t border-line mt-16">
           <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint">
             <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <Link href="/why" className="hover:text-muted">Why Visa</Link>
               <Link href="/network" className="hover:text-muted">Network</Link>
               <Link href="/whitepaper" className="hover:text-muted">Whitepaper</Link>
               <Link href="/disputes" className="hover:text-muted">Disputes</Link>
