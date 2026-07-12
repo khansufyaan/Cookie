@@ -72,6 +72,33 @@ X-VWR-Signature: hmac-sha256(secret, body)
   "data": { "wallet": "0xabc…", "from": "B+", "to": "A-", "score": 815 }
 }`;
 
+const WEBHOOK_VERIFY = `// verify every delivery came from us (Node)
+import crypto from "node:crypto";
+
+const sig = req.headers["x-vwr-signature"];
+const expected = crypto
+  .createHmac("sha256", process.env.VWR_WEBHOOK_SECRET) // the whsec_… from subscribe
+  .update(rawBody)
+  .digest("hex");
+if (sig !== expected) return res.status(401).end();     // reject forgeries`;
+
+const MCP_CONFIG = `// claude_desktop_config.json  (Claude Desktop / Cursor / Claude Code)
+{
+  "mcpServers": {
+    "visa-wallet-rating": {
+      "command": "node",
+      "args": ["/path/to/mcp/server.mjs"],
+      "env": { "VWR_API_KEY": "hb_live_…" }
+    }
+  }
+}`;
+
+const MCP_ASK = `You: "Is 0x0330…e54a safe to pay?"
+Claude → check_sanctions → ⛔ SANCTIONED — do not transact.
+
+You: "Rate wallet 0x2326…cfe8"
+Claude → rate_wallet → A+ · 990/1000 · Blue Chip, not sanctioned.`;
+
 function Code({ children }: { children: string }) {
   return (
     <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-surface-2 p-4 text-xs leading-relaxed font-mono text-muted">
@@ -171,23 +198,87 @@ function PaidDocs() {
         </div>
         <p className="mt-2 text-sm text-muted">Live cumulative activity totals for every tracked contract.</p>
       </section>
-
-      <section className="mt-10">
-        <div className="flex items-center gap-3">
-          <span className="rounded bg-surface-2 border border-line-strong px-2 py-0.5 font-mono text-xs text-accent">POST</span>
-          <h2 className="font-semibold font-mono text-sm sm:text-base">/api/v1/webhooks</h2>
-          <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-faint">New</span>
-        </div>
-        <p className="mt-2 text-sm text-muted max-w-2xl">
-          Don&apos;t poll — we notify you. Subscribe a URL and we push{" "}
-          <code className="font-mono text-xs">grade.changed</code> and{" "}
-          <code className="font-mono text-xs">sanctions.listed</code> events as the rating engine re-scores wallets.
-          Every delivery is signed so you can verify it came from us.
-        </p>
-        <Code>{WEBHOOK_EXAMPLE}</Code>
-        <Code>{WEBHOOK_DELIVERY}</Code>
-      </section>
     </div>
+  );
+}
+
+/* ---------- Webhooks — shared: available on every tier ---------- */
+
+function WebhooksSection() {
+  return (
+    <section id="webhooks" className="mt-16 scroll-mt-20 border-t border-line pt-12">
+      <div className="flex items-center gap-3">
+        <h2 className="text-2xl font-bold tracking-tight">Webhooks</h2>
+        <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">On every tier</span>
+      </div>
+      <p className="mt-3 text-sm text-muted max-w-2xl leading-relaxed">
+        Don&apos;t poll — we notify you. Subscribe a URL once and we push an event the moment a wallet you care about
+        crosses a threshold: <code className="font-mono text-xs">grade.changed</code> when the rating engine re-scores
+        it, and <code className="font-mono text-xs">sanctions.listed</code> the moment it lands on an OFAC list. This is
+        how you re-screen a counterparty <em>after</em> onboarding without re-querying — the pass stays current, and so
+        do you.
+      </p>
+
+      <h3 className="mt-8 font-semibold text-sm">1 · Subscribe a URL</h3>
+      <Code>{WEBHOOK_EXAMPLE}</Code>
+
+      <h3 className="mt-8 font-semibold text-sm">2 · Receive signed deliveries</h3>
+      <Code>{WEBHOOK_DELIVERY}</Code>
+
+      <h3 className="mt-8 font-semibold text-sm">3 · Verify the signature</h3>
+      <p className="mt-1 text-xs text-muted max-w-2xl">
+        Every delivery carries an HMAC-SHA256 signature of the raw body, keyed by the{" "}
+        <code className="font-mono text-xs">whsec_…</code> secret returned once at subscribe time. Check it before you
+        trust the payload.
+      </p>
+      <Code>{WEBHOOK_VERIFY}</Code>
+      <p className="mt-2 text-xs text-faint">
+        Unsubscribe any time: <code className="font-mono text-xs">DELETE /api/v1/webhooks</code> with the subscription id.
+      </p>
+    </section>
+  );
+}
+
+/* ---------- MCP — let any AI agent read the ratings ---------- */
+
+function McpSection() {
+  return (
+    <section id="mcp" className="mt-16 scroll-mt-20 border-t border-line pt-12">
+      <div className="flex items-center gap-3">
+        <h2 className="text-2xl font-bold tracking-tight">MCP server</h2>
+        <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-faint">New</span>
+      </div>
+      <p className="mt-3 text-sm text-muted max-w-2xl leading-relaxed">
+        The rating isn&apos;t just an API — it&apos;s a tool your AI agents can call. Drop our{" "}
+        <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer" className="text-accent underline">Model Context Protocol</a>{" "}
+        server into Claude Desktop, Cursor, or Claude Code and your assistant can rate a wallet or screen a
+        counterparty in plain language — before it signs, pays, or onboards.
+      </p>
+
+      <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
+        {[
+          { t: "rate_wallet", d: "Full A/B/C/F rating: score, factors, apps used, stablecoin mix, totals." },
+          { t: "check_sanctions", d: "One-address OFAC screen with a clear SANCTIONED / clear verdict." },
+          { t: "network_stats", d: "Live coverage: monitored contracts + rated-wallet universe." },
+        ].map((x) => (
+          <div key={x.t} className="rounded-xl border border-line bg-surface px-4 py-3">
+            <div className="font-mono text-sm font-semibold text-accent">{x.t}</div>
+            <p className="mt-1 text-xs text-muted leading-relaxed">{x.d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="mt-8 font-semibold text-sm">Add it to your client</h3>
+      <Code>{MCP_CONFIG}</Code>
+
+      <h3 className="mt-8 font-semibold text-sm">Then just ask</h3>
+      <Code>{MCP_ASK}</Code>
+      <p className="mt-2 text-xs text-faint">
+        Stateless relay over the read API — your <code className="font-mono text-xs">hb_live_…</code> key meters it; no
+        chain keys or data ever leave our servers. Setup lives in the repo under{" "}
+        <code className="font-mono text-xs">mcp/</code>.
+      </p>
+    </section>
   );
 }
 
@@ -196,7 +287,16 @@ export default function DevelopersPage() {
     <div className="mx-auto max-w-4xl px-5 pt-10 pb-8">
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
       <p className="mt-3 text-muted max-w-2xl">Two prices. Pick your side:</p>
+
+      <div className="mt-4 flex flex-wrap gap-2 text-xs">
+        <a href="#webhooks" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">Webhooks →</a>
+        <a href="#mcp" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">MCP server →</a>
+      </div>
+
       <ApiTabs free={<FreeDocs />} paid={<PaidDocs />} />
+
+      <WebhooksSection />
+      <McpSection />
     </div>
   );
 }

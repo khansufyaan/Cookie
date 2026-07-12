@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
-  { href: "/research", label: "Research" },
+  // Research tab hidden for now — page still lives at /research if we relink it.
   { href: "/methodology", label: "Methodology" },
   { href: "/developers", label: "API" },
   { href: "/pricing", label: "Pricing" },
