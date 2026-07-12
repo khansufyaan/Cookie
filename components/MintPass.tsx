@@ -210,13 +210,28 @@ function MintInner() {
                         View the transaction ↗
                       </a>
                     )}
-                    <div className="mt-4 w-full max-w-md space-y-1.5">
-                      <p className="text-xs text-faint">
-                        See it in MetaMask: switch to <strong className="text-muted">{onchain.chain}</strong> → NFTs
-                        → Import NFT:
+                    <div className="mt-5 w-full max-w-md rounded-2xl border border-line bg-surface p-4 text-left">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-faint text-center">
+                        See it in MetaMask
                       </p>
-                      <CopyField label="Contract" value={onchain.contract} />
-                      <CopyField label="Token ID" value={onchain.tokenId} />
+                      <ol className="mt-3 space-y-2 text-sm">
+                        <li className="flex items-center gap-2.5">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">1</span>
+                          Switch network to <strong>{onchain.chain}</strong>
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">2</span>
+                          <span><strong>NFTs</strong> tab → <strong>Import NFT</strong></span>
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">3</span>
+                          Paste these two:
+                        </li>
+                      </ol>
+                      <div className="mt-2 space-y-1.5">
+                        <CopyField label="Contract" value={onchain.contract} />
+                        <CopyField label="Token ID" value={onchain.tokenId} />
+                      </div>
                     </div>
                   </>
                 ) : (
