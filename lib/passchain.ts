@@ -1,20 +1,35 @@
 import { createPublicClient, createWalletClient, http, parseEventLogs } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 import { VWR_PASS_ABI } from "./generated/vwrpass";
 
 /**
- * On-chain pass minting (Base Sepolia for the demo; swap chain + env for
- * mainnet). The relayer wallet owns the contract and pays gas — "gas on us".
- * Active only when RELAYER_PRIVATE_KEY + PASS_CONTRACT_ADDRESS are set;
- * without them the claim flow falls back to reservation-only.
+ * On-chain pass minting. The relayer wallet owns the contract and pays gas —
+ * "gas on us". Chain selected by PASS_CHAIN env ("base" mainnet or
+ * "base-sepolia", the default); active only when RELAYER_PRIVATE_KEY +
+ * PASS_CONTRACT_ADDRESS are set, else the claim flow reserves only.
  */
 
-const RPC = process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org";
+const CHAINS = {
+  base: {
+    chain: base,
+    rpc: process.env.BASE_RPC || "https://mainnet.base.org",
+    name: "Base",
+    explorer: "https://basescan.org",
+  },
+  "base-sepolia": {
+    chain: baseSepolia,
+    rpc: process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org",
+    name: "Base Sepolia",
+    explorer: "https://sepolia.basescan.org",
+  },
+} as const;
+
+const ACTIVE = CHAINS[(process.env.PASS_CHAIN as keyof typeof CHAINS) ?? "base-sepolia"] ?? CHAINS["base-sepolia"];
 
 export const PASS_CHAIN = {
-  name: "Base Sepolia",
-  explorer: "https://sepolia.basescan.org",
+  name: ACTIVE.name,
+  explorer: ACTIVE.explorer,
 } as const;
 
 export function passChainConfigured(): boolean {
@@ -32,8 +47,8 @@ export interface MintResult {
 export async function mintPassOnChain(to: `0x${string}`, grade: string, score: number): Promise<MintResult> {
   const contract = process.env.PASS_CONTRACT_ADDRESS as `0x${string}`;
   const account = privateKeyToAccount(process.env.RELAYER_PRIVATE_KEY as `0x${string}`);
-  const pub = createPublicClient({ chain: baseSepolia, transport: http(RPC) });
-  const wallet = createWalletClient({ account, chain: baseSepolia, transport: http(RPC) });
+  const pub = createPublicClient({ chain: ACTIVE.chain, transport: http(ACTIVE.rpc) });
+  const wallet = createWalletClient({ account, chain: ACTIVE.chain, transport: http(ACTIVE.rpc) });
 
   const existing = (await pub.readContract({
     address: contract,
