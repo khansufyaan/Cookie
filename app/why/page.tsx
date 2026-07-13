@@ -10,16 +10,35 @@ const LOOP = [
 
 const AUDIENCES = [
   {
-    who: "For apps & exchanges",
-    title: "Stop guessing on new wallets.",
-    body: "Share what you see, and get everyone else's signal back — who's verified, active, or risky. You report to a neutral party, never to a competitor.",
-    cta: "Report on wallets →",
+    who: "New app developers",
+    title: "Know your users from day one.",
+    points: [
+      "Learn about a new user the moment they connect — no history of your own needed.",
+      "Spot risky or sanctioned wallets before they transact.",
+      "Start with the same insight the biggest apps already have.",
+    ],
+    cta: "Read the API docs →",
     href: "/developers",
   },
   {
-    who: "For consumers",
-    title: "Build your score over time.",
-    body: "Good behavior everywhere adds up to one grade you carry with you. A better score means better rates, higher limits, and earlier access.",
+    who: "Established apps & exchanges",
+    title: "Share data, get ratings free.",
+    points: [
+      "Share what you know about wallets — KYC, activity, fraud — with Visa.",
+      "Get ratings back for free, including every other app's signal.",
+      "Support the ecosystem — one shared standard makes everyone safer.",
+    ],
+    cta: "Start sharing →",
+    href: "/developers",
+  },
+  {
+    who: "Consumers",
+    title: "Understand and improve your score.",
+    points: [
+      "See your on-chain behavior in one clear score.",
+      "Learn exactly what drives your grade and how to raise it.",
+      "Carry a portable rating that unlocks better rates and access.",
+    ],
     cta: "Build your score →",
     href: "/claim",
   },
@@ -58,13 +77,20 @@ export default function WhyPage() {
       {/* Who it's for */}
       <section className="mt-14">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Who it&apos;s for</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
           {AUDIENCES.map((a) => (
-            <div key={a.who} className="flex flex-col rounded-2xl border border-line bg-surface p-6 sm:p-8">
+            <div key={a.who} className="flex flex-col rounded-2xl border border-line bg-surface p-6">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{a.who}</p>
-              <h3 className="mt-2 text-xl font-bold tracking-tight">{a.title}</h3>
-              <p className="mt-3 text-base text-muted leading-relaxed flex-1">{a.body}</p>
-              <Link href={a.href} className="mt-4 text-sm font-semibold text-accent hover:text-accent-strong">
+              <h3 className="mt-2 text-lg font-bold tracking-tight">{a.title}</h3>
+              <ul className="mt-4 space-y-2.5 flex-1">
+                {a.points.map((p) => (
+                  <li key={p} className="flex gap-2.5 text-sm text-muted leading-snug">
+                    <span className="mt-0.5 shrink-0" style={{ color: "var(--grade-a)" }}>✓</span>
+                    {p}
+                  </li>
+                ))}
+              </ul>
+              <Link href={a.href} className="mt-5 text-sm font-semibold text-accent hover:text-accent-strong">
                 {a.cta}
               </Link>
             </div>
