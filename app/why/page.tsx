@@ -1,120 +1,98 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 export const metadata = { title: "Who it's for — Visa Wallet Rating" };
 
-const LOOP = [
-  { n: "1", t: "Apps report", d: "An app shares what it saw: repaid or defaulted, verified or not, active or gone." },
-  { n: "2", t: "The score moves", d: "Each report nudges that wallet's grade up or down." },
-  { n: "3", t: "Everyone benefits", d: "Now every app sees the full picture — not just its own corner." },
-];
+function EyeIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+function ShareIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
+      <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+    </svg>
+  );
+}
+function PersonIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+    </svg>
+  );
+}
 
-const AUDIENCES = [
+const PERSONAS: { icon: ReactNode; persona: string; headline: string; points: string[]; cta: string; href: string }[] = [
   {
-    who: "New app developers",
-    title: "Know your users from day one.",
-    points: [
-      "Learn about a new user the moment they connect — no history of your own needed.",
-      "Spot risky or sanctioned wallets before they transact.",
-      "Start with the same insight the biggest apps already have.",
-    ],
-    cta: "Read the API docs →",
+    icon: <EyeIcon />,
+    persona: "New apps",
+    headline: "Understand who just connected.",
+    points: ["Instant read on any wallet", "Catch risky or sanctioned addresses", "No history of your own needed"],
+    cta: "Read the API docs",
     href: "/developers",
   },
   {
-    who: "Established apps & exchanges",
-    title: "Share data, get ratings free.",
-    points: [
-      "Share what you know about wallets — KYC, activity, fraud — with Visa.",
-      "Get ratings back for free, including every other app's signal.",
-      "Support the ecosystem — one shared standard makes everyone safer.",
-    ],
-    cta: "Start sharing →",
+    icon: <ShareIcon />,
+    persona: "Established apps",
+    headline: "Share data, get ratings free.",
+    points: ["Report what you know", "Get every app's signal back — free", "Strengthen the ecosystem"],
+    cta: "Start sharing",
     href: "/developers",
   },
   {
-    who: "Consumers",
-    title: "Understand and improve your score.",
-    points: [
-      "See your on-chain behavior in one clear score.",
-      "Learn exactly what drives your grade and how to raise it.",
-      "Carry a portable rating that unlocks better rates and access.",
-    ],
-    cta: "Build your score →",
+    icon: <PersonIcon />,
+    persona: "Consumers",
+    headline: "Know and grow your score.",
+    points: ["See your on-chain reputation", "Learn how to raise it", "Carry it everywhere"],
+    cta: "Build your score",
     href: "/claim",
   },
 ];
 
 export default function WhyPage() {
   return (
-    <div className="mx-auto max-w-3xl px-5 pt-14 pb-8">
-      {/* The problem */}
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">The problem</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight">Apps don&apos;t share what they know.</h1>
-      <p className="mt-4 text-lg text-muted leading-relaxed">
-        One wallet uses many apps — but each app only sees its own corner. So a great customer looks like a stranger
-        everywhere new, and a bad actor gets a fresh start every time. There&apos;s no shared record.
-      </p>
-
-      {/* The fix — the reporting loop */}
-      <section className="mt-14">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">The fix</p>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight">One score, built by everyone.</h2>
-        <p className="mt-3 text-base text-muted leading-relaxed">
-          Apps report what they see about a wallet. Each report moves its score up or down. In return, every app gets
-          to see what all the others reported — through one neutral party, so no one shares data with a rival.
+    <div className="mx-auto max-w-5xl px-5 pt-16 pb-16">
+      <div className="max-w-2xl">
+        <h1 className="text-4xl font-bold tracking-tight">Who it&apos;s for</h1>
+        <p className="mt-4 text-lg text-muted leading-relaxed">
+          Apps don&apos;t share what they know about a wallet. Visa is the neutral place they can — here&apos;s what
+          each side gets.
         </p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {LOOP.map((s) => (
-            <div key={s.n} className="rounded-2xl border border-line bg-surface p-5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">{s.n}</span>
-              <h3 className="mt-3 font-semibold">{s.t}</h3>
-              <p className="mt-1.5 text-base text-muted leading-relaxed">{s.d}</p>
+      </div>
+
+      <div className="mt-12 grid gap-5 md:grid-cols-3">
+        {PERSONAS.map((p) => (
+          <div key={p.persona} className="flex flex-col rounded-2xl border border-line bg-surface p-7">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-accent"
+              style={{ background: "rgba(20, 52, 203, 0.08)" }}
+            >
+              {p.icon}
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Who it's for */}
-      <section className="mt-14">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Who it&apos;s for</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          {AUDIENCES.map((a) => (
-            <div key={a.who} className="flex flex-col rounded-2xl border border-line bg-surface p-6">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{a.who}</p>
-              <h3 className="mt-2 text-lg font-bold tracking-tight">{a.title}</h3>
-              <ul className="mt-4 space-y-2.5 flex-1">
-                {a.points.map((p) => (
-                  <li key={p} className="flex gap-2.5 text-sm text-muted leading-snug">
-                    <span className="mt-0.5 shrink-0" style={{ color: "var(--grade-a)" }}>✓</span>
-                    {p}
-                  </li>
-                ))}
-              </ul>
-              <Link href={a.href} className="mt-5 text-sm font-semibold text-accent hover:text-accent-strong">
-                {a.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-14 rounded-2xl bg-foreground px-6 py-8 sm:px-10 text-background">
-        <p className="text-lg sm:text-xl font-semibold leading-relaxed">
-          No app sees the whole picture alone. Together, they can — and every honest wallet gets a score it can build
-          and take anywhere.
-        </p>
-      </section>
-
-      <div className="mt-10 flex flex-wrap gap-3 text-sm">
-        <Link href="/network" className="rounded-lg border border-line-strong px-4 py-2.5 font-medium hover:border-accent">
-          See the live network →
-        </Link>
-        <Link href="/developers" className="rounded-lg border border-line-strong px-4 py-2.5 font-medium hover:border-accent">
-          Report on wallets →
-        </Link>
-        <Link href="/claim" className="rounded-lg bg-accent px-4 py-2.5 font-semibold text-white hover:bg-accent-strong">
-          Build your score →
-        </Link>
+            <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">{p.persona}</p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight">{p.headline}</h2>
+            <ul className="mt-5 space-y-3 flex-1">
+              {p.points.map((pt) => (
+                <li key={pt} className="flex items-start gap-3 text-base text-muted">
+                  <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                  {pt}
+                </li>
+              ))}
+            </ul>
+            <Link href={p.href} className="mt-6 text-sm font-semibold text-accent hover:text-accent-strong">
+              {p.cta} →
+            </Link>
+          </div>
+        ))}
       </div>
     </div>
   );
