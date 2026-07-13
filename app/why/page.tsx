@@ -31,11 +31,11 @@ function PersonIcon() {
   );
 }
 
-const PERSONAS: { icon: ReactNode; persona: string; headline: string; points: string[]; cta: string; href: string }[] = [
+const PERSONAS: { icon: ReactNode; persona: string; value: string; points: string[]; cta: string; href: string }[] = [
   {
     icon: <EyeIcon />,
     persona: "New apps",
-    headline: "Understand who just connected.",
+    value: "Understand who just connected.",
     points: ["Instant read on any wallet", "Catch risky or sanctioned addresses", "No history of your own needed"],
     cta: "Read the API docs",
     href: "/developers",
@@ -43,7 +43,7 @@ const PERSONAS: { icon: ReactNode; persona: string; headline: string; points: st
   {
     icon: <ShareIcon />,
     persona: "Established apps",
-    headline: "Share data, get ratings free.",
+    value: "Share data, get ratings free.",
     points: ["Report what you know", "Get every app's signal back — free", "Strengthen the ecosystem"],
     cta: "Start sharing",
     href: "/developers",
@@ -51,7 +51,7 @@ const PERSONAS: { icon: ReactNode; persona: string; headline: string; points: st
   {
     icon: <PersonIcon />,
     persona: "Consumers",
-    headline: "Know and grow your score.",
+    value: "Know and grow your score.",
     points: ["See your on-chain reputation", "Learn how to raise it", "Carry it everywhere"],
     cta: "Build your score",
     href: "/claim",
@@ -60,27 +60,26 @@ const PERSONAS: { icon: ReactNode; persona: string; headline: string; points: st
 
 export default function WhyPage() {
   return (
-    <div className="mx-auto max-w-5xl px-5 pt-16 pb-16">
-      <div className="max-w-2xl">
-        <h1 className="text-4xl font-bold tracking-tight">Who it&apos;s for</h1>
-        <p className="mt-4 text-lg text-muted leading-relaxed">
-          Apps don&apos;t share what they know about a wallet. Visa is the neutral place they can — here&apos;s what
-          each side gets.
+    <div className="mx-auto flex min-h-[calc(100vh-3.5rem-11rem-2px)] max-w-6xl flex-col justify-center px-5 py-6">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Who it&apos;s for</h1>
+        <p className="mt-2 text-muted max-w-2xl">
+          Apps don&apos;t share what they know about a wallet. Visa is the neutral place they can.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-5 md:grid-cols-3">
+      <div className="mt-8 grid gap-5 md:grid-cols-3">
         {PERSONAS.map((p) => (
-          <div key={p.persona} className="flex flex-col rounded-2xl border border-line bg-surface p-7">
+          <div key={p.persona} className="flex flex-col rounded-2xl border border-line bg-surface p-6 sm:p-7">
             <div
               className="flex h-11 w-11 items-center justify-center rounded-xl text-accent"
               style={{ background: "rgba(20, 52, 203, 0.08)" }}
             >
               {p.icon}
             </div>
-            <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">{p.persona}</p>
-            <h2 className="mt-1 text-xl font-bold tracking-tight">{p.headline}</h2>
-            <ul className="mt-5 space-y-3 flex-1">
+            <h2 className="mt-5 text-4xl font-bold tracking-tight leading-[1.05]">{p.persona}</h2>
+            <p className="mt-3 text-lg font-semibold">{p.value}</p>
+            <ul className="mt-4 space-y-2.5 flex-1">
               {p.points.map((pt) => (
                 <li key={pt} className="flex items-start gap-3 text-base text-muted">
                   <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
