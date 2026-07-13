@@ -322,10 +322,10 @@ export default function DevelopersPage() {
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
       <p className="mt-3 text-muted max-w-2xl">Two prices. Pick your side:</p>
 
-      <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <a href="#webhooks" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">Webhooks →</a>
-        <a href="#mcp" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">MCP server →</a>
-        <a href="#pricing" className="rounded-full border border-line-strong px-3 py-1 font-medium text-muted hover:border-accent hover:text-accent">Pricing →</a>
+      <div className="mt-5 flex flex-wrap gap-3 text-sm">
+        <a href="#webhooks" className="rounded-full bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-strong transition-colors">Webhooks →</a>
+        <a href="#mcp" className="rounded-full bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-strong transition-colors">MCP server →</a>
+        <a href="#pricing" className="rounded-full bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-strong transition-colors">Pricing →</a>
       </div>
 
       <ApiTabs free={<FreeDocs />} paid={<PaidDocs />} />
