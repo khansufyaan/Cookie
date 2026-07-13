@@ -97,7 +97,7 @@ export default async function Home() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{x.who}</p>
             <h2 className="mt-2 font-semibold">{x.t}</h2>
             <p className="mt-2 text-sm text-muted leading-relaxed">{x.d}</p>
-            <span className="mt-3 inline-block text-sm font-medium text-accent group-hover:text-accent-strong">
+            <span className="mt-4 inline-block rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white group-hover:bg-accent-strong transition-colors">
               {x.cta} →
             </span>
           </Link>
@@ -126,12 +126,12 @@ export default async function Home() {
       {/* Integration surface — signals "infrastructure", not "a website" */}
       <section className="py-12 border-t border-line text-center">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">One rating, many ways in</p>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           {INTEGRATIONS.map((i) => (
             <Link
               key={i.label}
               href={i.href}
-              className="rounded-full border border-line-strong px-4 py-1.5 text-sm font-medium text-muted hover:border-accent hover:text-accent transition-colors"
+              className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
             >
               {i.label}
             </Link>
