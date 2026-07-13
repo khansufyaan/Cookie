@@ -139,7 +139,7 @@ export default async function Home() {
         </div>
         <p className="mt-4 text-sm text-muted max-w-md mx-auto">
           Read it over REST, get pushed grade changes, or let an AI agent call it directly.{" "}
-          <Link href="/why" className="text-accent underline hover:text-accent-strong">Why a neutral standard →</Link>
+          <Link href="/why" className="text-accent underline hover:text-accent-strong">The problem we solve →</Link>
         </p>
       </section>
 

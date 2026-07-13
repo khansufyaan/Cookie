@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 // Research tab hidden for now — page still lives at /research if we relink it.
 const NAV = [
   { href: "/methodology", label: "How it works" },
-  { href: "/why", label: "Why Visa" },
+  { href: "/why", label: "Who it's for" },
   { href: "/developers", label: "For developers" },
   { href: "/claim", label: "Mint" },
 ];
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="border-t border-line mt-16">
           <div className="mx-auto max-w-6xl px-5 py-8 text-xs text-faint">
             <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <Link href="/why" className="hover:text-muted">Why Visa</Link>
+              <Link href="/why" className="hover:text-muted">Who it&apos;s for</Link>
               <Link href="/network" className="hover:text-muted">Network</Link>
               <Link href="/whitepaper" className="hover:text-muted">Whitepaper</Link>
               <Link href="/disputes" className="hover:text-muted">Disputes</Link>

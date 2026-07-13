@@ -1,63 +1,89 @@
 import Link from "next/link";
 
-export const metadata = { title: "Why Visa — Visa Wallet Rating" };
+export const metadata = { title: "Who it's for — Visa Wallet Rating" };
 
-const REASONS = [
+const LOOP = [
+  { n: "1", t: "Apps report", d: "Each app reports what it sees on a wallet — repaid or defaulted, KYC'd or anonymous, active or abandoned, flagged or clean." },
+  { n: "2", t: "The score moves", d: "Every report nudges that wallet's grade up or down. The rating reflects behavior across the whole ecosystem, not one app's slice." },
+  { n: "3", t: "Everyone reads it", d: "In return, every app reads the pooled result from all the others — a fuller picture than any of them could build alone." },
+];
+
+const AUDIENCES = [
   {
-    n: "01",
-    who: "For new apps",
-    title: "Know who just walked in.",
-    body: "A wallet connects to your app for the first time. On your own, you know nothing about it — no history, no context, a cold start. Visa hands you the picture instantly: is this a real, active user with a track record across the ecosystem, or a brand-new, thin, or sanctioned address? It's the cookie moment for crypto — the visitor arrives already understood, so you can treat a power user like one and keep bad actors out from the very first transaction.",
-    take: "No cold start. Every wallet arrives with context.",
+    who: "For apps & exchanges",
+    title: "Stop flying blind on new wallets.",
+    body: "Report what you see, and in return get every other app's signal back — identity, activity, repayment, fraud — through one neutral source. You never hand data straight to a competitor; you report to the bureau, and the bureau gives you the whole picture.",
+    cta: "Report on wallets →",
+    href: "/developers",
   },
   {
-    n: "02",
-    who: "For established apps",
-    title: "Share signal, get the whole ecosystem back.",
-    body: "You see things about your users the chain never will — whether they passed KYC, whether they're genuinely active, whether they ever charged back or got flagged. Share those off-chain signals with Visa, and in return read what every other app has shared — for free. Visa sits in the middle as the neutral party: no app hands data to a direct competitor, because everyone reports to the bureau, not to each other. The whole ecosystem gets safer, and your view of each user gets richer than anything you could build alone.",
-    take: "Contribute what only you can see. Receive what everyone else can't.",
-  },
-  {
-    n: "03",
     who: "For consumers",
-    title: "Understand your score, unlock better offers.",
-    body: "Your rating isn't a black box. See exactly what drives it and how to raise it — then carry it everywhere as a pass you own. A strong, portable grade means apps can offer you what they reserve for their best users: better rates, higher limits, lower fees, earlier access — without making you re-earn trust from scratch at every new app you touch.",
-    take: "One grade you own, recognized everywhere.",
+    title: "Build your score over time.",
+    body: "Good behavior on every app compounds into one portable grade. Instead of re-earning trust from scratch at each new app, you carry a rating that unlocks better rates, higher limits, and earlier access — the more you use the ecosystem well, the more it works for you.",
+    cta: "Build your score →",
+    href: "/claim",
   },
 ];
 
 export default function WhyPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 pt-14 pb-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Why Visa</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight">The neutral layer between every app.</h1>
+      {/* The problem */}
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">The problem</p>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight">Apps don&apos;t share what they know.</h1>
       <p className="mt-4 text-lg text-muted max-w-2xl leading-relaxed">
-        The web has the cookie — a shared way for a site to understand who just arrived. Crypto has wallets, but no
-        neutral party to vouch for them. Visa is that layer: apps share what they know, and everyone gets a clearer,
-        safer view of who they&apos;re dealing with — without handing data to a competitor.
+        A single wallet might borrow on one app, trade on another, and get banned on a third — but none of those apps
+        can see the others. Every app judges a wallet on its own thin slice of history, so a proven user looks like a
+        stranger and a known bad actor gets a clean slate every time they show up somewhere new. There has never been a
+        credit bureau for wallets.
       </p>
 
-      <div className="mt-12 space-y-4">
-        {REASONS.map((r) => (
-          <section key={r.n} className="rounded-2xl border border-line bg-surface p-6 sm:p-8">
-            <div className="flex items-baseline gap-4">
-              <span className="visa-wordmark text-2xl" style={{ color: "var(--accent)" }}>{r.n}</span>
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{r.who}</p>
-                <h2 className="mt-1 text-xl font-bold tracking-tight">{r.title}</h2>
-              </div>
+      {/* The fix — the reporting loop */}
+      <section className="mt-14">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">The fix</p>
+        <h2 className="mt-3 text-2xl font-bold tracking-tight">One shared score, reported by everyone.</h2>
+        <p className="mt-3 text-sm text-muted max-w-2xl leading-relaxed">
+          Visa Wallet Rating is where apps report on the wallets they see — and each report moves that wallet&apos;s
+          credit score up or down. A neutral party sits in the middle, so apps get the benefit of shared data without
+          ever handing it to a rival.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {LOOP.map((s) => (
+            <div key={s.n} className="rounded-2xl border border-line bg-surface p-5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">{s.n}</span>
+              <h3 className="mt-3 font-semibold">{s.t}</h3>
+              <p className="mt-1.5 text-sm text-muted leading-relaxed">{s.d}</p>
             </div>
-            <p className="mt-4 text-sm text-muted leading-relaxed">{r.body}</p>
-            <p className="mt-4 border-l-2 border-accent pl-3 text-sm font-medium text-foreground">{r.take}</p>
-          </section>
-        ))}
-      </div>
+          ))}
+        </div>
+        <p className="mt-4 text-sm text-muted max-w-2xl">
+          It&apos;s the credit-bureau model, ported to crypto: lenders report behavior, and everyone reads a score
+          trained on the pooled result — one no single app could produce on its own.
+        </p>
+      </section>
+
+      {/* Who it's for */}
+      <section className="mt-14">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Who it&apos;s for</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {AUDIENCES.map((a) => (
+            <div key={a.who} className="flex flex-col rounded-2xl border border-line bg-surface p-6 sm:p-8">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{a.who}</p>
+              <h3 className="mt-2 text-xl font-bold tracking-tight">{a.title}</h3>
+              <p className="mt-3 text-sm text-muted leading-relaxed flex-1">{a.body}</p>
+              <Link href={a.href} className="mt-4 text-sm font-semibold text-accent hover:text-accent-strong">
+                {a.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-14 rounded-2xl bg-foreground px-6 py-8 sm:px-10 text-background">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">The one-line version</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">In one line</p>
         <p className="mt-3 text-lg sm:text-xl font-semibold leading-relaxed">
-          Visa is the neutral off-chain data layer between apps — the trusted middle that lets the whole ecosystem
-          understand its users, so builders start warm, partners share safely, and consumers carry one grade everywhere.
+          No app can see the whole picture of a wallet alone. Together — reporting through one neutral bureau — they
+          can, and every honest wallet gets a score it can build and carry everywhere.
         </p>
       </section>
 
@@ -66,10 +92,10 @@ export default function WhyPage() {
           See the live network →
         </Link>
         <Link href="/developers" className="rounded-lg border border-line-strong px-4 py-2.5 font-medium hover:border-accent">
-          Share data &amp; partner →
+          Report on wallets →
         </Link>
         <Link href="/claim" className="rounded-lg bg-accent px-4 py-2.5 font-semibold text-white hover:bg-accent-strong">
-          See your score →
+          Build your score →
         </Link>
       </div>
     </div>
