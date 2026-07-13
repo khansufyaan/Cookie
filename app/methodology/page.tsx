@@ -106,11 +106,7 @@ export default function MethodologyPage() {
 
       {/* The tracked app set */}
       <section id="apps" className="mt-16 scroll-mt-20">
-        <h2 className="text-2xl font-bold tracking-tight text-center">The tracked apps</h2>
-        <p className="mt-3 text-muted text-center max-w-xl mx-auto text-sm">
-          Reach and the Full-Stack bonus are measured against this set — the top apps by volume on each chain,
-          recalibrated quarterly. Activity is matched at their primary on-chain entry points.
-        </p>
+        <h2 className="text-3xl font-bold tracking-tight text-center">The tracked apps</h2>
         {(
           [
             { title: "Ethereum", apps: EVM_APPS, live: true },
@@ -152,11 +148,7 @@ export default function MethodologyPage() {
 
       {/* How to raise a rating */}
       <section id="raise" className="mt-16 scroll-mt-20">
-        <h2 className="text-2xl font-bold tracking-tight text-center">How to raise your rating</h2>
-        <p className="mt-3 text-muted text-center max-w-xl mx-auto text-sm">
-          The score only reads on-chain behavior, so every point has a lever you control. Each factor caps at
-          weight × 10 points — here is what moves each one.
-        </p>
+        <h2 className="text-3xl font-bold tracking-tight text-center">How to raise your rating</h2>
         <div className="mt-8 space-y-2">
           {[
             { f: FACTORS[0], action: "Stay active every month" },
