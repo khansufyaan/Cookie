@@ -26,11 +26,7 @@ export default function MethodologyPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 pt-20 pb-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">One number. Five factors.</h1>
-        <p className="mt-4 text-muted max-w-xl mx-auto">
-          A wallet&apos;s full on-chain history, distilled to a 0–1000 score and a letter grade. Explainable by
-          construction — every score decomposes into the five factors below.
-        </p>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">What builds your wallet rating</h1>
       </div>
 
       {/* Weight composition bar */}
@@ -55,22 +51,23 @@ export default function MethodologyPage() {
         </div>
       </section>
 
-      {/* Factors, one line each */}
-      <section className="mt-10 space-y-2.5">
+      {/* Factors — one bold row each, explanation set to the right */}
+      <section className="mt-10 space-y-3">
         {FACTORS.map((f) => (
-          <div key={f.letter} className="rounded-xl border border-line bg-surface px-5 py-4 flex gap-4 items-center">
+          <div key={f.letter} className="rounded-2xl border border-line bg-surface px-5 sm:px-7 py-5 flex items-center gap-5">
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base font-bold"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-2xl font-bold"
               style={{ background: f.color, color: f.ink }}
             >
               {f.letter}
             </div>
-            <p className="text-sm text-muted">
-              <strong className="text-foreground">{f.name}.</strong> {f.d}
-            </p>
+            <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <span className="text-xl font-bold tracking-tight">{f.name}</span>
+              <span className="text-base text-muted leading-snug sm:text-right sm:max-w-[52%]">{f.d}</span>
+            </div>
           </div>
         ))}
-        <p className="text-xs text-faint pt-1">
+        <p className="text-sm text-faint pt-2">
           Bonuses, capped at 1000: +50 Full-Stack (5+ tracked apps) · +50 KYC attestation.
         </p>
       </section>
