@@ -46,7 +46,7 @@ const INTEGRATIONS = [
 const DOORS = [
   { who: "For wallet owners", t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "#lookup", cta: "Look up a wallet" },
   { who: "For apps & exchanges", t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
-  { who: "For rated wallets", t: "Mint your pass", d: "Put your rating in your wallet as a living pass that upgrades itself as you transact.", href: "/claim", cta: "Connect & mint" },
+  { who: "For consumers", t: "Mint your pass", d: "Put your rating in your wallet as a living pass that upgrades itself as you transact.", href: "/claim", cta: "Connect & mint" },
 ];
 
 export default async function Home() {
@@ -94,8 +94,8 @@ export default async function Home() {
             href={x.href}
             className="rounded-xl border border-line bg-surface p-6 hover:border-accent transition-colors group"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">{x.who}</p>
-            <h2 className="mt-2 font-semibold">{x.t}</h2>
+            <p className="text-base font-extrabold uppercase tracking-[0.12em] text-accent">{x.who}</p>
+            <h2 className="mt-2 text-lg font-semibold">{x.t}</h2>
             <p className="mt-2 text-sm text-muted leading-relaxed">{x.d}</p>
             <span className="mt-4 inline-block rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white group-hover:bg-accent-strong transition-colors">
               {x.cta} →
