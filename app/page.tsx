@@ -44,9 +44,9 @@ const INTEGRATIONS = [
 ];
 
 const DOORS = [
-  { who: "For wallet owners", t: "Get rated", d: "Enter any wallet. Instant grade from its real on-chain history — free.", href: "#lookup", cta: "Look up a wallet" },
-  { who: "For apps & exchanges", t: "Screen every transfer", d: "Call the API at deposit or send time; get the counterparty grade, KYC and sanctions flags back in one round trip.", href: "/developers", cta: "Read the API docs" },
-  { who: "For consumers", t: "Mint your pass", d: "Put your rating in your wallet as a living pass that upgrades itself as you transact.", href: "/claim", cta: "Connect & mint" },
+  { who: "For new apps", t: "Know who just connected", d: "Get an instant read on any wallet the moment it connects — activity, risk, and sanctions.", href: "/developers", cta: "Read the API docs" },
+  { who: "For established apps", t: "Share data, get ratings free", d: "Report what you know about wallets, and read every other app's signal back — for free.", href: "/developers", cta: "Start sharing" },
+  { who: "For consumers", t: "Get rated & mint your pass", d: "Check any wallet free, then mint your rating as a living pass that upgrades as you transact.", href: "/claim", cta: "Mint your pass" },
 ];
 
 export default async function Home() {
