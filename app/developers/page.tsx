@@ -320,7 +320,6 @@ export default function DevelopersPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 pt-10 pb-8">
       <h1 className="text-3xl font-bold tracking-tight">API</h1>
-      <p className="mt-3 text-muted max-w-2xl">Two prices. Pick your side:</p>
 
       <div className="mt-5 flex flex-wrap gap-3 text-sm">
         <a href="#webhooks" className="rounded-full bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-strong transition-colors">Webhooks →</a>
