@@ -23,9 +23,9 @@ export default function GateForm() {
         setBusy(false);
         return;
       }
-      const next = new URLSearchParams(window.location.search).get("next") || "/";
-      // Full reload so the freshly-set cookie is sent with the navigation.
-      window.location.href = next.startsWith("/") ? next : "/";
+      // Always land on the home page after login (full reload so the
+      // freshly-set cookie is sent with the navigation).
+      window.location.href = "/";
     } catch {
       setError("Network error — try again.");
       setBusy(false);
