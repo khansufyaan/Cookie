@@ -106,7 +106,7 @@ export default function MethodologyPage() {
 
       {/* The tracked app set */}
       <section id="apps" className="mt-16 scroll-mt-20">
-        <h2 className="text-3xl font-bold tracking-tight text-center">The tracked apps</h2>
+        <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-center">The tracked apps</h2>
         {(
           [
             { title: "Ethereum", apps: EVM_APPS, live: true },
@@ -148,7 +148,7 @@ export default function MethodologyPage() {
 
       {/* How to raise a rating */}
       <section id="raise" className="mt-16 scroll-mt-20">
-        <h2 className="text-3xl font-bold tracking-tight text-center">How to raise your rating</h2>
+        <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-center">How to raise your rating</h2>
         <div className="mt-8 space-y-2">
           {[
             { f: FACTORS[0], action: "Stay active every month" },

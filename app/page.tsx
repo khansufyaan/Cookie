@@ -118,9 +118,6 @@ export default async function Home() {
             </Link>
           ))}
         </div>
-        <p className="mt-8 text-sm text-muted max-w-sm text-center">
-          One legible grade — built from five factors, screened for sanctions, sealed to the wallet.
-        </p>
       </section>
 
       {/* Integration surface — signals "infrastructure", not "a website" */}
