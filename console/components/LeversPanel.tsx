@@ -1,6 +1,129 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DEFAULT_LEVERS, PRESETS, type Levers } from "@/lib/model";
+
+interface SavedModel { id: number; name: string; actor: string; version: number; updated_at: string; levers: Levers }
+interface AuditRow { model_name: string; version: number; actor: string; created_at: string }
+
+/** Publish/load named lever configurations with an audit trail + share links. */
+function SavedModels({ levers, onChange }: { levers: Levers; onChange: (l: Levers) => void }) {
+  const [models, setModels] = useState<SavedModel[]>([]);
+  const [audit, setAudit] = useState<AuditRow[]>([]);
+  const [name, setName] = useState("");
+  const [actor, setActor] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+
+  async function load() {
+    const j = await fetch("/api/models").then((r) => r.json()).catch(() => null);
+    setModels(j?.data?.models ?? []);
+    setAudit(j?.data?.audit ?? []);
+  }
+  useEffect(() => {
+    load();
+    const savedActor = localStorage.getItem("vrc-actor");
+    if (savedActor) setActor(savedActor);
+  }, []);
+
+  async function publish(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setMsg(null);
+    localStorage.setItem("vrc-actor", actor);
+    try {
+      const res = await fetch("/api/models", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, actor, levers }),
+      });
+      const j = await res.json();
+      if (!res.ok) setMsg({ text: j.error ?? "Publish failed.", ok: false });
+      else {
+        setMsg({ text: `Published ${j.data.name} v${j.data.version}.`, ok: true });
+        setName("");
+        await load();
+      }
+    } catch {
+      setMsg({ text: "Network error.", ok: false });
+    }
+    setBusy(false);
+  }
+
+  function share(m: SavedModel) {
+    const url = `${window.location.origin}/?model=${m.id}`;
+    navigator.clipboard.writeText(url);
+    setMsg({ text: `Share link copied — ${m.name} v${m.version}.`, ok: true });
+  }
+
+  return (
+    <section className="border-t border-line pt-4">
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-faint">Saved models</h3>
+      {models.length > 0 && (
+        <div className="mt-2.5 space-y-1.5">
+          {models.slice(0, 5).map((m) => (
+            <div key={m.id} className="flex items-center gap-1.5">
+              <button
+                onClick={() => onChange({ ...DEFAULT_LEVERS, ...m.levers })}
+                className="min-w-0 flex-1 truncate rounded-md border border-line-strong px-2.5 py-1.5 text-left text-[11px] text-muted hover:border-accent hover:text-accent-strong transition-colors"
+                title={`Load ${m.name} v${m.version} (${m.actor || "unknown"})`}
+              >
+                {m.name} <span className="text-faint">v{m.version}</span>
+              </button>
+              <button
+                onClick={() => share(m)}
+                className="rounded-md border border-line-strong px-2 py-1.5 text-[11px] text-muted hover:border-accent hover:text-accent-strong transition-colors"
+                title="Copy share link"
+                aria-label={`Copy share link for ${m.name}`}
+              >
+                ⧉
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <form onSubmit={publish} className="mt-2.5 space-y-1.5">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Model name, e.g. Q3 onboarding"
+          className="w-full rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-[11px] placeholder:text-faint focus:outline-none focus:border-accent"
+        />
+        <div className="flex gap-1.5">
+          <input
+            value={actor}
+            onChange={(e) => setActor(e.target.value)}
+            placeholder="Your name"
+            className="min-w-0 flex-1 rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-[11px] placeholder:text-faint focus:outline-none focus:border-accent"
+          />
+          <button
+            type="submit"
+            disabled={busy || !name.trim()}
+            className="rounded-md bg-accent px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-50"
+          >
+            {busy ? "…" : "Publish"}
+          </button>
+        </div>
+      </form>
+      {msg && (
+        <p className="mt-1.5 text-[11px]" style={{ color: msg.ok ? "var(--risk-low)" : "var(--risk-high)" }}>{msg.text}</p>
+      )}
+      {audit.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">Audit trail</p>
+          <ul className="mt-1.5 space-y-1 text-[10px] leading-snug text-faint">
+            {audit.slice(0, 5).map((a, i) => (
+              <li key={i}>
+                <span className="text-muted">{a.model_name} v{a.version}</span> · {a.actor || "unknown"} ·{" "}
+                {new Date(a.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function Slider({
   label, value, min, max, step = 1, unit, onChange, format,
@@ -128,6 +251,8 @@ export default function LeversPanel({ levers, onChange }: { levers: Levers; onCh
           <div style={{ width: `${((1000 - levers.lowMin) / 1000) * 100}%`, background: "var(--risk-low)" }} className="py-1">Low</div>
         </div>
       </Group>
+
+      <SavedModels levers={levers} onChange={onChange} />
 
       <button
         onClick={() => onChange({ ...DEFAULT_LEVERS })}

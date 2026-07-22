@@ -83,6 +83,19 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid #0c101a;
   cursor: pointer;
 }
+/* Keyboard a11y: visible ring when a slider is focused via keyboard, and the
+   thumb grows so the active control is unmistakable. */
+input[type="range"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--accent-strong);
+}
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.35);
+}
+button:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
 
 /* Subtle scrollbars for the dark plane */
 * {

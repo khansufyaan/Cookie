@@ -33,6 +33,22 @@ export async function ensureConsoleTables(): Promise<boolean> {
       added_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       PRIMARY KEY (watchlist_id, address)
     );
+    CREATE TABLE IF NOT EXISTS console_models (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      levers JSONB NOT NULL,
+      actor TEXT NOT NULL DEFAULT '',
+      version INT NOT NULL DEFAULT 1,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS console_model_audit (
+      id SERIAL PRIMARY KEY,
+      model_name TEXT NOT NULL,
+      version INT NOT NULL,
+      actor TEXT NOT NULL DEFAULT '',
+      levers JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
   `);
   ready = true;
   return true;

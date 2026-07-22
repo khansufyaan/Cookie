@@ -224,3 +224,38 @@ export function bandMovement(current: Scored[], reference: Scored[]): { moved: n
   }
   return { moved: up + down, up, down };
 }
+
+/** Per-wallet factor breakdown under a given lever setting — the drill-down. */
+export interface Explanation {
+  score: number;
+  band: Band;
+  factors: { key: string; label: string; raw: number; points: number; detail: string }[];
+  adjustments: { label: string; points: number }[];
+}
+
+export function explainRow(row: WalletRow, L: Levers): Explanation {
+  const scored = scoreRow(row, L);
+  const avgTicket = row.txCount > 0 ? row.volumeUsd / row.txCount : 0;
+  const t = L.temperature;
+  const wSum = Math.max(1, L.wActivity + L.wVolume + L.wBreadth + L.wTicket);
+
+  const activity = Math.pow(logCalib(row.txCount, L.activityCeil), t);
+  const volume = Math.pow(logCalib(row.volumeUsd, L.volumeCeil), t);
+  const breadth = Math.pow(Math.min(1, row.appsUsed / Math.max(1, L.breadthSat)), t);
+  const ticket = Math.pow(logCalib(avgTicket, L.ticketCeil), t);
+
+  const factors = [
+    { key: "activity", label: "Activity", raw: activity, points: Math.round((activity * L.wActivity / wSum) * 1000), detail: `${row.txCount.toLocaleString()} transactions` },
+    { key: "volume", label: "Volume", raw: volume, points: Math.round((volume * L.wVolume / wSum) * 1000), detail: `$${Math.round(row.volumeUsd).toLocaleString()} lifetime` },
+    { key: "breadth", label: "Breadth", raw: breadth, points: Math.round((breadth * L.wBreadth / wSum) * 1000), detail: `${row.appsUsed} tracked apps` },
+    { key: "ticket", label: "Ticket size", raw: ticket, points: Math.round((ticket * L.wTicket / wSum) * 1000), detail: `$${Math.round(avgTicket).toLocaleString()} avg per tx` },
+  ];
+
+  const adjustments: { label: string; points: number }[] = [];
+  if (row.appsUsed >= L.fullStackThreshold) adjustments.push({ label: `Full-stack (${row.appsUsed} ≥ ${L.fullStackThreshold} apps)`, points: L.fullStackBonus });
+  if (row.kycVerified) adjustments.push({ label: "KYC attestation", points: L.kycBonus });
+  if (L.thinFileTx > 0 && row.txCount < L.thinFileTx) adjustments.push({ label: `Thin file (< ${L.thinFileTx} txs)`, points: -L.thinFilePenalty });
+  if (row.sanctioned) adjustments.push({ label: L.sanctionsBlock ? "Sanctions hard-block" : "Sanctions penalty", points: L.sanctionsBlock ? -1000 : -L.sanctionsPenalty });
+
+  return { score: scored.score, band: scored.band, factors, adjustments };
+}

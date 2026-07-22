@@ -1,6 +1,7 @@
 "use client";
 
-import { BAND_META, type Band, type PortfolioSummary, type Scored } from "@/lib/model";
+import { BAND_META, type Band, type Levers, type PortfolioSummary, type Scored } from "@/lib/model";
+import type { TimelineMonth } from "@/app/api/timeline/route";
 
 const BANDS: Band[] = ["low", "elevated", "high", "blocked"];
 
@@ -11,47 +12,86 @@ export function fmtUsd(n: number): string {
   return `$${Math.round(n)}`;
 }
 
-/** Stacked score-distribution histogram, 20 buckets of 50 points. */
-export function Histogram({ summary }: { summary: PortfolioSummary }) {
-  const max = Math.max(1, ...summary.histogram.map((h) => BANDS.reduce((s, b) => s + h.counts[b], 0)));
+/**
+ * Stacked score-distribution histogram — 20 buckets of 50 points.
+ * Bars animate as levers move; a hollow ghost bar behind each column shows
+ * the production-baseline distribution so cause-and-effect is visible.
+ * Click a column to drill into that score range.
+ */
+export function Histogram({
+  summary, baseline, onSelect, selected,
+}: {
+  summary: PortfolioSummary;
+  baseline: PortfolioSummary;
+  onSelect?: (bucket: number | null) => void;
+  selected?: number | null;
+}) {
+  const max = Math.max(
+    1,
+    ...summary.histogram.map((h) => BANDS.reduce((s, b) => s + h.counts[b], 0)),
+    ...baseline.histogram.map((h) => BANDS.reduce((s, b) => s + h.counts[b], 0)),
+  );
   return (
     <div>
       <div className="flex h-40 items-end gap-[3px]">
-        {summary.histogram.map((h) => {
+        {summary.histogram.map((h, i) => {
           const total = BANDS.reduce((s, b) => s + h.counts[b], 0);
+          const ghost = BANDS.reduce((s, b) => s + baseline.histogram[i].counts[b], 0);
+          const isSel = selected === h.bucket;
           return (
-            <div key={h.bucket} className="group relative flex-1 flex flex-col-reverse" style={{ height: "100%" }}>
-              {BANDS.map((b) =>
-                h.counts[b] > 0 ? (
+            <button
+              key={h.bucket}
+              onClick={() => onSelect?.(isSel ? null : h.bucket)}
+              className="group relative flex-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-strong)]"
+              style={{ height: "100%", background: isSel ? "rgba(64,102,255,0.10)" : undefined }}
+              aria-label={`Scores ${h.bucket}–${h.bucket + 49}: ${total} wallets`}
+            >
+              {/* Baseline ghost — hollow outline at the reference height */}
+              <div
+                className="pointer-events-none absolute inset-x-[15%] rounded-t-[2px] border border-b-0 transition-all duration-300"
+                style={{ bottom: 0, height: `${(ghost / max) * 100}%`, borderColor: "var(--border-strong)" }}
+              />
+              {/* Live stacked bar */}
+              <div className="absolute inset-x-0 bottom-0 flex flex-col-reverse">
+                {BANDS.map((b) => (
                   <div
                     key={b}
+                    className="w-full transition-all duration-300 ease-out"
                     style={{
-                      height: `${(h.counts[b] / max) * 100}%`,
+                      height: `${(h.counts[b] / max) * 160}px`,
                       background: BAND_META[b].color,
                       opacity: 0.92,
                     }}
-                    className="w-full rounded-[1px]"
                   />
-                ) : null,
-              )}
-              <div className="pointer-events-none absolute -top-7 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 text-[10px] text-muted group-hover:block z-10">
-                {h.bucket}–{h.bucket + 49}: {total}
+                ))}
               </div>
-            </div>
+              <div className="pointer-events-none absolute -top-7 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 text-[10px] text-muted group-hover:block">
+                {h.bucket}–{h.bucket + 49}: {total} <span className="text-faint">(was {ghost})</span>
+              </div>
+            </button>
           );
         })}
       </div>
       <div className="mt-1.5 flex justify-between text-[10px] text-faint tabular-nums">
         <span>0</span><span>250</span><span>500</span><span>750</span><span>1000</span>
       </div>
+      <p className="mt-1 text-[10px] text-faint">
+        Hollow outline = production baseline · click a column to inspect those wallets
+      </p>
     </div>
   );
 }
 
-/** Risk-band share donut. */
-export function Donut({ summary }: { summary: PortfolioSummary }) {
+/** Risk-band share donut. Click a band to filter the wallet list. */
+export function Donut({
+  summary, onSelect, selected,
+}: {
+  summary: PortfolioSummary;
+  onSelect?: (band: Band | null) => void;
+  selected?: Band | null;
+}) {
   const total = Math.max(1, summary.total);
-  const R = 15.915; // circumference 100
+  const R = 15.915;
   let offset = 25;
   return (
     <div className="flex items-center gap-5">
@@ -65,10 +105,11 @@ export function Donut({ summary }: { summary: PortfolioSummary }) {
               key={b}
               cx="21" cy="21" r={R} fill="none"
               stroke={BAND_META[b].color}
-              strokeWidth="5"
+              strokeWidth={selected === b ? 6.5 : 5}
               strokeDasharray={`${share} ${100 - share}`}
               strokeDashoffset={offset}
               strokeLinecap="butt"
+              className="transition-all duration-300"
             />
           );
           offset -= share;
@@ -77,26 +118,34 @@ export function Donut({ summary }: { summary: PortfolioSummary }) {
         <text x="21" y="20" textAnchor="middle" fill="var(--foreground)" fontSize="7" fontWeight="700">
           {Math.round(((summary.bands.low ?? 0) / total) * 100)}%
         </text>
-        <text x="21" y="27" textAnchor="middle" fill="var(--faint)" fontSize="3.4">
-          low risk
-        </text>
+        <text x="21" y="27" textAnchor="middle" fill="var(--faint)" fontSize="3.4">low risk</text>
       </svg>
-      <div className="space-y-2">
+      <div className="space-y-1">
         {BANDS.map((b) => (
-          <div key={b} className="flex items-center gap-2.5 text-sm">
+          <button
+            key={b}
+            onClick={() => onSelect?.(selected === b ? null : b)}
+            className="flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-sm outline-none transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-[var(--accent-strong)]"
+            style={selected === b ? { background: "var(--surface-2)" } : undefined}
+          >
             <span className="h-2.5 w-2.5 rounded-sm" style={{ background: BAND_META[b].color }} />
-            <span className="text-muted w-20">{BAND_META[b].label}</span>
+            <span className="w-20 text-left text-muted">{BAND_META[b].label}</span>
             <span className="font-semibold tabular-nums">{summary.bands[b].toLocaleString()}</span>
             <span className="text-xs text-faint tabular-nums">{Math.round((summary.bands[b] / total) * 100)}%</span>
-          </div>
+          </button>
         ))}
       </div>
     </div>
   );
 }
 
-/** Volume (log) vs score scatter — where the money sits vs where the risk sits. */
-export function Scatter({ scored }: { scored: Scored[] }) {
+/** Volume (log) vs score scatter. Click a dot to open the wallet breakdown. */
+export function Scatter({
+  scored, onSelect,
+}: {
+  scored: Scored[];
+  onSelect?: (address: string) => void;
+}) {
   const W = 560;
   const H = 190;
   const PAD = { l: 44, r: 8, t: 8, b: 22 };
@@ -127,11 +176,80 @@ export function Scatter({ scored }: { scored: Scored[] }) {
           key={s.row.address}
           cx={x(s.row.volumeUsd)}
           cy={y(s.score)}
-          r={2.1}
+          r={2.4}
           fill={BAND_META[s.band].color}
-          fillOpacity={0.75}
-        />
+          fillOpacity={0.78}
+          className="cursor-pointer transition-all duration-300 hover:stroke-white"
+          strokeWidth={1}
+          onClick={() => onSelect?.(s.row.address)}
+        >
+          <title>{s.row.address} — score {s.score}</title>
+        </circle>
       ))}
+    </svg>
+  );
+}
+
+/**
+ * Band migration over time — each month's stored score distribution split by
+ * the analyst's CURRENT thresholds, as 100%-stacked columns. Answers "is the
+ * portfolio drifting toward or away from my risk zone?"
+ */
+export function Timeline({ months, levers }: { months: TimelineMonth[]; levers: Levers }) {
+  if (months.length === 0) {
+    return <p className="py-8 text-center text-xs text-faint">No monthly history yet for this selection.</p>;
+  }
+  const bandOf = (bucketMid: number): Band =>
+    bucketMid >= levers.lowMin ? "low" : bucketMid >= levers.elevatedMin ? "elevated" : "high";
+
+  return (
+    <div>
+      <div className="flex h-36 items-end gap-1.5">
+        {months.map((m) => {
+          const counts: Record<Band, number> = { low: 0, elevated: 0, high: 0, blocked: 0 };
+          m.buckets.forEach((n, i) => { counts[bandOf(i * 50 + 25)] += n; });
+          const total = Math.max(1, m.total);
+          return (
+            <div key={m.month} className="group relative flex-1">
+              <div className="flex h-36 flex-col-reverse overflow-hidden rounded-[3px]">
+                {(["high", "elevated", "low"] as Band[]).map((b) => (
+                  <div
+                    key={b}
+                    className="w-full transition-all duration-300"
+                    style={{ height: `${(counts[b] / total) * 100}%`, background: BAND_META[b].color, opacity: 0.9 }}
+                  />
+                ))}
+              </div>
+              <div className="pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 text-[10px] text-muted group-hover:block">
+                {m.month}: {Math.round((counts.low / total) * 100)}% low · {Math.round((counts.high / total) * 100)}% high
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[10px] text-faint tabular-nums">
+        <span>{months[0].month}</span>
+        <span>{months[months.length - 1].month}</span>
+      </div>
+      <p className="mt-1 text-[10px] text-faint">
+        Month-end production scores, split by your current band thresholds — move the thresholds and history re-colors.
+      </p>
+    </div>
+  );
+}
+
+/** Tiny score sparkline for the wallet drill-down panel. */
+export function Sparkline({ points }: { points: { month: string; score: number }[] }) {
+  if (points.length < 2) return null;
+  const W = 220;
+  const H = 44;
+  const xs = (i: number) => (i / (points.length - 1)) * (W - 4) + 2;
+  const ys = (s: number) => H - 4 - (s / 1000) * (H - 8);
+  const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${xs(i).toFixed(1)},${ys(p.score).toFixed(1)}`).join(" ");
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+      <path d={d} fill="none" stroke="var(--accent-strong)" strokeWidth="1.6" />
+      <circle cx={xs(points.length - 1)} cy={ys(points[points.length - 1].score)} r="2.4" fill="var(--accent-strong)" />
     </svg>
   );
 }
