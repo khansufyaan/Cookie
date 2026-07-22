@@ -32,13 +32,38 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  let body: { id?: number; modelId?: number | null; watchlistId?: number | null };
+  let body: { id?: number; name?: string; modelId?: number | null; watchlistId?: number | null };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Body must be JSON." }, { status: 400 });
   }
-  if (!Number.isInteger(body.id)) return NextResponse.json({ error: "Provide a business line id." }, { status: 400 });
+
+  // Create mode: {name} with no id — any team can be onboarded as a line.
+  if (!Number.isInteger(body.id)) {
+    const name = body.name?.trim();
+    if (!name || name.length > 80) {
+      return NextResponse.json({ error: "Provide a business line name (max 80 chars)." }, { status: 400 });
+    }
+    try {
+      const p = getPool();
+      if (!p) throw new Error("no database");
+      await ensureConsoleTables();
+      const { randomBytes } = await import("node:crypto");
+      const key = `vrc_live_${randomBytes(16).toString("hex")}`;
+      const { rows } = await p.query(
+        `INSERT INTO console_business_lines (name, api_key) VALUES ($1, $2)
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id, name, api_key, model_id, watchlist_id`,
+        [name, key],
+      );
+      return NextResponse.json({ data: rows[0] });
+    } catch (err) {
+      console.error("business line create failed:", err);
+      return NextResponse.json({ error: "Database unreachable." }, { status: 503 });
+    }
+  }
+
   try {
     const p = getPool();
     if (!p) throw new Error("no database");

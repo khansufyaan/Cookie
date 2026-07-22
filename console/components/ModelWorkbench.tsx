@@ -63,16 +63,30 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
 
 const fmtK = (v: number) => (v >= 1_000_000 ? `${v / 1_000_000}M` : v >= 1000 ? `${v / 1000}k` : String(v));
 
+interface SavedModelRef { id: number; name: string; version: number; levers: Levers }
+
 export default function ModelWorkbench() {
   const { levers, setLevers, loadedModel } = useLevers();
   const [rows, setRows] = useState<WalletRow[]>([]);
+  const [saved, setSaved] = useState<SavedModelRef[]>([]);
+  const [active, setActive] = useState<SavedModelRef | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const set = (patch: Partial<Levers>) => setLevers({ ...levers, ...patch });
 
+  async function loadSaved() {
+    const j = await fetch("/api/models").then((r) => r.json()).catch(() => null);
+    setSaved(j?.data?.models ?? []);
+  }
   useEffect(() => {
     fetch("/api/portfolio?watchlist=all")
       .then((r) => r.json())
       .then((j) => setRows(j.data ?? []))
       .catch(() => {});
+    loadSaved();
+    const onChange = () => loadSaved();
+    window.addEventListener("vrc-models-changed", onChange);
+    return () => window.removeEventListener("vrc-models-changed", onChange);
   }, []);
 
   const scored = useMemo(() => scorePortfolio(rows, levers), [rows, levers]);
@@ -82,35 +96,120 @@ export default function ModelWorkbench() {
   const movement = useMemo(() => bandMovement(scored, baseline), [scored, baseline]);
 
   const activePreset = PRESETS.find((p) => JSON.stringify(p.levers) === JSON.stringify(levers))?.name;
+  const activeEdited =
+    active !== null && JSON.stringify({ ...DEFAULT_LEVERS, ...active.levers }) !== JSON.stringify(levers);
+
+  async function updateActive() {
+    if (!active) return;
+    setUpdating(true);
+    const res = await fetch("/api/models", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: active.name, actor: localStorage.getItem("vrc-actor") ?? "", levers }),
+    }).catch(() => null);
+    const j = await res?.json();
+    if (j?.data) {
+      setActive({ id: j.data.id, name: j.data.name, version: j.data.version, levers });
+      await loadSaved();
+    }
+    setUpdating(false);
+  }
 
   return (
     <div className="flex">
       <div className="min-w-0 flex-1 px-8 py-8">
-        <div className="max-w-xl">
+        <div className="max-w-2xl">
           <h1 className="text-3xl font-bold tracking-tight">Your risk model.</h1>
           <p className="mt-1.5 text-sm text-muted">
             Move a lever, watch every wallet re-score. No opinions — just yours.
-            {loadedModel && <span className="ml-1 text-accent-strong">Loaded: {loadedModel}</span>}
+            {loadedModel && !active && <span className="ml-1 text-accent-strong">Loaded: {loadedModel}</span>}
           </p>
 
-          {/* Segmented presets */}
-          <div className="mt-5 inline-flex rounded-xl bg-surface p-1">
-            {PRESETS.map((p) => (
-              <button
-                key={p.name}
-                onClick={() => setLevers({ ...p.levers })}
-                title={p.note}
-                className="rounded-lg px-4 py-1.5 text-xs font-semibold transition-all"
-                style={
-                  activePreset === p.name
-                    ? { background: "var(--accent)", color: "#fff" }
-                    : { color: "var(--muted)" }
-                }
-              >
-                {p.name.replace("Production baseline", "Baseline")}
-              </button>
-            ))}
+          {/* Starting points + YOUR named configs, side by side */}
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-xl bg-surface p-1">
+              {PRESETS.map((p) => (
+                <button
+                  key={p.name}
+                  onClick={() => { setLevers({ ...p.levers }); setActive(null); }}
+                  title={p.note}
+                  className="rounded-lg px-4 py-1.5 text-xs font-semibold transition-all"
+                  style={
+                    activePreset === p.name && !active
+                      ? { background: "var(--accent)", color: "#fff" }
+                      : { color: "var(--muted)" }
+                  }
+                >
+                  {p.name.replace("Production baseline", "Baseline")}
+                </button>
+              ))}
+            </div>
+            {saved.length > 0 && (
+              <div className="inline-flex flex-wrap gap-1 rounded-xl bg-surface p-1">
+                {saved.slice(0, 6).map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => {
+                      setLevers({ ...DEFAULT_LEVERS, ...m.levers });
+                      setActive(m);
+                    }}
+                    title={`Your saved config · v${m.version}`}
+                    className="rounded-lg px-4 py-1.5 text-xs font-semibold transition-all"
+                    style={
+                      active?.id === m.id
+                        ? { background: "var(--accent)", color: "#fff" }
+                        : { color: "var(--muted)" }
+                    }
+                  >
+                    {m.name}
+                    {active?.id === m.id && activeEdited && <span className="ml-1 opacity-80">●</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Active config: save edits + its dedicated API call */}
+          {active && (
+            <div className="mt-3 rounded-2xl bg-surface px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="text-sm">
+                  <span className="font-semibold">{active.name}</span>{" "}
+                  <span className="text-faint">v{active.version}</span>
+                  {activeEdited && <span className="ml-2 text-xs text-accent-strong">edited — unsaved</span>}
+                </div>
+                {activeEdited && (
+                  <button
+                    onClick={updateActive}
+                    disabled={updating}
+                    className="rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-50"
+                  >
+                    {updating ? "Saving…" : `Save to ${active.name}`}
+                  </button>
+                )}
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <code className="min-w-0 flex-1 truncate rounded-lg bg-surface-2 px-3 py-2 font-mono text-[11px] text-muted">
+                  GET /api/v1/assess/&lt;address&gt;?model={active.id} · header X-VRC-Key: &lt;your-line-key&gt;
+                </code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `curl "${window.location.origin}/api/v1/assess/<address>?model=${active.id}" -H "X-VRC-Key: <your-business-line-key>"`,
+                    );
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  }}
+                  className="rounded-lg border border-line-strong px-3 py-2 text-[11px] font-medium text-muted hover:border-accent hover:text-accent-strong transition-colors"
+                >
+                  {copied ? "✓ Copied" : "Copy curl"}
+                </button>
+              </div>
+              <p className="mt-1.5 text-[11px] text-faint">
+                Any wallet checked against this call is scored under <span className="text-muted">{active.name}</span> — exactly as configured here.
+              </p>
+            </div>
+          )}
 
           <Section title="What counts" sub="Four ingredients. You set the mix.">
             <Row label="Activity" hint="How often it transacts." value={levers.wActivity} min={0} max={100} onChange={(v) => set({ wActivity: v })} />
@@ -228,8 +327,8 @@ export default function ModelWorkbench() {
         </div>
       </div>
 
-      {/* Live impact rail */}
-      <aside className="sticky top-0 h-screen w-80 shrink-0 overflow-y-auto border-l border-line bg-surface px-5 py-8">
+      {/* Live impact rail — wide, so the charts carry the page */}
+      <aside className="sticky top-0 h-screen w-[27rem] shrink-0 overflow-y-auto border-l border-line bg-surface px-6 py-8">
         <h2 className="text-sm font-bold">Live impact</h2>
         <p className="mt-0.5 text-[11px] text-faint">{summary.total.toLocaleString()} wallets, re-scored as you drag.</p>
         {movement.moved > 0 && (
@@ -238,8 +337,8 @@ export default function ModelWorkbench() {
             <span style={{ color: "var(--risk-high)" }}>▼{movement.down} riskier</span> than baseline
           </p>
         )}
-        <div className="mt-4">
-          <Histogram summary={summary} baseline={baselineSummary} />
+        <div className="mt-5">
+          <Histogram summary={summary} baseline={baselineSummary} height={230} />
         </div>
         <div className="mt-5 border-t border-line pt-4">
           <Donut summary={summary} />

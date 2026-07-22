@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import BusinessLinePicker, { type BusinessLine } from "./BusinessLinePicker";
 
 interface Watchlist { id: number; name: string; wallet_count: number }
 
@@ -15,12 +16,38 @@ interface UploadResult {
 export default function WalletManager() {
   const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const [line, setLine] = useState<BusinessLine | null>(null);
   const [newName, setNewName] = useState("");
   const [addresses, setAddresses] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Picking a business line targets its watchlist automatically.
+  useEffect(() => {
+    if (line?.watchlist_id) setSelected(line.watchlist_id);
+  }, [line]);
+
+  /** The upload target for a business line — its bound watchlist, created
+   *  and bound on the fly the first time the line uploads wallets. */
+  async function resolveTarget(): Promise<number | null> {
+    if (!line) return selected;
+    if (line.watchlist_id) return line.watchlist_id;
+    const created = await fetch("/api/watchlists", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: `${line.name} wallets` }),
+    }).then((r) => r.json()).catch(() => null);
+    if (!created?.data?.id) return null;
+    await fetch("/api/business-lines", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: line.id, watchlistId: created.data.id }),
+    }).catch(() => {});
+    setLine({ ...line, watchlist_id: created.data.id, watchlist_name: `${line.name} wallets` });
+    return created.data.id;
+  }
 
   async function loadLists() {
     const j = await fetch("/api/watchlists").then((r) => r.json()).catch(() => ({ data: [] }));
@@ -60,14 +87,15 @@ export default function WalletManager() {
   }
 
   async function submit() {
-    if (selected === null) return setError("Create or pick a watchlist first.");
+    const target = await resolveTarget();
+    if (target === null) return setError(line ? "Couldn't set up this line's watchlist — try again." : "Create or pick a watchlist first.");
     const list = addresses.split(/[\s,;]+/).filter(Boolean);
     if (list.length === 0) return setError("Paste at least one address.");
     setBusy(true);
     setError("");
     setResult(null);
     try {
-      const res = await fetch(`/api/watchlists/${selected}/wallets`, {
+      const res = await fetch(`/api/watchlists/${target}/wallets`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ addresses: list }),
@@ -89,11 +117,22 @@ export default function WalletManager() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
-      <h1 className="text-xl font-bold tracking-tight">Wallet monitoring</h1>
-      <p className="mt-0.5 text-xs text-faint">
-        Add wallets that touch Visa systems. New addresses are queued and rated by the indexer; already-known wallets
-        appear in the portfolio immediately.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Wallet monitoring</h1>
+          <p className="mt-0.5 text-xs text-faint">
+            Add wallets that touch Visa systems. New addresses are queued and rated by the indexer; already-known
+            wallets appear in the portfolio immediately.
+          </p>
+        </div>
+        <BusinessLinePicker value={line} onChange={setLine} />
+      </div>
+      {line && (
+        <p className="mt-2 rounded-lg border border-line-strong px-3 py-2 text-xs text-muted">
+          Uploading for <span className="font-semibold text-accent-strong">{line.name}</span> — wallets land in{" "}
+          {line.watchlist_name ?? `a new "${line.name} wallets" watchlist`} and show in that line&apos;s portfolio.
+        </p>
+      )}
 
       {/* Watchlists */}
       <section className="mt-6 rounded-xl border border-line bg-surface p-5">

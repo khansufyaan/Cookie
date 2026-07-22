@@ -8,6 +8,7 @@ import {
 } from "@/lib/model";
 import { useLevers } from "@/lib/useLevers";
 import type { TimelineMonth } from "@/app/api/timeline/route";
+import BusinessLinePicker, { type BusinessLine } from "./BusinessLinePicker";
 import { Donut, Histogram, Scatter, Sparkline, Timeline, fmtUsd } from "./charts";
 
 interface Watchlist { id: number; name: string; wallet_count: number }
@@ -166,9 +167,30 @@ function WalletPanel({
 export default function Dashboard() {
   const [rows, setRows] = useState<WalletRow[]>([]);
   const [source, setSource] = useState<"live" | "demo" | "loading">("loading");
-  const { levers, loadedModel } = useLevers();
+  const { levers: myLevers, loadedModel } = useLevers();
+  const [line, setLine] = useState<BusinessLine | null>(null);
+  const [lineLevers, setLineLevers] = useState<Levers | null>(null);
   const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
   const [watchlist, setWatchlist] = useState<string>("all");
+
+  /* A selected business line views ITS watchlist under ITS bound model. */
+  const levers = lineLevers ?? myLevers;
+  useEffect(() => {
+    if (!line) {
+      setLineLevers(null);
+      setWatchlist("all");
+      return;
+    }
+    setWatchlist(line.watchlist_id ? String(line.watchlist_id) : "all");
+    if (line.model_id) {
+      fetch(`/api/models/${line.model_id}`)
+        .then((r) => r.json())
+        .then((j) => setLineLevers(j.data?.levers ? { ...DEFAULT_LEVERS, ...j.data.levers } : null))
+        .catch(() => setLineLevers(null));
+    } else {
+      setLineLevers(null);
+    }
+  }, [line]);
   const [months, setMonths] = useState<TimelineMonth[]>([]);
   const [filter, setFilter] = useState<Filter>(null);
   const [detail, setDetail] = useState<string | null>(null);
@@ -253,10 +275,16 @@ export default function Dashboard() {
       <div className="min-w-0 flex-1 px-6 py-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Portfolio risk</h1>
+            <h1 className="text-xl font-bold tracking-tight">
+              {line ? `${line.name} — portfolio risk` : "Portfolio risk"}
+            </h1>
             <p className="mt-0.5 text-xs text-faint">
-              Observed on-chain metrics, scored by <span className="text-muted">your</span> model.
-              {loadedModel && <span className="ml-1 text-accent-strong">Loaded: {loadedModel}</span>}
+              {line
+                ? line.model_name
+                  ? <>Scored under this line&apos;s policy: <span className="text-accent-strong">{line.model_name} v{line.model_version}</span></>
+                  : "No model bound to this line — scoring under your workbench model."
+                : <>Observed on-chain metrics, scored by <span className="text-muted">your</span> model.</>}
+              {!line && loadedModel && <span className="ml-1 text-accent-strong">Loaded: {loadedModel}</span>}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-faint">
               <span className="rounded border border-line-strong px-1.5 py-0.5 tabular-nums">temp {levers.temperature.toFixed(2)}</span>
@@ -303,10 +331,12 @@ export default function Dashboard() {
             >
               {source === "loading" ? "Loading…" : source === "live" ? "● Live data" : "Demo data"}
             </span>
+            <BusinessLinePicker value={line} onChange={setLine} />
             <select
               value={watchlist}
               onChange={(e) => setWatchlist(e.target.value)}
               className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm focus:outline-none focus:border-accent"
+              aria-label="Watchlist"
             >
               <option value="all">All monitored wallets</option>
               {watchlists.map((w) => (

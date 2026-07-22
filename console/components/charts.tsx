@@ -19,12 +19,13 @@ export function fmtUsd(n: number): string {
  * Click a column to drill into that score range.
  */
 export function Histogram({
-  summary, baseline, onSelect, selected,
+  summary, baseline, onSelect, selected, height = 160,
 }: {
   summary: PortfolioSummary;
   baseline: PortfolioSummary;
   onSelect?: (bucket: number | null) => void;
   selected?: number | null;
+  height?: number;
 }) {
   const max = Math.max(
     1,
@@ -33,7 +34,7 @@ export function Histogram({
   );
   return (
     <div>
-      <div className="flex h-40 items-end gap-[3px]">
+      <div className="flex items-end gap-[3px]" style={{ height: `${height}px` }}>
         {summary.histogram.map((h, i) => {
           const total = BANDS.reduce((s, b) => s + h.counts[b], 0);
           const ghost = BANDS.reduce((s, b) => s + baseline.histogram[i].counts[b], 0);
@@ -58,7 +59,7 @@ export function Histogram({
                     key={b}
                     className="w-full transition-all duration-300 ease-out"
                     style={{
-                      height: `${(h.counts[b] / max) * 160}px`,
+                      height: `${(h.counts[b] / max) * height}px`,
                       background: BAND_META[b].color,
                       opacity: 0.92,
                     }}

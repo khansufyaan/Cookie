@@ -43,6 +43,7 @@ export function SavedModels({ levers, onChange }: { levers: Levers; onChange: (l
         setMsg({ text: `Published ${j.data.name} v${j.data.version}.`, ok: true });
         setName("");
         await load();
+        window.dispatchEvent(new Event("vrc-models-changed"));
       }
     } catch {
       setMsg({ text: "Network error.", ok: false });
