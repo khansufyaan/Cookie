@@ -6,21 +6,21 @@ import { usePathname } from "next/navigation";
 const NAV = [
   {
     href: "/",
-    label: "Portfolio",
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-      </svg>
-    ),
-  },
-  {
-    href: "/model",
     label: "Model",
     icon: (
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         <path d="M4 8h10M18 8h2M4 16h2M10 16h10" />
         <circle cx="16" cy="8" r="2.2" />
         <circle cx="7" cy="16" r="2.2" />
+      </svg>
+    ),
+  },
+  {
+    href: "/portfolio",
+    label: "Portfolio",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
       </svg>
     ),
   },

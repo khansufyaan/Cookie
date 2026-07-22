@@ -1,5 +1,5 @@
-import Dashboard from "@/components/Dashboard";
+import ModelWorkbench from "@/components/ModelWorkbench";
 
 export default function Home() {
-  return <Dashboard />;
+  return <ModelWorkbench />;
 }

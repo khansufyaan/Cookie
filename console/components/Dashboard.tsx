@@ -266,7 +266,7 @@ export default function Dashboard() {
               <span className="rounded border border-line-strong px-1.5 py-0.5 tabular-nums">
                 bands {levers.elevatedMin}·{levers.lowMin}
               </span>
-              <Link href="/model" className="rounded bg-accent px-2 py-0.5 font-semibold text-white hover:bg-accent-strong transition-colors">
+              <Link href="/" className="rounded bg-accent px-2 py-0.5 font-semibold text-white hover:bg-accent-strong transition-colors">
                 Adjust model →
               </Link>
             </div>
