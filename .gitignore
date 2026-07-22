@@ -47,3 +47,7 @@ _*.mjs
 
 # MCP server deps
 mcp/node_modules
+
+# console app artifacts
+console/node_modules
+console/.next
