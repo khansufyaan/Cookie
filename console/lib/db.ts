@@ -49,7 +49,35 @@ export async function ensureConsoleTables(): Promise<boolean> {
       levers JSONB NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
+    CREATE TABLE IF NOT EXISTS console_business_lines (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      api_key TEXT NOT NULL UNIQUE,
+      model_id INT,
+      watchlist_id INT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS console_contracts (
+      id SERIAL PRIMARY KEY,
+      label TEXT NOT NULL,
+      chain TEXT NOT NULL,
+      address TEXT NOT NULL,
+      kind TEXT NOT NULL DEFAULT 'visa-internal',
+      added_by TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE (chain, address)
+    );
   `);
+  // Seed the two internal customers with stable demo API keys (idempotent).
+  const { createHash } = await import("node:crypto");
+  for (const name of ["Visa Direct", "Global Treasury"]) {
+    const key = `vrc_live_${createHash("sha256").update(`vrc-seed:${name}`).digest("hex").slice(0, 32)}`;
+    await p.query(
+      `INSERT INTO console_business_lines (name, api_key) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING`,
+      [name, key],
+    );
+  }
   ready = true;
   return true;
 }

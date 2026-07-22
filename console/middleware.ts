@@ -16,6 +16,9 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
   if (pathname === "/gate" || pathname === "/api/gate") return NextResponse.next();
+  // The business-line API surface authenticates with its own per-line key
+  // (X-VRC-Key) — external callers can't carry the browser gate cookie.
+  if (pathname.startsWith("/api/v1/")) return NextResponse.next();
 
   const token = req.cookies.get(COOKIE)?.value;
   if (token && token === (await expectedToken(password))) return NextResponse.next();

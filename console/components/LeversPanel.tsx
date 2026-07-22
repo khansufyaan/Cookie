@@ -7,7 +7,7 @@ interface SavedModel { id: number; name: string; actor: string; version: number;
 interface AuditRow { model_name: string; version: number; actor: string; created_at: string }
 
 /** Publish/load named lever configurations with an audit trail + share links. */
-function SavedModels({ levers, onChange }: { levers: Levers; onChange: (l: Levers) => void }) {
+export function SavedModels({ levers, onChange }: { levers: Levers; onChange: (l: Levers) => void }) {
   const [models, setModels] = useState<SavedModel[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
   const [name, setName] = useState("");

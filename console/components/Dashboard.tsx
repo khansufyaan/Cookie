@@ -1,13 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BAND_META, DEFAULT_LEVERS, bandMovement, explainRow, scorePortfolio, summarize,
   type Band, type Levers, type Scored, type WalletRow,
 } from "@/lib/model";
+import { useLevers } from "@/lib/useLevers";
 import type { TimelineMonth } from "@/app/api/timeline/route";
 import { Donut, Histogram, Scatter, Sparkline, Timeline, fmtUsd } from "./charts";
-import LeversPanel from "./LeversPanel";
 
 interface Watchlist { id: number; name: string; wallet_count: number }
 type Filter = { kind: "bucket"; bucket: number } | { kind: "band"; band: Band } | null;
@@ -165,14 +166,13 @@ function WalletPanel({
 export default function Dashboard() {
   const [rows, setRows] = useState<WalletRow[]>([]);
   const [source, setSource] = useState<"live" | "demo" | "loading">("loading");
-  const [levers, setLevers] = useState<Levers>({ ...DEFAULT_LEVERS });
+  const { levers, loadedModel } = useLevers();
   const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
   const [watchlist, setWatchlist] = useState<string>("all");
   const [months, setMonths] = useState<TimelineMonth[]>([]);
   const [filter, setFilter] = useState<Filter>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [cbSafe, setCbSafe] = useState(false);
-  const [loadedModel, setLoadedModel] = useState<string | null>(null);
 
   /* Colorblind-safe palette: swap the CSS custom properties so every chart,
      chip, and threshold bar re-colors at once. Persisted per analyst. */
@@ -189,21 +189,6 @@ export default function Dashboard() {
     root.style.setProperty("--risk-blocked", pal.blocked);
     localStorage.setItem("vrc-cb-safe", cbSafe ? "1" : "0");
   }, [cbSafe]);
-
-  /* Shared model link: /?model=<id> loads a published lever set. */
-  useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("model");
-    if (!id) return;
-    fetch(`/api/models/${id}`)
-      .then((r) => r.json())
-      .then((j) => {
-        if (j.data?.levers) {
-          setLevers({ ...DEFAULT_LEVERS, ...j.data.levers });
-          setLoadedModel(`${j.data.name} v${j.data.version}`);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     fetch("/api/watchlists").then((r) => r.json()).then((j) => setWatchlists(j.data ?? [])).catch(() => {});
@@ -273,6 +258,18 @@ export default function Dashboard() {
               Observed on-chain metrics, scored by <span className="text-muted">your</span> model.
               {loadedModel && <span className="ml-1 text-accent-strong">Loaded: {loadedModel}</span>}
             </p>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-faint">
+              <span className="rounded border border-line-strong px-1.5 py-0.5 tabular-nums">temp {levers.temperature.toFixed(2)}</span>
+              <span className="rounded border border-line-strong px-1.5 py-0.5 tabular-nums">
+                w {levers.wActivity}/{levers.wVolume}/{levers.wBreadth}/{levers.wTicket}
+              </span>
+              <span className="rounded border border-line-strong px-1.5 py-0.5 tabular-nums">
+                bands {levers.elevatedMin}·{levers.lowMin}
+              </span>
+              <Link href="/model" className="rounded bg-accent px-2 py-0.5 font-semibold text-white hover:bg-accent-strong transition-colors">
+                Adjust model →
+              </Link>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             {movement.moved > 0 && (
@@ -451,10 +448,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-
-      <aside className="sticky top-0 h-screen w-72 shrink-0 overflow-y-auto border-l border-line bg-surface px-5 py-6">
-        <LeversPanel levers={levers} onChange={setLevers} />
-      </aside>
 
       {detailScored && <WalletPanel scored={detailScored} levers={levers} onClose={() => setDetail(null)} />}
     </div>

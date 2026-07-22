@@ -14,12 +14,42 @@ const NAV = [
     ),
   },
   {
+    href: "/model",
+    label: "Model",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M4 8h10M18 8h2M4 16h2M10 16h10" />
+        <circle cx="16" cy="8" r="2.2" />
+        <circle cx="7" cy="16" r="2.2" />
+      </svg>
+    ),
+  },
+  {
     href: "/wallets",
     label: "Wallets",
     icon: (
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="6" width="20" height="14" rx="3" />
         <path d="M2 10h20M16 15h2" />
+      </svg>
+    ),
+  },
+  {
+    href: "/registry",
+    label: "Registry",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 4h16v5H4zM4 15h16v5H4z" />
+        <path d="M8 9v6" />
+      </svg>
+    ),
+  },
+  {
+    href: "/integrations",
+    label: "API stack",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 8l-5 4 5 4M16 8l5 4-5 4M13 5l-3 14" />
       </svg>
     ),
   },
