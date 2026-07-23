@@ -30,7 +30,7 @@ function Row({
       <div className="flex items-baseline justify-between gap-4">
         <div>
           <div className="text-[15px] font-semibold">{label}</div>
-          <div className="mt-0.5 text-xs text-faint">{hint}</div>
+          <div className="mt-1 text-[13px] text-muted">{hint}</div>
         </div>
         <div className="text-xl font-bold tabular-nums text-foreground">
           {format ? format(value) : value}
