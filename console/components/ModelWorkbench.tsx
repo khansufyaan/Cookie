@@ -129,7 +129,7 @@ export default function ModelWorkbench() {
   }
 
   return (
-    <div className="flex">
+    <div className="mx-auto flex max-w-[80rem]">
       <div className="min-w-0 flex-1 px-8 py-8">
         <div className="max-w-2xl">
           <h1 className="text-3xl font-bold tracking-tight">Your risk model.</h1>
@@ -319,20 +319,20 @@ export default function ModelWorkbench() {
       </div>
 
       {/* Live impact rail — wide, so the charts carry the page */}
-      <aside className="sticky top-0 h-screen w-[27rem] shrink-0 overflow-y-auto border-l border-line bg-surface px-6 py-8">
-        <h2 className="text-sm font-bold">Live impact</h2>
-        <p className="mt-0.5 text-[11px] text-faint">{summary.total.toLocaleString()} wallets, re-scored as you drag.</p>
+      <aside className="sticky top-0 h-screen w-[31rem] shrink-0 overflow-y-auto border-l border-line bg-surface px-7 py-8">
+        <h2 className="text-base font-bold">Live impact</h2>
+        <p className="mt-0.5 text-xs text-muted">{summary.total.toLocaleString()} wallets, re-scored as you drag.</p>
         {movement.moved > 0 && (
-          <p className="mt-2 rounded-lg bg-surface-2 px-3 py-2 text-[11px] text-muted tabular-nums">
+          <p className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted tabular-nums">
             <span style={{ color: "var(--risk-low)" }}>▲{movement.up} safer</span> ·{" "}
             <span style={{ color: "var(--risk-high)" }}>▼{movement.down} riskier</span> than baseline
           </p>
         )}
-        <div className="mt-5">
-          <Histogram summary={summary} baseline={baselineSummary} height={230} />
+        <div className="mt-6">
+          <Histogram summary={summary} baseline={baselineSummary} height={320} />
         </div>
-        <div className="mt-5 border-t border-line pt-4">
-          <Donut summary={summary} />
+        <div className="mt-7 border-t border-line pt-6">
+          <Donut summary={summary} size={168} />
         </div>
         <div className="mt-5 border-t border-line pt-4">
           <SavedModels levers={levers} onChange={setLevers} />

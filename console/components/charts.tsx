@@ -85,18 +85,19 @@ export function Histogram({
 
 /** Risk-band share donut. Click a band to filter the wallet list. */
 export function Donut({
-  summary, onSelect, selected,
+  summary, onSelect, selected, size = 128,
 }: {
   summary: PortfolioSummary;
   onSelect?: (band: Band | null) => void;
   selected?: Band | null;
+  size?: number;
 }) {
   const total = Math.max(1, summary.total);
   const R = 15.915;
   let offset = 25;
   return (
     <div className="flex items-center gap-5">
-      <svg viewBox="0 0 42 42" className="h-32 w-32 shrink-0">
+      <svg viewBox="0 0 42 42" className="shrink-0" style={{ width: size, height: size }}>
         <circle cx="21" cy="21" r={R} fill="none" stroke="var(--border)" strokeWidth="5" />
         {BANDS.map((b) => {
           const share = (summary.bands[b] / total) * 100;
