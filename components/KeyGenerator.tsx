@@ -52,26 +52,24 @@ export default function KeyGenerator() {
   }
 
   return (
-    <form onSubmit={submit}>
-      <div className="flex gap-2">
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@company.com"
-          className="flex-1 rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm placeholder:text-faint focus:outline-none focus:border-accent"
-          aria-label="Email for API key"
-        />
-        <button
-          type="submit"
-          disabled={state === "busy"}
-          className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60 whitespace-nowrap"
-        >
-          {state === "busy" ? "…" : "Get free key"}
-        </button>
-      </div>
-      {state === "error" && <p className="mt-2 text-sm text-left" style={{ color: "var(--grade-c)" }}>{message}</p>}
+    <form onSubmit={submit} className="flex flex-col gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@company.com"
+        className="w-full min-w-0 rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm placeholder:text-faint focus:outline-none focus:border-accent"
+        aria-label="Email for API key"
+      />
+      <button
+        type="submit"
+        disabled={state === "busy"}
+        className="w-full rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-60"
+      >
+        {state === "busy" ? "…" : "Get free key"}
+      </button>
+      {state === "error" && <p className="text-sm text-left" style={{ color: "var(--grade-c)" }}>{message}</p>}
     </form>
   );
 }

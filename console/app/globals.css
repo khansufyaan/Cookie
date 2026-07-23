@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* Visa Risk Console — internal analyst tool. Dark, dense, data-first.
+   Near-black navy plane, hairline borders, desaturated ink, Visa blue accent.
+   Risk colors are the only saturated hues on screen. */
+:root {
+  --background: #07090f;
+  --surface: #0c101a;
+  --surface-2: #121828;
+  --border: #1b2336;
+  --border-strong: #293452;
+  --foreground: #eef1f8;
+  --muted: #b3bdd2;
+  --faint: #7c88a2;
+  --accent: #4066ff;
+  --accent-strong: #6580ff;
+  --risk-low: #2fbf7f;
+  --risk-elevated: #f0b429;
+  --risk-high: #f4604d;
+  --risk-blocked: #a63232;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-risk-low: var(--risk-low);
+  --color-risk-elevated: var(--risk-elevated);
+  --color-risk-high: var(--risk-high);
+  --font-sans: var(--font-brand-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-brand-sans), system-ui, sans-serif;
+}
+
+.visa-wordmark {
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.045em;
+  font-stretch: 112%;
+}
+
+/* Range sliders — accent track on dark */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  border: 2px solid #0c101a;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  border: 2px solid #0c101a;
+  cursor: pointer;
+}
+/* Keyboard a11y: visible ring when a slider is focused via keyboard, and the
+   thumb grows so the active control is unmistakable. */
+input[type="range"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--accent-strong);
+}
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.35);
+}
+button:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+/* Subtle scrollbars for the dark plane */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}

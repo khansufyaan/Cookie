@@ -32,7 +32,7 @@ export default function ApiPlayground() {
     }
   }
 
-  const curl = `curl https://halbrook.vercel.app/api/v1/score/${address.trim() || "<address>"}`;
+  const curl = `curl https://visa-wallet-rating.vercel.app/api/v1/score/${address.trim() || "<address>"}`;
 
   return (
     <div className="rounded-xl border border-line bg-surface overflow-hidden">

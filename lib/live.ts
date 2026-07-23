@@ -43,12 +43,25 @@ async function fetchJson(url: string, init?: RequestInit, retries = 1): Promise<
 }
 
 async function ethPriceUsd(): Promise<number> {
+  // Primary: Blockscout stats. Fallback: Coingecko. A single-source outage
+  // must not silently zero every ETH-denominated volume (which would corrupt
+  // Magnitude/Bedrock and, via the indexer, persist a wrong score).
   try {
     const stats = (await fetchJson("https://eth.blockscout.com/api/v2/stats", {
       headers: { accept: "application/json" },
       next: { revalidate: 300 },
     } as RequestInit)) as { coin_price?: string };
     const p = Number(stats.coin_price);
+    if (Number.isFinite(p) && p > 0) return p;
+  } catch {
+    // fall through to the secondary source
+  }
+  try {
+    const data = (await fetchJson(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
+      { headers: { accept: "application/json" }, next: { revalidate: 300 } } as RequestInit,
+    )) as { ethereum?: { usd?: number } };
+    const p = data.ethereum?.usd ?? 0;
     return Number.isFinite(p) && p > 0 ? p : 0;
   } catch {
     return 0;
@@ -282,20 +295,31 @@ export async function fetchLiveEvmLookup(address: string): Promise<LiveLookup | 
   if (!alchemy) return blockscout;
   if (!blockscout) return alchemy;
 
-  // Merge: key by hash+app; keep the record with the larger USD value.
-  const merged = new Map<string, MatchedTx>();
-  for (const m of [...alchemy.matched, ...blockscout.matched]) {
-    const key = `${m.hash}:${m.appId}`;
-    const cur = merged.get(key);
-    if (!cur || m.usd > cur.usd) merged.set(key, m);
+  // Merge: Alchemy is authoritative for depth and USD valuation (its matched
+  // legs are summed per-tx downstream). Blockscout only contributes txs whose
+  // hash Alchemy didn't see (e.g. zero-value contract calls), so we add its
+  // rows for unseen hashes only — never re-collapsing or double-counting
+  // Alchemy's own multi-leg-per-tx rows.
+  const alchemyHashes = new Set(alchemy.matched.map((m) => m.hash));
+  const extra = blockscout.matched.filter((m) => !alchemyHashes.has(m.hash));
+  const matched = [...alchemy.matched, ...extra].sort((x, y) => x.date.localeCompare(y.date));
+
+  // Combine stablecoin mixes from both sources (Alchemy carries the USD-valued
+  // legs; without this the enriched `stablecoins` API field is always empty).
+  const stableSums = new Map<string, number>();
+  for (const s of [...(alchemy.stableMix ?? []), ...(blockscout.stableMix ?? [])]) {
+    stableSums.set(s.asset, (stableSums.get(s.asset) ?? 0) + s.usd);
   }
-  const matched = [...merged.values()].sort((x, y) => x.date.localeCompare(y.date));
+
   return {
     profile: buildProfileFromMatched(addr, matched),
     matched,
     scannedTx: alchemy.scannedTx + blockscout.scannedTx,
     windowCapped: alchemy.windowCapped,
     source: "alchemy",
+    stableMix: [...stableSums.entries()]
+      .map(([asset, usd]) => ({ asset, usd: Math.round(usd) }))
+      .sort((a, b) => b.usd - a.usd),
   };
 }
 

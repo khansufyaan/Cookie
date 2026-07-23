@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch
+_*.mjs
+
+# chain artifacts
+
+# MCP server deps
+mcp/node_modules
+
+# console app artifacts
+console/node_modules
+console/.next

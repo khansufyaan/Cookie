@@ -1,26 +1,31 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FactorBars from "@/components/FactorBars";
-import GradeSeal from "@/components/GradeSeal";
+import GradeCard from "@/components/GradeCard";
 import LookupForm from "@/components/LookupForm";
 import ScoreHistory, { HistoryTable } from "@/components/ScoreHistory";
 import AppLogo from "@/components/AppLogo";
+import AppCoverage from "@/components/AppCoverage";
 import { APP_BY_ID } from "@/lib/apps";
-import { liveCoverageNote, resolveWallet } from "@/lib/wallets";
+import { resolveWalletCached } from "@/lib/wallets";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const TIER_STYLE: Record<string, { color: string; blurb: string }> = {
-  Prime: { color: "var(--grade-a)", blurb: "KYC-verified identity + grade A activity — the top of the network." },
-  Verified: { color: "var(--accent)", blurb: "KYC-verified identity attestation on this wallet." },
-  Standard: { color: "var(--muted)", blurb: "No identity attestation — rated on activity alone." },
-  Restricted: { color: "var(--grade-c)", blurb: "OFAC sanctions match. Do not serve this wallet." },
+const GRADE_MEANING: Record<string, string> = {
+  A: "Top-decile wallet",
+  B: "Established wallet",
+  C: "Developing wallet",
 };
+
+/** Compact USD, e.g. $113M, $24.1K. */
+function usdCompact(n: number): string {
+  return `$${new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(n)}`;
+}
 
 export default async function WalletPage({ params }: { params: Promise<{ address: string }> }) {
   const { address } = await params;
-  const resolution = await resolveWallet(decodeURIComponent(address));
+  const resolution = await resolveWalletCached(decodeURIComponent(address));
   if (resolution.kind === "invalid") notFound();
 
   if (resolution.kind === "custodial") {
@@ -67,12 +72,25 @@ export default async function WalletPage({ params }: { params: Promise<{ address
   const { result, profile, history } = report;
   const stableMix = report.stableMix.filter((s) => s.usd >= 1);
   const stableTotal = stableMix.reduce((t, s) => t + s.usd, 0);
+  // Pseudo-domains resolved by the logo proxy to each coin's official mark
+  // (an issuer favicon — Circle, Sky, PayPal — is not the coin's logo).
   const STABLE_DOMAINS: Record<string, string> = {
-    USDC: "circle.com", USDT: "tether.to", DAI: "sky.money", USDE: "ethena.fi",
-    PYUSD: "paypal.com", USDS: "sky.money", FDUSD: "firstdigitallabs.com",
+    USDC: "usdc.token", USDT: "usdt.token", DAI: "dai.token", USDE: "usde.token",
+    PYUSD: "pyusd.token", USDS: "usds.token", FDUSD: "fdusd.token",
   };
   const active = profile.activities.filter((a) => a.txCount > 0);
-  const tierStyle = TIER_STYLE[result.tier];
+  const usedAppIds = active.map((a) => a.appId);
+  const years = (result.totals.walletAgeMonths / 12).toFixed(1);
+  const gradeMeaning = result.sanctions.listed
+    ? "Restricted — do not serve"
+    : GRADE_MEANING[result.grade];
+  const pills: { text: string; good?: boolean }[] = [
+    { text: result.archetype },
+    { text: `${result.totals.appsUsed}/10 apps` },
+    ...(result.totals.volumeUsd > 0 ? [{ text: usdCompact(result.totals.volumeUsd) }] : []),
+    { text: `${years}y history` },
+    result.kyc.verified ? { text: "ID verified", good: true } : { text: "No ID check" },
+  ];
 
   return (
     <div className="mx-auto max-w-6xl px-5 pt-10">
@@ -86,11 +104,6 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         <LookupForm compact />
       </div>
 
-      <div className="mt-5 rounded-lg border border-line bg-surface px-4 py-3 text-sm">
-        <span className="font-semibold" style={{ color: "var(--grade-a)" }}>● Live data</span>
-        <span className="ml-2 text-muted">{liveCoverageNote(report)}</span>
-      </div>
-
       {result.sanctions.listed && (
         <div className="mt-3 rounded-lg border px-4 py-3 text-sm font-medium" style={{ borderColor: "var(--grade-c)", color: "var(--grade-c)", background: "var(--surface)" }}>
           ⚠ This address appears on the {result.sanctions.list} snapshot. Rating suppressed; tier Restricted.
@@ -98,37 +111,45 @@ export default async function WalletPage({ params }: { params: Promise<{ address
       )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[auto_1fr] items-start">
-        <div className="rounded-xl border border-line bg-surface p-8 flex flex-col items-center text-center lg:w-80">
-          <GradeSeal grade={result.grade} modifier={result.modifier} size="lg" />
-          <div className="mt-5 text-3xl font-bold tabular-nums">
-            {result.score}
-            <span className="ml-1 text-sm font-normal text-faint">/ 1000</span>
+        <div className="rounded-xl border border-line bg-surface p-6 flex flex-col items-center text-center lg:w-96">
+          <GradeCard
+            /* Sanctioned wallets carry the F strike, not a letter grade. */
+            grade={result.sanctions.listed ? "F" : result.grade}
+            modifier={result.sanctions.listed ? "" : result.modifier}
+            score={result.score}
+            address={result.address}
+            /* Show the tier only when it's a signal (Prime/Verified/Restricted);
+               otherwise the characterful archetype reads better than "Standard". */
+            holder={
+              result.sanctions.listed
+                ? "Sanctioned"
+                : result.tier === "Standard"
+                  ? result.archetype
+                  : `${result.tier} tier`
+            }
+          />
+          <div className="mt-5 text-sm font-semibold">{gradeMeaning}</div>
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+            {pills.map((p) => (
+              <span
+                key={p.text}
+                className="rounded-full border px-2.5 py-1 text-xs font-medium"
+                style={
+                  p.good
+                    ? { borderColor: "var(--grade-a)", color: "var(--grade-a)" }
+                    : { borderColor: "var(--border-strong)", color: "var(--muted)" }
+                }
+              >
+                {p.text}
+              </span>
+            ))}
           </div>
-          <div className="mt-3 flex items-center gap-2">
-            <span className="rounded-full border px-3 py-1 text-xs font-semibold" style={{ borderColor: tierStyle.color, color: tierStyle.color }}>
-              {result.tier} tier
-            </span>
-            <span className="rounded-full border border-line-strong px-3 py-1 text-xs font-medium text-accent">
-              {result.archetype}
-            </span>
-          </div>
-          <p className="mt-3 text-xs text-muted max-w-[16rem]">{result.archetypeNote}</p>
-          {result.fullStackBonus > 0 && (
-            <p className="mt-3 text-xs font-medium" style={{ color: "var(--grade-a)" }}>
-              ✓ Full-Stack bonus +{result.fullStackBonus}
-            </p>
-          )}
-          {result.kycBonus > 0 && (
-            <p className="mt-1 text-xs font-medium" style={{ color: "var(--grade-a)" }}>
-              ✓ KYC bonus +{result.kycBonus}
-            </p>
-          )}
           {!result.sanctions.listed && (
             <Link
               href="/claim"
               className="mt-5 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-strong transition-colors"
             >
-              Claim your score
+              Mint your pass
             </Link>
           )}
         </div>
@@ -150,9 +171,74 @@ export default async function WalletPage({ params }: { params: Promise<{ address
         )}
       </div>
 
+      {/* "Active on" — app logos, sorted by activity (directly under the chart) */}
+      {active.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-xl font-semibold tracking-tight">Active on</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {[...active]
+              .sort((a, b) => b.txCount - a.txCount)
+              .map((a) => {
+                const app = APP_BY_ID.get(a.appId);
+                return (
+                  <div key={a.appId} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                    {app && <AppLogo domain={app.domain} name={app.name} size={32} />}
+                    <div>
+                      <div className="font-semibold text-sm">{app?.name ?? a.appId}</div>
+                      <div className="text-xs text-faint tabular-nums">
+                        {a.txCount.toLocaleString()} tx
+                        {a.volumeUsd > 0 && ` · $${Math.round(a.volumeUsd).toLocaleString()}`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </section>
+      )}
+
+      {/* Stablecoin usage — per-asset outgoing volume */}
+      {stableMix.length > 0 && stableTotal > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Stablecoin usage</h2>
+          <p className="mt-1 text-xs text-faint">
+            Outgoing stablecoin volume by asset, across tracked activity.
+          </p>
+          <div className="mt-4 flex h-3 w-full overflow-hidden rounded-full">
+            {stableMix.map((s, i) => (
+              <div
+                key={s.asset}
+                title={`${s.asset} — $${Math.round(s.usd).toLocaleString()}`}
+                style={{
+                  width: `${(s.usd / stableTotal) * 100}%`,
+                  background: `var(--accent)`,
+                  opacity: 1 - i * (0.6 / Math.max(stableMix.length, 1)),
+                }}
+              />
+            ))}
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {stableMix.map((s) => (
+              <div key={s.asset} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+                {STABLE_DOMAINS[s.asset] && <AppLogo domain={STABLE_DOMAINS[s.asset]} name={s.asset} size={28} />}
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm">{s.asset}</div>
+                  <div className="text-xs text-faint tabular-nums">
+                    ${Math.round(s.usd).toLocaleString()} · {Math.round((s.usd / stableTotal) * 100)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Gamified coverage + milestone boosts */}
+      {!result.sanctions.listed && <AppCoverage result={result} usedAppIds={usedAppIds} />}
+
       {/* Score breakdown under the chart */}
       {history.length >= 2 && (
-        <div className="mt-4 rounded-xl border border-line bg-surface p-6">
+        <div className="mt-10 rounded-xl border border-line bg-surface p-6">
           <h2 className="font-semibold">Wallet Rating Score breakdown</h2>
           <p className="mt-1 text-xs text-faint">
             Five factors, weighted into a 0–1000 score.{" "}
@@ -169,7 +255,12 @@ export default async function WalletPage({ params }: { params: Promise<{ address
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-xl border border-line bg-surface p-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Identity (KYC)</h3>
+            <div className="flex items-center gap-2">
+              {result.kyc.verified && result.kyc.source.includes("Coinbase") && (
+                <AppLogo domain="coinbase.com" name="Coinbase" size={20} />
+              )}
+              <h3 className="font-semibold text-sm">Identity (KYC)</h3>
+            </div>
             <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
               style={{ borderColor: result.kyc.verified ? "var(--grade-a)" : "var(--border-strong)", color: result.kyc.verified ? "var(--grade-a)" : "var(--faint)" }}>
               {result.kyc.verified ? "✓ Verified" : "Unverified"}
@@ -239,15 +330,23 @@ export default async function WalletPage({ params }: { params: Promise<{ address
                   </td>
                 </tr>
               )}
-              {active.map((a) => (
+              {active.map((a) => {
+                const app = APP_BY_ID.get(a.appId);
+                return (
                 <tr key={a.appId} className="border-b border-line last:border-0">
-                  <td className="px-4 py-3 font-medium">{APP_BY_ID.get(a.appId)?.name ?? a.appId}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2.5 font-medium">
+                      {app && <AppLogo domain={app.domain} name={app.name} size={22} />}
+                      {app?.name ?? a.appId}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-right tabular-nums">{a.txCount.toLocaleString()}</td>
                   <td className="px-4 py-3 text-right tabular-nums">${a.volumeUsd.toLocaleString()}</td>
                   <td className="px-4 py-3 text-muted tabular-nums">{a.firstTx}</td>
                   <td className="px-4 py-3 text-muted tabular-nums">{a.lastTx}</td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -266,7 +365,7 @@ export default async function WalletPage({ params }: { params: Promise<{ address
                 rating changes.
               </p>
               <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-surface-2 p-3 text-xs font-mono text-muted">
-                {`<a href="https://halbrook.vercel.app/wallet/${result.address}">\n  <img src="https://halbrook.vercel.app/api/v1/badge/${result.address}" width="120" />\n</a>`}
+                {`<a href="https://visa-wallet-rating.vercel.app/wallet/${result.address}">\n  <img src="https://visa-wallet-rating.vercel.app/api/v1/badge/${result.address}" width="120" />\n</a>`}
               </pre>
             </div>
           </div>

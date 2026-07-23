@@ -43,6 +43,22 @@ function hash(v: string): string {
   return createHash("sha256").update(v).digest("hex");
 }
 
+/**
+ * Best-effort trusted client IP. The leftmost X-Forwarded-For value is
+ * client-supplied and trivially spoofable (rotate it → unlimited anonymous
+ * buckets), so prefer the platform-set headers Vercel injects at the edge
+ * (x-real-ip / x-vercel-forwarded-for) and only fall back to XFF.
+ */
+export function clientIp(req: Request): string {
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
+  const vercel = req.headers.get("x-vercel-forwarded-for");
+  if (vercel) return vercel.split(",")[0]!.trim();
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0]!.trim();
+  return "unknown";
+}
+
 export async function createApiKey(email: string): Promise<{ key: string } | { error: string }> {
   if (!(await ensureTables())) return { error: "Key service temporarily unavailable." };
   const p = getPool()!;
@@ -88,8 +104,7 @@ export async function meter(req: Request): Promise<MeterResult> {
       tier = rows[0].tier;
       identifier = `key:${hash(rawKey).slice(0, 16)}`;
     } else {
-      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-      identifier = `ip:${hash(ip).slice(0, 16)}`;
+      identifier = `ip:${hash(clientIp(req)).slice(0, 16)}`;
     }
 
     const limit = TIER_LIMITS[tier] ?? TIER_LIMITS.free;
