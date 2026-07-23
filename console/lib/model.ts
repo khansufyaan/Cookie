@@ -84,23 +84,19 @@ export const PRESETS: { name: string; note: string; levers: Levers }[] = [
   },
   {
     name: "Conservative",
-    note: "Strict curve, KYC weighted heavily, thin files penalized.",
+    note: "KYC weighted heavily, higher bars for low risk.",
     levers: {
       ...DEFAULT_LEVERS,
-      temperature: 1.5,
       kycBonus: 120,
-      thinFileTx: 10,
-      thinFilePenalty: 120,
       lowMin: 780,
       elevatedMin: 500,
     },
   },
   {
     name: "Growth",
-    note: "Lenient curve — favors breadth and early activity.",
+    note: "Favors breadth and early activity; lower bars.",
     levers: {
       ...DEFAULT_LEVERS,
-      temperature: 0.75,
       wBreadth: 30,
       wTicket: 10,
       lowMin: 600,
@@ -135,12 +131,11 @@ export function scoreRow(row: WalletRow, L: Levers): Scored {
   }
 
   const avgTicket = row.txCount > 0 ? row.volumeUsd / row.txCount : 0;
-  const t = L.temperature;
 
-  const activity = Math.pow(logCalib(row.txCount, L.activityCeil), t);
-  const volume = Math.pow(logCalib(row.volumeUsd, L.volumeCeil), t);
-  const breadth = Math.pow(Math.min(1, row.appsUsed / Math.max(1, L.breadthSat)), t);
-  const ticket = Math.pow(logCalib(avgTicket, L.ticketCeil), t);
+  const activity = logCalib(row.txCount, L.activityCeil);
+  const volume = logCalib(row.volumeUsd, L.volumeCeil);
+  const breadth = Math.min(1, row.appsUsed / Math.max(1, L.breadthSat));
+  const ticket = logCalib(avgTicket, L.ticketCeil);
 
   const wSum = Math.max(1, L.wActivity + L.wVolume + L.wBreadth + L.wTicket);
   let score =
@@ -148,7 +143,6 @@ export function scoreRow(row: WalletRow, L: Levers): Scored {
 
   if (row.appsUsed >= L.fullStackThreshold) score += L.fullStackBonus;
   if (row.kycVerified) score += L.kycBonus;
-  if (L.thinFileTx > 0 && row.txCount < L.thinFileTx) score -= L.thinFilePenalty;
   if (row.sanctioned && !L.sanctionsBlock) score -= L.sanctionsPenalty;
 
   score = Math.max(0, Math.min(1000, Math.round(score)));
@@ -236,13 +230,12 @@ export interface Explanation {
 export function explainRow(row: WalletRow, L: Levers): Explanation {
   const scored = scoreRow(row, L);
   const avgTicket = row.txCount > 0 ? row.volumeUsd / row.txCount : 0;
-  const t = L.temperature;
   const wSum = Math.max(1, L.wActivity + L.wVolume + L.wBreadth + L.wTicket);
 
-  const activity = Math.pow(logCalib(row.txCount, L.activityCeil), t);
-  const volume = Math.pow(logCalib(row.volumeUsd, L.volumeCeil), t);
-  const breadth = Math.pow(Math.min(1, row.appsUsed / Math.max(1, L.breadthSat)), t);
-  const ticket = Math.pow(logCalib(avgTicket, L.ticketCeil), t);
+  const activity = logCalib(row.txCount, L.activityCeil);
+  const volume = logCalib(row.volumeUsd, L.volumeCeil);
+  const breadth = Math.min(1, row.appsUsed / Math.max(1, L.breadthSat));
+  const ticket = logCalib(avgTicket, L.ticketCeil);
 
   const factors = [
     { key: "activity", label: "Activity", raw: activity, points: Math.round((activity * L.wActivity / wSum) * 1000), detail: `${row.txCount.toLocaleString()} transactions` },
@@ -252,9 +245,8 @@ export function explainRow(row: WalletRow, L: Levers): Explanation {
   ];
 
   const adjustments: { label: string; points: number }[] = [];
-  if (row.appsUsed >= L.fullStackThreshold) adjustments.push({ label: `Full-stack (${row.appsUsed} ≥ ${L.fullStackThreshold} apps)`, points: L.fullStackBonus });
+  if (row.appsUsed >= L.fullStackThreshold) adjustments.push({ label: `Full-stack (${row.appsUsed}+ apps)`, points: L.fullStackBonus });
   if (row.kycVerified) adjustments.push({ label: "KYC attestation", points: L.kycBonus });
-  if (L.thinFileTx > 0 && row.txCount < L.thinFileTx) adjustments.push({ label: `Thin file (< ${L.thinFileTx} txs)`, points: -L.thinFilePenalty });
   if (row.sanctioned) adjustments.push({ label: L.sanctionsBlock ? "Sanctions hard-block" : "Sanctions penalty", points: L.sanctionsBlock ? -1000 : -L.sanctionsPenalty });
 
   return { score: scored.score, band: scored.band, factors, adjustments };

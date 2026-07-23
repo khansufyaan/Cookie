@@ -72,7 +72,20 @@ export default function ModelWorkbench() {
   const [active, setActive] = useState<SavedModelRef | null>(null);
   const [copied, setCopied] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const set = (patch: Partial<Levers>) => setLevers({ ...levers, ...patch });
+
+  async function deleteActive() {
+    if (!active) return;
+    if (!window.confirm(`Delete "${active.name}"? Business lines using it revert to the baseline.`)) return;
+    setDeleting(true);
+    await fetch(`/api/models/${active.id}`, { method: "DELETE" }).catch(() => null);
+    setDeleting(false);
+    setActive(null);
+    setLevers({ ...DEFAULT_LEVERS });
+    await loadSaved();
+    window.dispatchEvent(new Event("vrc-models-changed"));
+  }
 
   async function loadSaved() {
     const j = await fetch("/api/models").then((r) => r.json()).catch(() => null);
@@ -178,15 +191,24 @@ export default function ModelWorkbench() {
                   <span className="text-faint">v{active.version}</span>
                   {activeEdited && <span className="ml-2 text-xs text-accent-strong">edited — unsaved</span>}
                 </div>
-                {activeEdited && (
+                <div className="flex items-center gap-2">
+                  {activeEdited && (
+                    <button
+                      onClick={updateActive}
+                      disabled={updating}
+                      className="rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-50"
+                    >
+                      {updating ? "Saving…" : `Save to ${active.name}`}
+                    </button>
+                  )}
                   <button
-                    onClick={updateActive}
-                    disabled={updating}
-                    className="rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent-strong transition-colors disabled:opacity-50"
+                    onClick={deleteActive}
+                    disabled={deleting}
+                    className="rounded-lg border border-line-strong px-3 py-1.5 text-xs font-medium text-faint hover:border-[var(--risk-high)] hover:text-[var(--risk-high)] transition-colors disabled:opacity-50"
                   >
-                    {updating ? "Saving…" : `Save to ${active.name}`}
+                    {deleting ? "Deleting…" : "Delete"}
                   </button>
-                )}
+                </div>
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <code className="min-w-0 flex-1 truncate rounded-lg bg-surface-2 px-3 py-2 font-mono text-[11px] text-muted">
@@ -218,28 +240,6 @@ export default function ModelWorkbench() {
             <Row label="Ticket size" hint="Average dollars per transaction." value={levers.wTicket} min={0} max={100} onChange={(v) => set({ wTicket: v })} />
           </Section>
 
-          <Section title="Strictness" sub="How tough the grader is.">
-            <div className="px-6 py-5">
-              <div className="flex items-baseline justify-between">
-                <div className="text-[15px] font-semibold">Temperature</div>
-                <div className="text-xl font-bold tabular-nums">{levers.temperature.toFixed(2)}</div>
-              </div>
-              <input
-                type="range"
-                min={0.5}
-                max={2}
-                step={0.05}
-                value={levers.temperature}
-                onChange={(e) => set({ temperature: Number(e.target.value) })}
-                className="mt-3.5"
-                aria-label="Temperature"
-              />
-              <div className="mt-2 flex justify-between text-[11px] text-faint">
-                <span>Lenient</span><span>Neutral</span><span>Strict</span>
-              </div>
-            </div>
-          </Section>
-
           <Section title="Your risk lines" sub="Everything above the line is fine by you.">
             <Row label="Low risk starts at" hint="Scores here and up are safe." value={levers.lowMin} min={levers.elevatedMin + 50} max={950} step={10} onChange={(v) => set({ lowMin: v })} />
             <Row label="Elevated starts at" hint="Below this is high risk." value={levers.elevatedMin} min={50} max={levers.lowMin - 50} step={10} onChange={(v) => set({ elevatedMin: v })} />
@@ -257,7 +257,7 @@ export default function ModelWorkbench() {
             <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl bg-surface px-6 py-4 [&::-webkit-details-marker]:hidden">
               <div>
                 <span className="text-lg font-bold tracking-tight">Fine-tuning</span>
-                <p className="mt-0.5 text-sm text-faint">Ceilings, bonuses, penalties, sanctions.</p>
+                <p className="mt-0.5 text-sm text-faint">Ceilings, bonuses, sanctions.</p>
               </div>
               <span className="text-faint transition-transform group-open:rotate-90">›</span>
             </summary>
@@ -277,16 +277,7 @@ export default function ModelWorkbench() {
                 <p className="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Extra points</p>
                 <div className="mt-2 divide-y divide-[var(--border)] rounded-2xl bg-surface">
                   <Row label="Verified identity" hint="Bonus for a KYC attestation." value={levers.kycBonus} min={0} max={200} step={5} onChange={(v) => set({ kycBonus: v })} unit="pts" />
-                  <Row label="Full-stack threshold" hint="Apps needed to earn the bonus." value={levers.fullStackThreshold} min={2} max={9} onChange={(v) => set({ fullStackThreshold: v })} unit="apps" />
-                  <Row label="Full-stack bonus" hint="What hitting it earns." value={levers.fullStackBonus} min={0} max={200} step={5} onChange={(v) => set({ fullStackBonus: v })} unit="pts" />
-                </div>
-              </div>
-
-              <div>
-                <p className="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Thin files</p>
-                <div className="mt-2 divide-y divide-[var(--border)] rounded-2xl bg-surface">
-                  <Row label="Too few transactions" hint="Below this, it's a thin file. 0 = off." value={levers.thinFileTx} min={0} max={50} onChange={(v) => set({ thinFileTx: v })} unit="txs" />
-                  <Row label="Points docked" hint="What a thin file loses." value={levers.thinFilePenalty} min={0} max={300} step={10} onChange={(v) => set({ thinFilePenalty: v })} unit="pts" />
+                  <Row label="Full-stack bonus" hint="Points for using 5+ tracked apps." value={levers.fullStackBonus} min={0} max={200} step={5} onChange={(v) => set({ fullStackBonus: v })} unit="pts" />
                 </div>
               </div>
 
